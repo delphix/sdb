@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_test:
+	#
+	# Don't run the tests when building the package. We'll enforce
+	# testing via another mechanism, so running it during package
+	# builds is unnecessary.
+	#

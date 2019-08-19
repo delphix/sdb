@@ -1,0 +1,44 @@
+dist: xenial
+
+language: python
+python:
+  - "3.6"
+
+install:
+  - python3 -m pip install yapf
+  - python3 -m pip install pylint
+  - python3 -m pip install pytest
+
+script:
+  - yapf --diff --style google --recursive sdb
+  - yapf --diff --style google --recursive tests
+  - pylint -d duplicate-code sdb
+  - pylint -d duplicate-code tests
+  - pytest -v tests
+  - python3 setup.py install
+
+#
+# We depend on "drgn" for running our tests, and since there isn't any
+# package for it already, we must build it from source.
+#
+# Also note, we don't use any specific version of the "drgn" source. In
+# addition to it lacking packages, "drgn" also lacks any releases; thus,
+# we just pull the HEAD of the master branch, and hope for the best.
+#
+before_script:
+  - git clone https://github.com/osandov/drgn.git
+  - cd drgn
+  - python3 setup.py install
+  - cd -
+  - rm -rf drgn
+
+#
+# Addtionally, since we're building "drgn" from source, we need to
+# ensure we have its build dependencies installed.
+#
+addons:
+  apt:
+    packages:
+      - libelf-dev
+      - libdw-dev
+      - libomp-dev

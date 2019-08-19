@@ -1,0 +1,11 @@
+Source: sdb
+Section: misc
+Priority: optional
+Maintainer: Delphix Engineering <eng@delphix.com>
+Standards-Version: 4.1.2
+Build-Depends: debhelper (>= 9), dh-python, python3
+
+Package: sdb
+Architecture: any
+Depends: ${shlibs:Depends}, ${python3:Depends}
+Description: The Slick/Simple Debugger
