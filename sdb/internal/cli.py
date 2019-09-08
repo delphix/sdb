@@ -180,7 +180,6 @@ def setup_target(args: argparse.Namespace) -> drgn.Program:
         try:
             load_debug_info(prog, args.symbol_search)
         except (
-                drgn.FileFormatError,
                 drgn.MissingDebugInfoError,
                 OSError,
         ) as debug_info_err:
