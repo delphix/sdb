@@ -69,32 +69,46 @@ class REPL:
 
         atexit.register(readline.write_history_file, histfile)
 
-    def run(self):
+    def eval_cmd(self, input_: str) -> int:
+        """
+        Evaluates the SDB command/pipeline passed as input_
+        and prints the result.
+
+        Returns:
+            0 for success
+            1 for error
+            2 for incorrect arguments passed
+        """
+        try:
+            objs = sdb.invoke(self.target, [], input_)
+            if not objs:
+                return 0
+
+            for obj in objs:
+                print(obj)
+        except sdb.CommandArgumentsError:
+            #
+            # We skip printing anything for this specific error
+            # as argparse should have already printed a helpful
+            # message to the REPL for us.
+            #
+            return 2
+        except sdb.Error as err:
+            print(err.text)
+            return 1
+        return 0
+
+    def start_session(self) -> None:
         """
         Starts a REPL session.
         """
         while True:
             try:
                 line = input(self.prompt).strip()
-                if not line:
-                    continue
-
-                objs = sdb.invoke(self.target, [], line)
-                if not objs:
-                    continue
-
-                for obj in objs:
-                    print(obj)
-
-            except sdb.CommandArgumentsError:
-                #
-                # We skip printing anything for this specific error
-                # as argparse should have already printed a helpful
-                # message to the REPL for us.
-                #
-                continue
-            except sdb.Error as err:
-                print(err.text)
             except (EOFError, KeyboardInterrupt):
                 print(self.closing)
                 break
+
+            if not line:
+                continue
+            _ = self.eval_cmd(line)
