@@ -80,6 +80,12 @@ def parse_arguments() -> argparse.Namespace:
         "don't load any debugging symbols that were not explicitly added with -s",
     )
 
+    parser.add_argument("-e",
+                        "--eval",
+                        metavar="CMD",
+                        type=str,
+                        action="store",
+                        help="evaluate CMD and exit")
     parser.add_argument("-q",
                         "--quiet",
                         action="store_true",
@@ -203,7 +209,11 @@ def main() -> None:
         return
 
     repl = REPL(prog, sdb.all_commands)
-    repl.run()
+    if args.eval:
+        exit_code = repl.eval_cmd(args.eval)
+        sys.exit(exit_code)
+    else:
+        repl.start_session()
 
 
 if __name__ == "__main__":
