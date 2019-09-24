@@ -10,11 +10,31 @@ install:
   - python3 -m pip install pytest
 
 script:
+  #
+  # We first record the version of everything we use as a baseline
+  # for future regressions introduced by these tools being upgraded.
+  #
+  - yapf --version
+  - pylint --version
+  - pytest --version
+  - python3 --version
+
+  #
+  # Ensure code is style and lint clean.
+  #
   - yapf --diff --style google --recursive sdb
   - yapf --diff --style google --recursive tests
   - pylint -d duplicate-code sdb
   - pylint -d duplicate-code tests
+
+  #
+  # Ensure there aren't new regressions in unit tests.
+  #
   - pytest -v tests
+
+  #
+  # Ensure installing sdb doesn't fail.
+  #
   - python3 setup.py install
 
 #

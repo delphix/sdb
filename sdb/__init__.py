@@ -15,6 +15,10 @@
 #
 """This module enables integration with the SDB REPL."""
 
+import shlex
+import subprocess
+import sys
+
 from typing import Dict, Type
 
 #
@@ -111,10 +115,6 @@ def invoke(prog: drgn.Program, first_input: Iterable[drgn.Object],
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
-
-    import shlex
-    import subprocess
-    import sys
 
     shell_cmd = None
     # Parse the argument string. Each pipeline stage is delimited by
