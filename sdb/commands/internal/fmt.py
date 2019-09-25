@@ -16,15 +16,13 @@
 
 # pylint: disable=missing-docstring
 
-import glob
-import importlib
-import os
+from typing import Union
 
-for path in glob.glob("{}/*.py".format(os.path.dirname(__file__))):
-    if path != __file__:
-        module = os.path.splitext(os.path.basename(path))[0]
-        importlib.import_module("sdb.commands.linux.{}".format(module))
 
-for path in glob.glob("{}/*/__init__.py".format(os.path.dirname(__file__))):
-    module = os.path.basename(os.path.dirname(path))
-    importlib.import_module("sdb.commands.linux.{}".format(module))
+def size_nicenum(num: Union[int, float]) -> str:
+    num = float(num)
+    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        if num < 1024.0:
+            return f"{num:.1f}{unit}"
+        num /= 1024.0
+    return f"{num:.1f}YB"
