@@ -38,7 +38,7 @@ def test_single_object():
     ret = invoke(MOCK_PROGRAM, objs, line)
 
     assert len(ret) == 1
-    assert ret[0].value_() == 0xffffffffc0a8aee0
+    assert ret[0].value_() == 0xffffffffc0000000
     assert ret[0].type_ == MOCK_PROGRAM.type('int *')
 
 
@@ -60,7 +60,7 @@ def test_multiple_object():
     ret = invoke(MOCK_PROGRAM, objs, line)
 
     assert len(ret) == 3
-    assert ret[0].value_() == 0xffffffffc0a8aee0
+    assert ret[0].value_() == 0xffffffffc0000000
     assert ret[0].type_ == MOCK_PROGRAM.type('int *')
     assert ret[1].value_() == 0xffffffffc084eee0
     assert ret[1].type_ == MOCK_PROGRAM.type('void *')
@@ -75,7 +75,7 @@ def test_piped_invocations():
     ret = invoke(MOCK_PROGRAM, objs, line)
 
     assert len(ret) == 3
-    assert ret[0].value_() == 0xffffffffc0a8aee0
+    assert ret[0].value_() == 0xffffffffc0000000
     assert ret[0].type_ == MOCK_PROGRAM.type('int *')
     assert ret[1].value_() == 0xffffffffc084eee0
     assert ret[1].type_ == MOCK_PROGRAM.type('void *')
