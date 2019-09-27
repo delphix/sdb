@@ -89,6 +89,7 @@ def setup_basic_mock_program() -> drgn.Program:
 
     prog.add_type_finder(mock_type_find)
 
+    global_int_addr = 0xffffffffc0000000
     global_struct_addr = 0xffffffffc0a8aee0
 
     def mock_object_find(prog: drgn.Program, name: str,
@@ -98,7 +99,7 @@ def setup_basic_mock_program() -> drgn.Program:
         assert flags == drgn.FindObjectFlags.ANY
 
         mock_objects = {
-            'global_int': (int_type, 0xffffffffc0a8aee0),
+            'global_int': (int_type, global_int_addr),
             'global_void_ptr': (voidp_type, 0xffff88d26353c108),
             'global_struct': (struct_type, global_struct_addr),
         }
@@ -115,8 +116,11 @@ def setup_basic_mock_program() -> drgn.Program:
         assert address == physical
         assert not offset
         fake_mappings = {
-            # address of global_struct and its first member ts_int
-            global_struct_addr: b'\x01\x00\x00\x00'
+            #
+            # Remember that our mocks are little-endian!
+            #
+            global_int_addr: b'\x04\x03\x02\x01',
+            global_struct_addr: b'\x01\x00\x00\x00',
         }
         assert address in fake_mappings
         assert count == len(fake_mappings[address])

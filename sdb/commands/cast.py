@@ -32,9 +32,13 @@ class Cast(sdb.Command):
                  name: str = "_") -> None:
         super().__init__(prog, args, name)
         if not self.args.type:
-            self.parser.error("the following arguments are required: type")
+            self.parser.error("the following arguments are required: <type>")
 
-        self.type = self.prog.type(" ".join(self.args.type))
+        tname = " ".join(self.args.type)
+        try:
+            self.type = self.prog.type(tname)
+        except LookupError:
+            raise sdb.CommandError(self.name, f"could not find type '{tname}'")
 
     def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
         #
@@ -49,4 +53,7 @@ class Cast(sdb.Command):
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for obj in objs:
-            yield drgn.cast(self.type, obj)
+            try:
+                yield drgn.cast(self.type, obj)
+            except TypeError as err:
+                raise sdb.CommandError(self.name, str(err))
