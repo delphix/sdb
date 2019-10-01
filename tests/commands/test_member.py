@@ -60,7 +60,7 @@ def test_member_not_found():
     assert "'struct test_struct' has no member 'bogus'" in str(err.value)
 
 
-def test_one_member():
+def test_first_member():
     line = 'addr global_struct | member ts_int'
     objs = []
 
@@ -70,3 +70,17 @@ def test_one_member():
     assert ret[0] == drgn.Object(MOCK_PROGRAM,
                                  MOCK_PROGRAM.type('int'),
                                  value=1)
+
+
+def test_second_member():
+    line = 'addr global_struct | member ts_voidp'
+    objs = []
+
+    ret = invoke(MOCK_PROGRAM, objs, line)
+
+    #
+    # We expect global_struct.ts_voidp to point to
+    # global_int (see comment on fake_mappings).
+    #
+    assert len(ret) == 1
+    assert ret[0] == MOCK_PROGRAM['global_int'].address_of_()
