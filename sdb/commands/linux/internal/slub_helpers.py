@@ -67,7 +67,7 @@ def object_size(obj: drgn.Object) -> int:
     return obj.object_size.value_()
 
 
-def memused(obj: drgn.Object) -> int:
+def total_memory(obj: drgn.Object) -> int:
     assert obj.type_.type_name() == 'struct kmem_cache *'
     nslabs = nr_slabs(obj)
     epslab = entries_per_slab(obj)
@@ -109,10 +109,14 @@ def active_objs(obj: drgn.Object) -> int:
     return objs(obj) - inactive_objs(obj)
 
 
+def active_memory(obj: drgn.Object) -> int:
+    assert obj.type_.type_name() == 'struct kmem_cache *'
+    return active_objs(obj) * entry_size(obj)
+
+
 def util(obj: drgn.Object) -> int:
     assert obj.type_.type_name() == 'struct kmem_cache *'
-    total = objs(obj)
-    if total == 0:
+    total_mem = total_memory(obj)
+    if total_mem == 0:
         return 0
-    inactive = inactive_objs(obj)
-    return int(((total - inactive) / total) * 100)
+    return int((active_memory(obj) / total_mem) * 100)

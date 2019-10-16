@@ -25,16 +25,15 @@ import drgn
 import sdb
 from sdb.commands.internal.fmt import size_nicenum
 from sdb.commands.internal.table import Table
-from sdb.commands.linux.internal import slub_helpers as slub
+from sdb.commands.spl.internal import kmem_helpers as kmem
 
 
-class Slabs(sdb.Locator, sdb.PrettyPrinter):
-    # pylint: disable=too-few-public-methods
+class SplKmemCaches(sdb.Locator, sdb.PrettyPrinter):
 
-    names = ["slabs"]
+    names = ["spl_kmem_caches"]
 
-    input_type = "struct kmem_cache *"
-    output_type = "struct kmem_cache *"
+    input_type = "spl_kmem_cache_t *"
+    output_type = "spl_kmem_cache_t *"
 
     def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
@@ -63,13 +62,13 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
         #
         parser.formatter_class = argparse.RawDescriptionHelpFormatter
         parser.epilog = textwrap.fill(
-            f"FIELDS := {', '.join(Slabs.FIELDS.keys())}\n",
+            f"FIELDS := {', '.join(SplKmemCaches.FIELDS.keys())}\n",
             width=80,
             replace_whitespace=False)
         parser.epilog += "\n\n"
         parser.epilog += textwrap.fill(
             ("If -o is not specified the default fields used are "
-             f"{', '.join(Slabs.DEFAULT_FIELDS)}.\n"),
+             f"{', '.join(SplKmemCaches.DEFAULT_FIELDS)}.\n"),
             width=80,
             replace_whitespace=False)
         parser.epilog += "\n\n"
@@ -77,17 +76,11 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
             ("If the -s option is not specified and the command's "
              "output is not piped anywhere then we sort by the "
              "following fields in order: "
-             f"{', '.join(Slabs.DEFAULT_SORT_FIELDS)}. "
+             f"{', '.join(SplKmemCaches.DEFAULT_SORT_FIELDS)}. "
              "If none of those exists in the field-set we sort by "
              "the first field specified in the set."),
             width=80,
             replace_whitespace=False)
-
-    def __no_input_iterator(self) -> Iterable[drgn.Object]:
-        for root_cache in slub.list_for_each_root_cache(self.prog):
-            yield root_cache
-            if self.args.recursive:
-                yield from slub.list_for_each_child_cache(root_cache)
 
     def no_input(self) -> Iterable[drgn.Object]:
         #
@@ -97,36 +90,46 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
         # that will be the input of the next command in the pipeline.
         #
         if self.args.s and not self.islast:
-            if self.args.s not in Slabs.FIELDS.keys():
+            if self.args.s not in SplKmemCaches.FIELDS.keys():
                 raise sdb.CommandInvalidInputError(
                     self.name, f"'{self.args.s}' is not a valid field")
             yield from sorted(
-                self.__no_input_iterator(),
-                key=Slabs.FIELDS[self.args.s],
-                reverse=(
-                    self.args.s not in Slabs.DEFAULT_INCREASING_ORDER_FIELDS))
+                kmem.list_for_each_spl_kmem_cache(self.prog),
+                key=SplKmemCaches.FIELDS[self.args.s],
+                reverse=(self.args.s not in
+                         SplKmemCaches.DEFAULT_INCREASING_ORDER_FIELDS))
         else:
-            yield from self.__no_input_iterator()
+            yield from kmem.list_for_each_spl_kmem_cache(self.prog)
 
     FIELDS = {
         "address": lambda obj: hex(obj.value_()),
-        "name": lambda obj: obj.name.string_().decode('utf-8'),
-        "object_size": slub.object_size,
-        "entry_size": slub.entry_size,
-        "entries_per_slab": slub.entries_per_slab,
-        "slabs": slub.nr_slabs,
-        "active_memory": slub.active_memory,
-        "total_memory": slub.total_memory,
-        "objs": slub.objs,
-        "active_objs": slub.active_objs,
-        "inactive_objs": slub.inactive_objs,
-        "util": slub.util,
+        "name": kmem.slab_name,
+        "flags": kmem.slab_flags,
+        "object_size": kmem.object_size,
+        "entry_size": kmem.entry_size,
+        "slab_size": kmem.slab_size,
+        "objects_per_slab": kmem.objs_per_slab,
+        "entries_per_slab": kmem.objs_per_slab,
+        "slabs": kmem.nr_slabs,
+        "active_slabs": kmem.slab_alloc,
+        "active_memory": kmem.active_memory,
+        "total_memory": kmem.total_memory,
+        "objs": kmem.nr_objects,
+        "active_objs": kmem.obj_alloc,
+        "inactive_objs": kmem.obj_inactive,
+        "source": kmem.slab_linux_cache_source,
+        "util": kmem.util,
     }
     DEFAULT_FIELDS = [
-        "name", "entry_size", "active_objs", "active_memory", "total_memory",
-        "util"
+        "name",
+        "entry_size",
+        "active_objs",
+        "active_memory",
+        "source",
+        "total_memory",
+        "util",
     ]
-    DEFAULT_SORT_FIELDS = ["total_memory", "address", "name"]
+    DEFAULT_SORT_FIELDS = ["active_memory", "address", "name"]
 
     #
     # In general we prefer values to be sorted decreasing order
@@ -140,7 +143,7 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
 
     def __pp_parse_args(self
                        ) -> (str, List[str], Dict[str, Callable[[Any], str]]):
-        fields = self.DEFAULT_FIELDS
+        fields = SplKmemCaches.DEFAULT_FIELDS
         if self.args.o:
             #
             # HACK: Until we have a proper lexer for SDB we can
@@ -152,10 +155,10 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
                 self.args.o = self.args.o[1:-1]
             fields = self.args.o.split(",")
         elif self.args.v:
-            fields = list(Slabs.FIELDS.keys())
+            fields = list(SplKmemCaches.FIELDS.keys())
 
         for field in fields:
-            if field not in self.FIELDS:
+            if field not in SplKmemCaches.FIELDS:
                 raise sdb.CommandError(
                     self.name, "'{:s}' is not a valid field".format(field))
 
@@ -180,8 +183,8 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
                 sort_field = fields[0]
 
         formatters = {
-            "total_memory": size_nicenum,
-            "active_memory": size_nicenum
+            "active_memory": size_nicenum,
+            "total_memory": size_nicenum
         }
         if self.args.p:
             formatters = {}
@@ -192,7 +195,9 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
         sort_field, fields, formatters = self.__pp_parse_args()
         table = Table(fields, set(fields) - {"name"}, formatters)
         for obj in objs:
-            row_dict = {field: Slabs.FIELDS[field](obj) for field in fields}
+            row_dict = {
+                field: SplKmemCaches.FIELDS[field](obj) for field in fields
+            }
             table.add_row(row_dict[sort_field], row_dict)
         table.print_(print_headers=self.args.H,
                      reverse_sort=(sort_field not in ["name", "address"]))
