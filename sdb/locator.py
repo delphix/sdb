@@ -89,6 +89,13 @@ class Locator(sdb.Command):
 
             # try walkers
             try:
+                # pylint: disable=import-outside-toplevel
+                #
+                # The reason we do the above is that putting
+                # the import at the top-level hits a cyclic
+                # import error which pretty-much breaks
+                # everything. We should reconsider how we
+                # handle all our imports.
                 from sdb.commands.walk import Walk
                 for obj in Walk(self.prog).call([i]):
                     yield drgn.cast(out_type, obj)
