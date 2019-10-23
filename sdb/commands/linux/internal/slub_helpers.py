@@ -22,9 +22,9 @@ import drgn
 from drgn.helpers.linux.list import list_for_each_entry
 
 
-def is_root_cache(obj: drgn.Object) -> bool:
-    assert obj.type_.type_name() == 'struct kmem_cache *'
-    return obj.memcg_params.root_cache.value_() == 0x0
+def is_root_cache(cache: drgn.Object) -> bool:
+    assert cache.type_.type_name() == 'struct kmem_cache *'
+    return cache.memcg_params.root_cache.value_() == 0x0
 
 
 def list_for_each_root_cache(prog: drgn.Program) -> Iterable[drgn.Object]:
@@ -40,83 +40,83 @@ def list_for_each_child_cache(root_cache: drgn.Object) -> Iterable[drgn.Object]:
         "memcg_params.children_node")
 
 
-def nr_slabs(obj: drgn.Object) -> int:
-    assert obj.type_.type_name() == 'struct kmem_cache *'
-    nslabs = obj.node[0].nr_slabs.counter.value_()
-    if not is_root_cache(obj):
+def nr_slabs(cache: drgn.Object) -> int:
+    assert cache.type_.type_name() == 'struct kmem_cache *'
+    nslabs = cache.node[0].nr_slabs.counter.value_()
+    if not is_root_cache(cache):
         return nslabs
     for child in list_for_each_entry("struct kmem_cache",
-                                     obj.memcg_params.children.address_of_(),
+                                     cache.memcg_params.children.address_of_(),
                                      "memcg_params.children_node"):
         nslabs += nr_slabs(child)
     return nslabs
 
 
-def entries_per_slab(obj: drgn.Object) -> int:
-    assert obj.type_.type_name() == 'struct kmem_cache *'
-    return obj.oo.x.value_() & 0xffff
+def entries_per_slab(cache: drgn.Object) -> int:
+    assert cache.type_.type_name() == 'struct kmem_cache *'
+    return cache.oo.x.value_() & 0xffff
 
 
-def entry_size(obj: drgn.Object) -> int:
-    assert obj.type_.type_name() == 'struct kmem_cache *'
-    return obj.size.value_()
+def entry_size(cache: drgn.Object) -> int:
+    assert cache.type_.type_name() == 'struct kmem_cache *'
+    return cache.size.value_()
 
 
-def object_size(obj: drgn.Object) -> int:
-    assert obj.type_.type_name() == 'struct kmem_cache *'
-    return obj.object_size.value_()
+def object_size(cache: drgn.Object) -> int:
+    assert cache.type_.type_name() == 'struct kmem_cache *'
+    return cache.object_size.value_()
 
 
-def total_memory(obj: drgn.Object) -> int:
-    assert obj.type_.type_name() == 'struct kmem_cache *'
-    nslabs = nr_slabs(obj)
-    epslab = entries_per_slab(obj)
-    esize = entry_size(obj)
+def total_memory(cache: drgn.Object) -> int:
+    assert cache.type_.type_name() == 'struct kmem_cache *'
+    nslabs = nr_slabs(cache)
+    epslab = entries_per_slab(cache)
+    esize = entry_size(cache)
     return nslabs * epslab * esize
 
 
-def objs(obj: drgn.Object) -> int:
-    assert obj.type_.type_name() == 'struct kmem_cache *'
-    count = obj.node[0].total_objects.counter.value_()
-    if not is_root_cache(obj):
+def objs(cache: drgn.Object) -> int:
+    assert cache.type_.type_name() == 'struct kmem_cache *'
+    count = cache.node[0].total_objects.counter.value_()
+    if not is_root_cache(cache):
         return count
     for child in list_for_each_entry("struct kmem_cache",
-                                     obj.memcg_params.children.address_of_(),
+                                     cache.memcg_params.children.address_of_(),
                                      "memcg_params.children_node"):
         count += objs(child)
     return count
 
 
-def inactive_objs(obj: drgn.Object) -> int:
-    assert obj.type_.type_name() == 'struct kmem_cache *'
-    node = obj.node[0].partial
+def inactive_objs(cache: drgn.Object) -> int:
+    assert cache.type_.type_name() == 'struct kmem_cache *'
+    node = cache.node[0].partial
     free = 0
     for page in list_for_each_entry("struct page", node.address_of_(), "lru"):
         free += page.objects.value_() - page.inuse.value_()
 
-    if not is_root_cache(obj):
+    if not is_root_cache(cache):
         return free
 
     for child in list_for_each_entry("struct kmem_cache",
-                                     obj.memcg_params.children.address_of_(),
+                                     cache.memcg_params.children.address_of_(),
                                      "memcg_params.children_node"):
         free += inactive_objs(child)
     return free
 
 
-def active_objs(obj: drgn.Object) -> int:
-    assert obj.type_.type_name() == 'struct kmem_cache *'
-    return objs(obj) - inactive_objs(obj)
+def active_objs(cache: drgn.Object) -> int:
+    assert cache.type_.type_name() == 'struct kmem_cache *'
+    return objs(cache) - inactive_objs(cache)
 
 
-def active_memory(obj: drgn.Object) -> int:
-    assert obj.type_.type_name() == 'struct kmem_cache *'
-    return active_objs(obj) * entry_size(obj)
+def active_memory(cache: drgn.Object) -> int:
+    assert cache.type_.type_name() == 'struct kmem_cache *'
+    return active_objs(cache) * entry_size(cache)
 
 
-def util(obj: drgn.Object) -> int:
-    assert obj.type_.type_name() == 'struct kmem_cache *'
-    total_mem = total_memory(obj)
+def util(cache: drgn.Object) -> int:
+    assert cache.type_.type_name() == 'struct kmem_cache *'
+    total_mem = total_memory(cache)
     if total_mem == 0:
         return 0
-    return int((active_memory(obj) / total_mem) * 100)
+    return int((active_memory(cache) / total_mem) * 100)
