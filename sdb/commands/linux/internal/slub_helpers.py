@@ -27,13 +27,13 @@ def is_root_cache(cache: drgn.Object) -> bool:
     return cache.memcg_params.root_cache.value_() == 0x0
 
 
-def list_for_each_root_cache(prog: drgn.Program) -> Iterable[drgn.Object]:
+def for_each_root_cache(prog: drgn.Program) -> Iterable[drgn.Object]:
     yield from list_for_each_entry("struct kmem_cache",
                                    prog["slab_root_caches"].address_of_(),
                                    "memcg_params.__root_caches_node")
 
 
-def list_for_each_child_cache(root_cache: drgn.Object) -> Iterable[drgn.Object]:
+def for_each_child_cache(root_cache: drgn.Object) -> Iterable[drgn.Object]:
     assert root_cache.type_.type_name() == 'struct kmem_cache *'
     yield from list_for_each_entry(
         "struct kmem_cache", root_cache.memcg_params.children.address_of_(),
