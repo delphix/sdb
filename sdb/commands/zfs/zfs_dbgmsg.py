@@ -23,7 +23,7 @@ from typing import Iterable
 import drgn
 import sdb
 from sdb.commands.cast import Cast
-from sdb.commands.zfs.spl_list import SPLList
+from sdb.commands.spl.spl_list import SPLList
 
 
 class ZfsDbgmsg(sdb.Locator, sdb.PrettyPrinter):

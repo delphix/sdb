@@ -21,7 +21,7 @@ import argparse
 import drgn
 import sdb
 from sdb.commands.cast import Cast
-from sdb.commands.zfs.avl import Avl
+from sdb.commands.spl.avl import Avl
 from sdb.commands.zfs.vdev import Vdev
 
 
