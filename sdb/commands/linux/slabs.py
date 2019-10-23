@@ -84,10 +84,10 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
             replace_whitespace=False)
 
     def __no_input_iterator(self) -> Iterable[drgn.Object]:
-        for root_cache in slub.list_for_each_root_cache(self.prog):
+        for root_cache in slub.for_each_root_cache(self.prog):
             yield root_cache
             if self.args.recursive:
-                yield from slub.list_for_each_child_cache(root_cache)
+                yield from slub.for_each_child_cache(root_cache)
 
     def no_input(self) -> Iterable[drgn.Object]:
         #
