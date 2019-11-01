@@ -61,10 +61,10 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
         parser.add_argument("poolnames", nargs="*")
 
     def pretty_print(self, spas):
-        print("{:14} {}".format("ADDR", "NAME"))
+        print("{:18} {}".format("ADDR", "NAME"))
         print("%s" % ("-" * 60))
         for spa in spas:
-            print("{:14} {}".format(hex(spa),
+            print("{:18} {}".format(hex(spa),
                                     spa.spa_name.string_().decode("utf-8")))
             if self.args.vdevs:
                 vdevs = sdb.execute_pipeline(self.prog, [spa],
@@ -78,7 +78,7 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
             [Avl(self.prog), Cast(self.prog, "spa_t *")],
         )
         for spa in spas:
-            if (self.args.poolnames and
-                    spa.spa_name.string_() not in self.args.poolnames):
+            if (self.args.poolnames and spa.spa_name.string_().decode("utf-8")
+                    not in self.args.poolnames):
                 continue
             yield spa
