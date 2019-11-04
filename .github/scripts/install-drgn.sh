@@ -1,0 +1,13 @@
+#!/bin/bash -eux
+
+#
+# These are build requirements of "drgn"; if we don't install these, the
+# build/install of "drgn" will fail below.
+#
+sudo apt-get install bison flex libelf-dev libdw-dev libomp-dev
+
+git clone https://github.com/osandov/drgn.git
+
+cd drgn
+python3 setup.py install
+cd -
