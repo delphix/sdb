@@ -16,8 +16,8 @@
 
 # pylint: disable=missing-docstring
 
-import drgn
 import pytest
+import drgn
 import sdb
 
 from tests import invoke, MOCK_PROGRAM
