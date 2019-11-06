@@ -16,7 +16,7 @@
 
 # pylint: disable=missing-docstring
 
-import argparse
+import sys
 from typing import Iterable
 
 import drgn
@@ -29,4 +29,4 @@ class Echo(sdb.Command):
     names = ["exit", "quit"]
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        exit()
+        sys.exit()
