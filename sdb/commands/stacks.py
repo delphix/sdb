@@ -223,8 +223,29 @@ class Stacks(sdb.Command):
         stack_aggr = defaultdict(list)
         for task in for_each_task(self.prog):
             stack_key = [Stacks.task_struct_get_state(task)]
-            for frame in self.prog.stack_trace(task):
-                stack_key.append(frame.pc)
+            try:
+                for frame in self.prog.stack_trace(task):
+                    stack_key.append(frame.pc)
+            except ValueError:
+                #
+                # Unwinding the stack of a running/runnable task will
+                # result in an exception. Since we expect some tasks to
+                # be running, we silently ignore this case, and move on.
+                #
+                # Unfortunately, the exception thrown in this case is a
+                # generic "ValueError" exception, so we may wind up
+                # masking other "ValueError" exceptions that are not due
+                # to unwinding the stack of a running task.
+                #
+                # We can't check the state of the task here, and verify
+                # it's in the "R" state, since that state can change in
+                # between the point where the "ValueError" exception was
+                # originally raised, and here where we'd verify the
+                # state of the task; i.e. it could have concurrently
+                # transitioned from running to some other state.
+                #
+                pass
+
             stack_aggr[tuple(stack_key)].append(task)
 
         for stack_key, tasks in sorted(stack_aggr.items(),
