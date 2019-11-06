@@ -66,7 +66,7 @@ def parse_arguments() -> argparse.Namespace:
         "-s",
         "--symbol-search",
         metavar="PATH",
-        type=str,
+        default=[],
         action="append",
         help="load debug info and symbols from the given directory or file;" +
         " this may option may be given more than once",
@@ -120,6 +120,7 @@ def parse_arguments() -> argparse.Namespace:
     #
     if args.object and not args.core:
         parser.error("raw object file target is not supported yet")
+
     return args
 
 
@@ -159,7 +160,7 @@ def setup_target(args: argparse.Namespace) -> drgn.Program:
         # or userland binary using the non-default debug info
         # load API.
         #
-        args.symbol_search.insert(0, args.object)
+        args.symbol_search = [args.object] + args.symbol_search
     elif args.pid:
         prog.set_pid(args.pid)
     else:
