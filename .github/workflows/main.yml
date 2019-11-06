@@ -1,0 +1,61 @@
+on: push
+jobs:
+  #
+  # Verify the build and installation of SDB.
+  #
+  install:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.6'
+      - run: python3 setup.py install
+  #
+  # Verify "pylint" runs successfully.
+  #
+  # Note, we need to have "drgn" installed in order to run "pylint".
+  # Thus, prior to running "pylint" we have to clone, build, and install
+  # the "drgn" from source (there's no package currently available).
+  #
+  pylint:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.6'
+      - run: ./.github/scripts/install-drgn.sh
+      - run: python3 -m pip install pylint pytest
+      - run: pylint -d duplicate-code sdb
+      - run: pylint -d duplicate-code tests
+  #
+  # Verify "pytest" runs successfully.
+  #
+  # Note, we need to have "drgn" installed in order to "pytest". Thus,
+  # prior to running "pytest" we have to clone, build, and install the
+  # "drgn" from source (there's no package currently available).
+  #
+  pytest:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.6'
+      - run: ./.github/scripts/install-drgn.sh
+      - run: python3 -m pip install pytest
+      - run: pytest -v tests
+  #
+  # Verify "yapf" runs successfully.
+  #
+  yapf:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.6'
+      - run: python3 -m pip install yapf
+      - run: yapf --diff --style google --recursive sdb
+      - run: yapf --diff --style google --recursive tests
