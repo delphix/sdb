@@ -1,4 +1,4 @@
-on: push
+on: [push, pull_request]
 jobs:
   #
   # Verify the build and installation of SDB.
