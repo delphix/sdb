@@ -84,3 +84,25 @@ class Command:
              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         # pylint: disable=missing-docstring
         raise NotImplementedError
+
+    @classmethod
+    def help(cls, name: str, verbose: bool = False):
+        """
+        Print a help message for the command based on the documentation
+        string for the class. This assumes the documentation uses the form:
+        <one line description of command>
+        <optional, and possibly multi-line description of command>
+        :type name: bool
+        """
+        cmd_name = '{0}: '.format(name)
+        docstr = inspect.getdoc(cls)
+        summary = docstr.splitlines()[0]
+
+        print(cmd_name + summary)
+        if verbose:
+            # Print additional names (a.k.a. aliases) for the command
+            if len(cls.names) > 1:
+                print('aliases: {0}'.format(cls.names[1:]))
+            # Print out remaining doc string
+            if len(docstr) > len(summary):
+                print(docstr[len(summary) + 1:])
