@@ -27,6 +27,12 @@ import sdb
 class Tail(sdb.Command):
     # pylint: disable=too-few-public-methods
 
+    """
+    Return the last N objects passed in the pipeline
+
+    Command takes a 'count' parameter which defaults to 10
+    """
+
     names = ["tail"]
 
     def _init_argparse(self, parser: argparse.ArgumentParser) -> None:

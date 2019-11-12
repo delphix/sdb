@@ -27,6 +27,10 @@ class Filter(sdb.Command):
     # pylint: disable=too-few-public-methods
     # pylint: disable=eval-used
 
+    """
+    Returns a list of objects matching the given expression
+    """
+
     names = ["filter"]
 
     def __init__(self, prog: drgn.Program, args: str = "",

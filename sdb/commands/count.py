@@ -25,6 +25,10 @@ import sdb
 class Count(sdb.Command):
     # pylint: disable=too-few-public-methods
 
+    """
+    Return the number of objects passed in the pipeline
+    """
+
     names = ["count", "cnt", "wc"]
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:

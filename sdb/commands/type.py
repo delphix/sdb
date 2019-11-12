@@ -25,6 +25,10 @@ import sdb
 class Type(sdb.Command):
     # pylint: disable=too-few-public-methods
 
+    """
+    Return the type of the object passed
+    """
+
     names = ["type"]
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
