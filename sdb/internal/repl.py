@@ -105,7 +105,7 @@ class REPL:
         while True:
             try:
                 line = input(self.prompt).strip()
-            except (EOFError, KeyboardInterrupt):
+            except (EOFError, KeyboardInterrupt, SystemExit):
                 print(self.closing)
                 break
 
