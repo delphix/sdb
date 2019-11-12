@@ -22,8 +22,10 @@ import drgn
 import sdb
 
 
-class Echo(sdb.Command):
+class Exit(sdb.Command):
     # pylint: disable=too-few-public-methods
+
+    "Exit the application"
 
     names = ["exit", "quit"]
 
