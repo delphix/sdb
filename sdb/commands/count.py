@@ -24,7 +24,6 @@ import sdb
 
 class Count(sdb.Command):
     # pylint: disable=too-few-public-methods
-
     """
     Return the number of objects passed in the pipeline
     """

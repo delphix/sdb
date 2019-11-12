@@ -26,7 +26,6 @@ import sdb
 
 class Tail(sdb.Command):
     # pylint: disable=too-few-public-methods
-
     """
     Return the last N objects passed in the pipeline
 

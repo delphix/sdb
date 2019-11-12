@@ -24,7 +24,6 @@ import sdb
 
 class Type(sdb.Command):
     # pylint: disable=too-few-public-methods
-
     """
     Return the type of the object passed
     """

@@ -37,7 +37,7 @@ class Help(sdb.Command):
     def call(self, objs: Iterable[drgn.Object]):
         if self.args.cmd:
             if self.args.cmd in sdb.all_commands:
-                cmd_list = [ self.args.cmd ]
+                cmd_list = [self.args.cmd]
             else:
                 print('Unknown command: ' + self.args.cmd)
                 return
@@ -47,14 +47,14 @@ class Help(sdb.Command):
             # aliases. Filter out the aliases when listing the commands
             cmd_list = []
             aliases = []
-            for c in sdb.all_commands:
-                if c in aliases:
-                    aliases.remove(c)
+            for cmd in sdb.all_commands:
+                if cmd in aliases:
+                    aliases.remove(cmd)
                 else:
-                    cmd_list.append(c)
+                    cmd_list.append(cmd)
                     # Add names to aliases but remove the current one
-                    aliases.extend(sdb.all_commands[c].names)
-                    aliases.remove(c)
+                    aliases.extend(sdb.all_commands[cmd].names)
+                    aliases.remove(cmd)
 
-        for c in cmd_list:
-            sdb.all_commands[c].help(c, self.args.verbose)
+        for cmd in cmd_list:
+            sdb.all_commands[cmd].help(cmd, self.args.verbose)
