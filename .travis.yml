@@ -24,8 +24,8 @@ script:
   #
   - yapf --diff --style google --recursive sdb
   - yapf --diff --style google --recursive tests
-  - pylint -d duplicate-code sdb
-  - pylint -d duplicate-code tests
+  - pylint -d duplicate-code -d invalid-name sdb
+  - pylint -d duplicate-code -d invalid-name tests
 
   #
   # Ensure there aren't new regressions in unit tests.
