@@ -11,7 +11,7 @@ Ensure you have the following dependencies:
 
 Then run:
 ```
-$ git clone https://github.com/sdimitro/sdb.git
+$ git clone https://github.com/delphix/sdb.git
 $ cd sdb
 $ sudo python3 setup.py install
 ```
