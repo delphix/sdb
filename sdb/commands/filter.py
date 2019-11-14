@@ -29,6 +29,12 @@ class Filter(sdb.Command):
 
     names = ["filter"]
 
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super(Filter, cls)._init_parser(name)
+        parser.add_argument("expr", nargs=argparse.REMAINDER)
+        return parser
+
     def __init__(self, prog: drgn.Program, args: str = "",
                  name: str = "_") -> None:
         super().__init__(prog, args, name)
@@ -74,10 +80,6 @@ class Filter(sdb.Command):
             raise sdb.CommandEvalSyntaxError(self.name, err)
 
         self.compare = self.args.expr[index]
-
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument("expr", nargs=argparse.REMAINDER)
-        self.parser = parser
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         try:

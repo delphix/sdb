@@ -32,7 +32,9 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
     input_type = "metaslab_t *"
     output_type = "metaslab_t *"
 
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super(Metaslab, cls)._init_parser(name)
         parser.add_argument(
             "-H",
             "--histogram",
@@ -48,6 +50,7 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
                             help="weight flag")
 
         parser.add_argument("metaslab_ids", nargs="*", type=int)
+        return parser
 
     @staticmethod
     def metaslab_weight_print(msp, print_header, indent):

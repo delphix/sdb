@@ -30,16 +30,9 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
     input_type = "vdev_t *"
     output_type = "vdev_t *"
 
-    def __init__(self, prog: drgn.Program, args: str = "",
-                 name: str = "_") -> None:
-        super().__init__(prog, args, name)
-        self.arg_string = ""
-        if self.args.histogram:
-            self.arg_string += "-H "
-        if self.args.weight:
-            self.arg_string += "-w "
-
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super(Vdev, cls)._init_parser(name)
         parser.add_argument(
             "-m",
             "--metaslab",
@@ -63,6 +56,16 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
                             help="weight flag")
 
         parser.add_argument("vdev_ids", nargs="*", type=int)
+        return parser
+
+    def __init__(self, prog: drgn.Program, args: str = "",
+                 name: str = "_") -> None:
+        super().__init__(prog, args, name)
+        self.arg_string = ""
+        if self.args.histogram:
+            self.arg_string += "-H "
+        if self.args.weight:
+            self.arg_string += "-w "
 
     def pretty_print(self, vdevs, indent=0):
         print(

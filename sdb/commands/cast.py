@@ -28,6 +28,19 @@ class Cast(sdb.Command):
 
     names = ["cast"]
 
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super(Cast, cls)._init_parser(name)
+        #
+        # We use REMAINDER here to allow the type to be specified
+        # without the user having to worry about escaping whitespace.
+        # The drawback of this is an error will not be automatically
+        # thrown if no type is provided. To workaround this, we check
+        # the parsed arguments, and explicitly throw an error if needed.
+        #
+        parser.add_argument("type", nargs=argparse.REMAINDER)
+        return parser
+
     def __init__(self, prog: drgn.Program, args: str = "",
                  name: str = "_") -> None:
         super().__init__(prog, args, name)
@@ -39,17 +52,6 @@ class Cast(sdb.Command):
             self.type = self.prog.type(tname)
         except LookupError:
             raise sdb.CommandError(self.name, f"could not find type '{tname}'")
-
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
-        #
-        # We use REMAINDER here to allow the type to be specified
-        # without the user having to worry about escaping whitespace.
-        # The drawback of this is an error will not be automatically
-        # thrown if no type is provided. To workaround this, we check
-        # the parsed arguments, and explicitly throw an error if needed.
-        #
-        parser.add_argument("type", nargs=argparse.REMAINDER)
-        self.parser = parser
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for obj in objs:

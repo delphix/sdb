@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Delphix
+# Copyright 2019 Chuck Tuffli
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,27 +23,19 @@ import drgn
 import sdb
 
 
-class Member(sdb.Command):
+class Help(sdb.Command):
     # pylint: disable=too-few-public-methods
 
-    names = ["member"]
+    names = ["help"]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super(Member, cls)._init_parser(name)
-        parser.add_argument("members", nargs="+", metavar="<member>")
+        parser = super(Help, cls)._init_parser(name)
+        parser.add_argument("cmd", type=str)
         return parser
 
-    def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        for obj in objs:
-            for member in self.args.members:
-                try:
-                    obj = obj.member_(member)
-                except (LookupError, TypeError) as err:
-                    #
-                    # The expected error messages that we get from
-                    # member_() are good enough to be propagated
-                    # as-is.
-                    #
-                    raise sdb.CommandError(self.name, str(err))
-            yield obj
+    def call(self, objs: Iterable[drgn.Object]) -> None:
+        try:
+            sdb.all_commands[self.args.cmd].help(self.args.cmd)
+        except KeyError:
+            raise sdb.error.CommandNotFoundError(self.args.cmd)

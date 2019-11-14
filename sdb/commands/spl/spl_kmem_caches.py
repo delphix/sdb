@@ -35,7 +35,9 @@ class SplKmemCaches(sdb.Locator, sdb.PrettyPrinter):
     input_type = "spl_kmem_cache_t *"
     output_type = "spl_kmem_cache_t *"
 
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super(SplKmemCaches, cls)._init_parser(name)
         parser.add_argument(
             '-H',
             action='store_false',
@@ -81,6 +83,7 @@ class SplKmemCaches(sdb.Locator, sdb.PrettyPrinter):
              "the first field specified in the set."),
             width=80,
             replace_whitespace=False)
+        return parser
 
     def no_input(self) -> Iterable[drgn.Object]:
         #

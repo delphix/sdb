@@ -36,7 +36,9 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
     input_type = "struct kmem_cache *"
     output_type = "struct kmem_cache *"
 
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super(Slabs, cls)._init_parser(name)
         parser.add_argument(
             '-H',
             action='store_false',
@@ -82,6 +84,7 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
              "the first field specified in the set."),
             width=80,
             replace_whitespace=False)
+        return parser
 
     def __no_input_iterator(self) -> Iterable[drgn.Object]:
         for root_cache in slub.for_each_root_cache(self.prog):
