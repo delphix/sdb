@@ -38,7 +38,7 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super(Slabs, cls)._init_parser(name)
+        parser = super()._init_parser(name)
         parser.add_argument(
             '-H',
             action='store_false',

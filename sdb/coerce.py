@@ -32,7 +32,7 @@ class Coerce(sdb.Command):
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super(Coerce, cls)._init_parser(name)
+        parser = super()._init_parser(name)
         #
         # We use REMAINDER here to allow the type to be specified
         # without the user having to worry about escaping whitespace.

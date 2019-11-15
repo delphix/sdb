@@ -32,7 +32,7 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super(Spa, cls)._init_parser(name)
+        parser = super()._init_parser(name)
         parser.add_argument("-v",
                             "--vdevs",
                             action="store_true",

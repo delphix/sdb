@@ -30,7 +30,7 @@ class Help(sdb.Command):
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super(Help, cls)._init_parser(name)
+        parser = super()._init_parser(name)
         parser.add_argument("cmd", type=str)
         return parser
 

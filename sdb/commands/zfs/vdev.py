@@ -32,7 +32,7 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super(Vdev, cls)._init_parser(name)
+        parser = super()._init_parser(name)
         parser.add_argument(
             "-m",
             "--metaslab",

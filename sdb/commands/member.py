@@ -30,7 +30,7 @@ class Member(sdb.Command):
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super(Member, cls)._init_parser(name)
+        parser = super()._init_parser(name)
         parser.add_argument("members", nargs="+", metavar="<member>")
         return parser
 

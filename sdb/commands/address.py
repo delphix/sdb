@@ -44,7 +44,7 @@ class Address(sdb.Command):
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super(Address, cls)._init_parser(name)
+        parser = super()._init_parser(name)
         parser.add_argument("symbols", nargs="*", metavar="<symbol>")
         return parser
 

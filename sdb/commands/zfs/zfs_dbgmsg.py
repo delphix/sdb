@@ -33,7 +33,7 @@ class ZfsDbgmsg(sdb.Locator, sdb.PrettyPrinter):
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super(ZfsDbgmsg, cls)._init_parser(name)
+        parser = super()._init_parser(name)
         parser.add_argument('--verbose', '-v', action='count', default=0)
         return parser
 

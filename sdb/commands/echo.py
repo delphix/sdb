@@ -30,7 +30,7 @@ class Echo(sdb.Command):
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super(Echo, cls)._init_parser(name)
+        parser = super()._init_parser(name)
         parser.add_argument("addrs", nargs="*", metavar="<address>")
         return parser
 

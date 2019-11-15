@@ -30,7 +30,7 @@ class PyFilter(sdb.Command):
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super(PyFilter, cls)._init_parser(name)
+        parser = super()._init_parser(name)
         parser.add_argument("expr", nargs=argparse.REMAINDER)
         return parser
 
