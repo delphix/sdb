@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Delphix
+# Copyright 2019 Chuck Tuffli
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,21 +23,19 @@ import drgn
 import sdb
 
 
-class Head(sdb.Command):
+class Help(sdb.Command):
     # pylint: disable=too-few-public-methods
 
-    names = ["head"]
+    names = ["help"]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
         parser = super()._init_parser(name)
-        parser.add_argument("count", nargs="?", default=10, type=int)
+        parser.add_argument("cmd", type=str)
         return parser
 
-    def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        for obj in objs:
-            if self.args.count == 0:
-                break
-
-            self.args.count -= 1
-            yield obj
+    def call(self, objs: Iterable[drgn.Object]) -> None:
+        try:
+            sdb.all_commands[self.args.cmd].help(self.args.cmd)
+        except KeyError:
+            raise sdb.error.CommandNotFoundError(self.args.cmd)

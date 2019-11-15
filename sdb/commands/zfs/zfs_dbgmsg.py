@@ -31,8 +31,11 @@ class ZfsDbgmsg(sdb.Locator, sdb.PrettyPrinter):
     input_type = "zfs_dbgmsg_t *"
     output_type = "zfs_dbgmsg_t *"
 
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
         parser.add_argument('--verbose', '-v', action='count', default=0)
+        return parser
 
     # obj is a zfs_dbgmsg_t*
     @staticmethod

@@ -56,7 +56,9 @@ class Stacks(sdb.Command):
 
     names = ["stacks"]
 
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
         parser.add_argument(
             "-a",
             "--all",
@@ -78,6 +80,7 @@ class Stacks(sdb.Command):
             help="only print threads which are in TSTATE thread state")
         parser.epilog = "TSTATE := [{:s}]".format(", ".join(
             Stacks.TASK_STATES.values()))
+        return parser
 
     #
     # See include/linux/sched.h

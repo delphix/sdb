@@ -34,21 +34,67 @@ class Command:
 
     # pylint: disable=too-few-public-methods
 
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        #
+        # If the class doesn't have a docstring, "inspect.getdoc" will
+        # pull from the parent class's docstring, if the parent class
+        # does have a docstring. This is not the behavior we want, so we
+        # first check "cls.__doc__" before using "inspect.getdoc".
+        #
+        if cls.__doc__:
+            summary = inspect.getdoc(cls).splitlines()[0].strip()
+        else:
+            summary = None
+        return argparse.ArgumentParser(prog=name, description=summary)
+
+    @classmethod
+    def help(cls, name: str):
+        """
+        This method will print a "help message" for the particular
+        command class that it's called on. The docstring and parser for
+        the class is used to populate the contents of the message.
+        """
+        parser = cls._init_parser(name)
+
+        print("SUMMARY")
+        for i, line in enumerate(parser.format_help().split('\n')):
+            #
+            # When printing the help message, the first line will have a
+            # "usage: " prefix string which looks awkward, so we strip
+            # that prefix prior to printing the first line.
+            #
+            if i == 0:
+                line = line.replace('usage: ', '')
+            print("    {}".format(line))
+
+        if len(cls.names) > 1:
+            print("ALIASES")
+            print("    {}".format(", ".join(cls.names)))
+            print()
+
+        #
+        # If the class doesn't have a docstring, "inspect.getdoc" will
+        # pull from the parent class's docstring, if the parent class
+        # does have a docstring. This is not the behavior we want, so we
+        # first check "cls.__doc__" before using "inspect.getdoc".
+        #
+        if cls.__doc__:
+            #
+            # The first line of the docstring is the summary, which is
+            # already be included in the parser description. The second
+            # line should be empty. Thus, we skip these two lines.
+            #
+            for line in inspect.getdoc(cls).splitlines()[2:]:
+                print("{}".format(line))
+            print()
+
     #
     # names:
     #    The potential names that can be used to invoke
     #    the command.
     #
     names: List[str] = []
-
-    #
-    # name:
-    #    The name used when the command was invoked. This
-    #    is generally used as a parameter passed to
-    #    exceptions raised by SDB to make error messages
-    #    more precise.
-    #
-    name: str = ""
 
     input_type: Optional[str] = None
 
@@ -63,9 +109,8 @@ class Command:
                 self.call).return_annotation == Iterable[drgn.Object]:
             self.ispipeable = True
 
-        parser = argparse.ArgumentParser(prog=name)
-        self._init_argparse(parser)
-        self.args = parser.parse_args(args.split())
+        self.parser = type(self)._init_parser(name)
+        self.args = self.parser.parse_args(args.split())
 
     def __init_subclass__(cls, **kwargs):
         """
@@ -76,9 +121,6 @@ class Command:
         super().__init_subclass__(**kwargs)
         for name in cls.names:
             sdb.register_command(name, cls)
-
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
-        pass
 
     def call(self,
              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
