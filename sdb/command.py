@@ -66,7 +66,7 @@ class Command:
             #
             if i == 0:
                 line = line.replace('usage: ', '')
-            print("    {}".format(line.replace('usage: ', '')))
+            print("    {}".format(line))
 
         if len(cls.names) > 1:
             print("ALIASES")
@@ -81,7 +81,7 @@ class Command:
         #
         if cls.__doc__:
             #
-            # The first line of the docstring is the summary, whichis
+            # The first line of the docstring is the summary, which is
             # already be included in the parser description. The second
             # line should be empty. Thus, we skip these two lines.
             #
