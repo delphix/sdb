@@ -47,7 +47,7 @@ class Walk(sdb.Command):
             print("The following types have walkers:")
             print("\t%-20s %-20s" % ("WALKER", "TYPE"))
             for type_, class_ in baked:
-                print("\t%-20s %-20s" % (class_(self.prog).names, type_))
+                print("\t%-20s %-20s" % (class_(self.prog).names[0], type_))
             raise TypeError("no walker found for input of type {}".format(
                 i.type_))
         # If we got no input and we're the last thing in the pipeline, we're
@@ -57,4 +57,4 @@ class Walk(sdb.Command):
             print("The following types have walkers:")
             print("\t%-20s %-20s" % ("WALKER", "TYPE"))
             for type_, class_ in baked:
-                print("\t%-20s %-20s" % (class_(self.prog).names, type_))
+                print("\t%-20s %-20s" % (class_(self.prog).names[0], type_))
