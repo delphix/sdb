@@ -51,7 +51,7 @@ class REPL:
 
         return custom_complete
 
-    def __init__(self, target, vocabulary, prompt="> ", closing=""):
+    def __init__(self, target, vocabulary, prompt="sdb> ", closing=""):
         self.prompt = prompt
         self.closing = closing
         self.vocabulary = vocabulary
