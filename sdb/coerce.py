@@ -65,7 +65,7 @@ class Coerce(sdb.Command):
 
         # "void *" can be coerced to any pointer type
         if (obj.type_.kind is drgn.TypeKind.POINTER and
-                obj.type_.primitive is drgn.PrimitiveType.C_VOID):
+                obj.type_.type.primitive is drgn.PrimitiveType.C_VOID):
             return drgn.cast(self.type, obj)
 
         # integers can be coerced to any pointer typo
