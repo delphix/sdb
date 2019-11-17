@@ -30,18 +30,9 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
     input_type = "spa_t *"
     output_type = "spa_t *"
 
-    def __init__(self, prog: drgn.Program, args: str = "",
-                 name: str = "_") -> None:
-        super().__init__(prog, args, name)
-        self.arg_string = ""
-        if self.args.metaslab:
-            self.arg_string += "-m "
-        if self.args.histogram:
-            self.arg_string += "-H "
-        if self.args.weight:
-            self.arg_string += "-w "
-
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
         parser.add_argument("-v",
                             "--vdevs",
                             action="store_true",
@@ -59,6 +50,18 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
                             action="store_true",
                             help="weight flag")
         parser.add_argument("poolnames", nargs="*")
+        return parser
+
+    def __init__(self, prog: drgn.Program, args: str = "",
+                 name: str = "_") -> None:
+        super().__init__(prog, args, name)
+        self.arg_string = ""
+        if self.args.metaslab:
+            self.arg_string += "-m "
+        if self.args.histogram:
+            self.arg_string += "-H "
+        if self.args.weight:
+            self.arg_string += "-w "
 
     def pretty_print(self, spas):
         print("{:18} {}".format("ADDR", "NAME"))

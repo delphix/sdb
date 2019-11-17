@@ -28,8 +28,11 @@ class Echo(sdb.Command):
 
     names = ["echo", "cc"]
 
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
         parser.add_argument("addrs", nargs="*", metavar="<address>")
+        return parser
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for obj in objs:
