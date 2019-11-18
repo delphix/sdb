@@ -47,7 +47,7 @@ def test_scalar_input():
     with pytest.raises(sdb.CommandError) as err:
         invoke(MOCK_PROGRAM, objs, line)
 
-    assert "'int' is not a structure or union" in str(err.value)
+    assert "'int' is not a structure, union, or class" in str(err.value)
 
 
 def test_member_not_found():
