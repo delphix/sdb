@@ -30,6 +30,19 @@ class Coerce(sdb.Command):
     to the appropriate pointer type.
     """
 
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        #
+        # We use REMAINDER here to allow the type to be specified
+        # without the user having to worry about escaping whitespace.
+        # The drawback of this is an error will not be automatically
+        # thrown if no type is provided. To workaround this, we check
+        # the parsed arguments, and explicitly throw an error if needed.
+        #
+        parser.add_argument("type", nargs=argparse.REMAINDER)
+        return parser
+
     def __init__(self, prog: drgn.Program, args: str = "",
                  name: str = "_") -> None:
         super().__init__(prog, args, name)
@@ -41,17 +54,6 @@ class Coerce(sdb.Command):
         if self.type.kind is not drgn.TypeKind.POINTER:
             raise TypeError("can only coerce to pointer types, not {}".format(
                 self.type))
-
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
-        #
-        # We use REMAINDER here to allow the type to be specified
-        # without the user having to worry about escaping whitespace.
-        # The drawback of this is an error will not be automatically
-        # thrown if no type is provided. To workaround this, we check
-        # the parsed arguments, and explicitly throw an error if needed.
-        #
-        parser.add_argument("type", nargs=argparse.REMAINDER)
-        self.parser = parser
 
     def coerce(self, obj: drgn.Object) -> drgn.Object:
         """
@@ -65,7 +67,7 @@ class Coerce(sdb.Command):
 
         # "void *" can be coerced to any pointer type
         if (obj.type_.kind is drgn.TypeKind.POINTER and
-                obj.type_.primitive is drgn.PrimitiveType.C_VOID):
+                obj.type_.type.primitive is drgn.PrimitiveType.C_VOID):
             return drgn.cast(self.type, obj)
 
         # integers can be coerced to any pointer typo

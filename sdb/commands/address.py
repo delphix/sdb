@@ -42,9 +42,11 @@ class Address(sdb.Command):
 
     names = ["address", "addr"]
 
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
-        super()._init_argparse(parser)
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
         parser.add_argument("symbols", nargs="*", metavar="<symbol>")
+        return parser
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for obj in objs:

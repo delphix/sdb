@@ -28,6 +28,12 @@ class PyFilter(sdb.Command):
 
     names = ["pyfilter"]
 
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        parser.add_argument("expr", nargs=argparse.REMAINDER)
+        return parser
+
     def __init__(self, prog: drgn.Program, args: str = "",
                  name: str = "_") -> None:
         super().__init__(prog, args, name)
@@ -38,10 +44,6 @@ class PyFilter(sdb.Command):
             self.code = compile(" ".join(self.args.expr), "<string>", "eval")
         except SyntaxError as err:
             raise sdb.CommandEvalSyntaxError(self.name, err)
-
-    def _init_argparse(self, parser: argparse.ArgumentParser) -> None:
-        parser.add_argument("expr", nargs=argparse.REMAINDER)
-        self.parser = parser
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         # pylint: disable=eval-used
