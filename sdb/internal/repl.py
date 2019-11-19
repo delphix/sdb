@@ -96,6 +96,15 @@ class REPL:
         except sdb.Error as err:
             print(err.text)
             return 1
+        except KeyboardInterrupt:
+            #
+            # Interrupting commands half way through their execution
+            # (e.g. with Ctrl+c) should be allowed. Note that we
+            # print a new line for better formatting of the next
+            # prompt.
+            #
+            print()
+            return 1
         return 0
 
     def start_session(self) -> None:
@@ -105,7 +114,21 @@ class REPL:
         while True:
             try:
                 line = input(self.prompt).strip()
-            except (EOFError, KeyboardInterrupt, SystemExit):
+            except KeyboardInterrupt:
+                #
+                # Pressing Ctrl+C while in the middle of writing
+                # a command or before even typing anything should
+                # bring back a new prompt. The user should use
+                # Ctrl+d if they need to exit without typing a
+                # command.
+                #
+                # We clear out `line` and print a new line so we
+                # don't display multiple prompts within the same
+                # line.
+                #
+                line = ""
+                print()
+            except (EOFError, SystemExit):
                 print(self.closing)
                 break
 
