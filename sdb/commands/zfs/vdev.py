@@ -119,13 +119,11 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
             # yield the requested top-level vdevs
             for i in self.args.vdev_ids:
                 if i >= spa.spa_root_vdev.vdev_children:
-                    raise TypeError(
+                    raise sdb.CommandError(
+                        self.name,
                         "vdev id {} not valid; there are only {} vdevs in {}".
-                        format(
-                            i,
-                            spa.spa_root_vdev.vdev_children,
-                            spa.spa_name.string_().decode("utf-8"),
-                        ))
+                        format(i, int(spa.spa_root_vdev.vdev_children),
+                               spa.spa_name.string_().decode("utf-8")))
                 yield spa.spa_root_vdev.vdev_child[i]
         else:
             yield from self.from_vdev(spa.spa_root_vdev)
@@ -133,9 +131,9 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
     @sdb.InputHandler("vdev_t*")
     def from_vdev(self, vdev: drgn.Object) -> Iterable[drgn.Object]:
         if self.args.vdev_ids:
-            raise TypeError(
-                "when providing a vdev, specific child vdevs can not be requested"
-            )
+            raise sdb.CommandError(
+                self.name, "when providing a vdev, "
+                "specific child vdevs can not be requested")
         yield vdev
         for cid in range(0, int(vdev.vdev_children)):
             cvd = vdev.vdev_child[cid]

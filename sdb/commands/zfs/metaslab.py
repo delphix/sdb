@@ -177,9 +177,10 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
             # yield the requested metaslabs
             for i in self.args.metaslab_ids:
                 if i >= vdev.vdev_ms_count:
-                    raise TypeError(
-                        "metaslab id {} not valid; there are only {} metaslabs in vdev id {}"
-                        .format(i, vdev.vdev_ms_count, vdev.vdev_id))
+                    raise sdb.CommandError(
+                        self.name, "metaslab id {} not valid; "
+                        "there are only {} metaslabs in vdev id {}".format(
+                            i, int(vdev.vdev_ms_count), int(vdev.vdev_id)))
                 yield vdev.vdev_ms[i]
         else:
             for i in range(0, int(vdev.vdev_ms_count)):
