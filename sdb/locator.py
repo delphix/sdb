@@ -48,7 +48,7 @@ class Locator(sdb.Command):
 
     def no_input(self) -> Iterable[drgn.Object]:
         # pylint: disable=missing-docstring
-        raise TypeError('command "{}" requires an input'.format(self.names))
+        raise sdb.CommandError(self.name, 'command requires an input')
 
     def caller(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         """
@@ -104,9 +104,8 @@ class Locator(sdb.Command):
                 pass
 
             # error
-            raise TypeError(
-                'command "{}" does not handle input of type {}'.format(
-                    self.names, i.type_))
+            raise sdb.CommandError(
+                self.name, 'no handler for input of type {}'.format(i.type_))
         if not has_input:
             yield from self.no_input()
 
