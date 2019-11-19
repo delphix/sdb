@@ -27,8 +27,8 @@ jobs:
           python-version: '3.6'
       - run: ./.github/scripts/install-drgn.sh
       - run: python3 -m pip install pylint pytest
-      - run: pylint -d duplicate-code sdb
-      - run: pylint -d duplicate-code tests
+      - run: pylint -d duplicate-code -d invalid-name sdb
+      - run: pylint -d duplicate-code -d invalid-name tests
   #
   # Verify "pytest" runs successfully.
   #
