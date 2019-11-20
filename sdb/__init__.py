@@ -18,8 +18,9 @@
 import shlex
 import subprocess
 import sys
+import itertools
 
-from typing import Dict, Type
+from typing import Dict, Type, Tuple
 
 #
 # The _register_command is used by the sdb.Command class when its
@@ -39,7 +40,6 @@ def register_command(name: str, class_: Type["sdb.Command"]) -> None:
 
 # pylint: disable=wrong-import-position,cyclic-import
 from sdb.command import *
-from sdb.coerce import *
 from sdb.error import *
 from sdb.locator import *
 from sdb.pretty_printer import *
@@ -61,20 +61,12 @@ def execute_pipeline(prog: drgn.Program, first_input: Iterable[drgn.Object],
     output as input.
     """
 
-    #
-    # If the last stage wants its input to be of a certain type, we
-    # automatically insert a "coerce" stage before it, so that the input
-    # can be safely coerced into the type that it wants.
-    #
-    if pipeline[-1].input_type is not None:
-        pipeline.insert(-1, sdb.Coerce(prog, pipeline[-1].input_type))
-
     if len(pipeline) == 1:
         this_input = first_input
     else:
         this_input = execute_pipeline(prog, first_input, pipeline[:-1])
 
-    yield from pipeline[-1].call(this_input)
+    yield from pipeline[-1].massage_input_and_call(this_input)
 
 
 def execute_pipeline_term(prog: drgn.Program,
@@ -87,20 +79,12 @@ def execute_pipeline_term(prog: drgn.Program,
     pipeline doesn't yield any results.
     """
 
-    #
-    # If the last stage wants its input to be of a certain type, we
-    # automatically insert a "coerce" stage before it, so that the input
-    # can be safely coerced into the type that it wants.
-    #
-    if pipeline[-1].input_type is not None:
-        pipeline.insert(-1, sdb.Coerce(prog, pipeline[-1].input_type))
-
     if len(pipeline) == 1:
         this_input = first_input
     else:
         this_input = execute_pipeline(prog, first_input, pipeline[:-1])
 
-    pipeline[-1].call(this_input)
+    pipeline[-1].massage_input_and_call(this_input)
 
 
 def invoke(prog: drgn.Program, first_input: Iterable[drgn.Object],
@@ -191,3 +175,20 @@ def invoke(prog: drgn.Program, first_input: Iterable[drgn.Object],
         if shell_cmd is not None:
             sys.stdout = old_stdout
             shell_proc.wait()
+
+
+def get_first_type(objs: Iterable[drgn.Object]
+                  ) -> Tuple[drgn.Type, Iterable[drgn.Object]]:
+    """
+    Determine the type of the first object in the iterable. The first element
+    in the iterable will be consumed. Therefore, a tuple is returned with the
+    type and a new iterable with the same values as the specified iterable.
+    Callers must use the returned iterable in place of the specified one.
+
+    e.g.: first_type, objs = sdb.get_first_type(objs)
+    """
+    iterator = iter(objs)
+    first_obj = next(iterator, None)
+    if first_obj is None:
+        return None, []
+    return first_obj.type_, itertools.chain([first_obj], iterator)
