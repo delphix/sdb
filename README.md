@@ -1,7 +1,7 @@
 # sdb
 The Slick/Simple Debugger
 
-[![Build Status](https://travis-ci.org/delphix/sdb.svg?branch=master)](https://travis-ci.org/delphix/sdb)
+![](https://github.com/delphix/sdb/workflows/.github/workflows/main.yml/badge.svg)
 
 ### Installation
 
