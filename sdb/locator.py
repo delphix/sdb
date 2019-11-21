@@ -120,13 +120,16 @@ class Locator(sdb.Command):
             yield from self.caller(objs)
 
 
-# pylint: disable=invalid-name
 T = TypeVar("T", bound=Locator)
 IH = Callable[[T, drgn.Object], Iterable[drgn.Object]]
 
 
 def InputHandler(typename: str) -> Callable[[IH[T]], IH[T]]:
-    # pylint: disable=invalid-name,missing-docstring
+    """
+    This is a decorator which should be applied to methods of subclasses of
+    Locator. The decorator causes this method to be called when the pipeline
+    passes an object of the specified type to this Locator.
+    """
 
     def decorator(func: IH[T]) -> IH[T]:
         func.input_typename_handled = typename  # type: ignore
