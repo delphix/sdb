@@ -93,3 +93,54 @@ def get_prog() -> drgn.Program:
 def set_prog(myprog: drgn.Program) -> None:
     global prog
     prog = myprog
+
+
+def type_canonicalize(t: drgn.Type) -> drgn.Type:
+    """
+    Return the "canonical" version of this type.  This means removing
+    qualifiers (const, volatile, etc) and typedef's.
+
+    For example the type `foo_t*` will be canonicalized to `struct foo *`.
+
+    Note: function type's arguments and return types are not canonicalized.
+    """
+    if t.kind == drgn.TypeKind.TYPEDEF:
+        return type_canonicalize(t.type)
+    if t.kind == drgn.TypeKind.POINTER:
+        return drgn.pointer_type(t.size, type_canonicalize(t.type))
+    if t.kind == drgn.TypeKind.ARRAY:
+        return drgn.array_type(t.length, type_canonicalize(t.type))
+    return t.unqualified()
+
+
+def type_canonical_name(t: drgn.Type) -> str:
+    """
+    Return the "canonical name" of this type.  See type_canonicalize().
+    """
+    return str(type_canonicalize(t))
+
+
+def type_canonicalize_name(type_name: str) -> str:
+    """
+    Return the "canonical name" of this type name.  See type_canonicalize().
+    """
+    global prog
+    return type_canonical_name(prog.type(type_name))
+
+
+def type_equals(a: drgn.Type, b: drgn.Type) -> bool:
+    """
+    This function determines if two types have the same canonical name. See
+    type_canonicalize(). Note that two types may have the same canonical name
+    and not actually be the same exact type, if they were definied in
+    different source .c files. However, we can safely assume they are the
+    same because we usually just need to know, "is this a foo_t*", without
+    regard for which source .c file defined the foo_t.
+
+    Note that the drgn type equality operator (==) attempts to evalue deep
+    type equality and therefore doesn't complete in a reasonable amount of time.
+    "Deep type equality" means that two "struct foo"s that each contain a
+    "struct bar *member" are not necessarily equal, because we must recursively
+    check if each of their "struct bar"s are actually the same.
+    """
+    return type_canonical_name(a) == type_canonical_name(b)
