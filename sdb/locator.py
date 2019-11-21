@@ -100,7 +100,7 @@ class Locator(sdb.Command):
                 for obj in Walk(self.prog).call([i]):
                     yield drgn.cast(out_type, obj)
                 continue
-            except TypeError:
+            except sdb.CommandError:
                 pass
 
             # error
