@@ -50,8 +50,9 @@ class Walker(sdb.Command):
         type_ = self.prog.type(self.input_type)
         for obj in objs:
             if obj.type_ != type_:
-                raise TypeError(
-                    'command "{}" does not handle input of type {}'.format(
-                        self.names, obj.type_))
+                raise sdb.CommandError(
+                    self.name,
+                    'expected input of type {}, but received {}'.format(
+                        type_, obj.type_))
 
             yield from self.walk(obj)

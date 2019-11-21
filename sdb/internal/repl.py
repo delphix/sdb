@@ -19,6 +19,7 @@
 import atexit
 import os
 import readline
+import traceback
 
 import sdb
 
@@ -79,6 +80,7 @@ class REPL:
             1 for error
             2 for incorrect arguments passed
         """
+        # pylint: disable=broad-except
         try:
             objs = sdb.invoke(self.target, [], input_)
             if not objs:
@@ -96,6 +98,46 @@ class REPL:
         except sdb.Error as err:
             print(err.text)
             return 1
+        except KeyboardInterrupt:
+            #
+            # Interrupting commands half way through their execution
+            # (e.g. with Ctrl+c) should be allowed. Note that we
+            # print a new line for better formatting of the next
+            # prompt.
+            #
+            print()
+            return 1
+        except Exception:
+            #
+            # Ideally it would be great if all commands had no issues and
+            # would take care of all their possible edge case. That is
+            # something that we should strive for and ask in code reviews
+            # when introducing commands. Looking into the long-term though
+            # if SDB commands/modules are to be decoupled from the SDB repo,
+            # it can be harder to have control over the quality of the
+            # commands imported by SDB during the runtime.
+            #
+            # Catching all exceptions from the REPL may be a bit ugly as a
+            # programming practice in general. That said in this case, not
+            # catching these errors leads to the worst outcome in terms of
+            # user-experience that you can get from SDB - getting dropped
+            # out of SDB with a non-friendly error message. Furthermore,
+            # given that there is no state maintained in the REPL between
+            # commands, attempting to recover after a command error is not
+            # that bad and most probably won't lead to any problems in
+            # future commands issued within the same session.
+            #
+            print("sdb encountered an internal error due to a bug. Here's the")
+            print("information you need to file the bug:")
+            print("----------------------------------------------------------")
+            print("Target Info:")
+            print(f"\t{self.target.flags}")
+            print(f"\t{self.target.platform}")
+            print()
+            traceback.print_exc()
+            print("----------------------------------------------------------")
+            print("Link: https://github.com/delphix/sdb/issues/new")
+            return 1
         return 0
 
     def start_session(self) -> None:
@@ -105,7 +147,21 @@ class REPL:
         while True:
             try:
                 line = input(self.prompt).strip()
-            except (EOFError, KeyboardInterrupt, SystemExit):
+            except KeyboardInterrupt:
+                #
+                # Pressing Ctrl+C while in the middle of writing
+                # a command or before even typing anything should
+                # bring back a new prompt. The user should use
+                # Ctrl+d if they need to exit without typing a
+                # command.
+                #
+                # We clear out `line` and print a new line so we
+                # don't display multiple prompts within the same
+                # line.
+                #
+                line = ""
+                print()
+            except (EOFError, SystemExit):
                 print(self.closing)
                 break
 

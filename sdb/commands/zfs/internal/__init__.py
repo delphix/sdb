@@ -15,15 +15,14 @@
 #
 
 # pylint: disable=missing-docstring
-# pylint: disable=unnecessary-lambda
 
 import os
-from typing import Callable
+from typing import List
 
 import drgn
 
 
-def enum_lookup(prog, enum_type_name, value):
+def enum_lookup(prog: drgn.Program, enum_type_name: str, value: int):
     """return a string which is the short name of the enum value
     (truncating off the common prefix) """
     fields = prog.type(enum_type_name).type.enumerators
@@ -31,7 +30,7 @@ def enum_lookup(prog, enum_type_name, value):
     return fields[value][0][prefix.rfind("_") + 1:]
 
 
-def print_histogram(histogram, size, offset):
+def print_histogram(histogram: List[int], size: int, offset: int) -> None:
     max_data = 0
     maxidx = 0
     minidx = size - 1
@@ -51,7 +50,7 @@ def print_histogram(histogram, size, offset):
               (i + offset, histogram[i], "*" * int(histogram[i])))
 
 
-def nicenum(num, suffix="B"):
+def nicenum(num: int, suffix: str = "B") -> str:
     for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
         if num < 1024:
             return "{}{}{}".format(int(num), unit, suffix)
@@ -59,23 +58,27 @@ def nicenum(num, suffix="B"):
     return "{}{}{}".format(int(num), "Y", suffix)
 
 
-P2PHASE: Callable[[drgn.Object, int], drgn.Object] = lambda x, align: ((x) & (
-    (align) - 1))
-BF64_DECODE: Callable[[drgn.Object, int, int], int] = lambda x, low, len: int(
-    P2PHASE(x >> low, 1 << len))
-BF64_GET: Callable[[drgn.Object, int, int],
-                   int] = lambda x, low, len: BF64_DECODE(x, low, len)
+def P2PHASE(x: drgn.Object, align: int) -> int:
+    return int(x & (align - 1))
 
 
-def WEIGHT_IS_SPACEBASED(weight):  # pylint: disable=invalid-name
+def BF64_DECODE(x: drgn.Object, low: int, length: int) -> int:
+    return int(P2PHASE(x >> low, 1 << length))
+
+
+def BF64_GET(x: drgn.Object, low: int, length: int) -> int:
+    return BF64_DECODE(x, low, length)
+
+
+def WEIGHT_IS_SPACEBASED(weight: int) -> bool:
     return weight == 0 or BF64_GET(weight, 60, 1)
 
 
-def WEIGHT_GET_INDEX(weight):  # pylint: disable=invalid-name
+def WEIGHT_GET_INDEX(weight: int) -> int:
     return BF64_GET((weight), 54, 6)
 
 
-def WEIGHT_GET_COUNT(weight):  # pylint: disable=invalid-name
+def WEIGHT_GET_COUNT(weight: int) -> int:
     return BF64_GET((weight), 0, 54)
 
 
@@ -85,3 +88,4 @@ METASLAB_WEIGHT_CLAIM = int(1 << 61)
 METASLAB_WEIGHT_TYPE = int(1 << 60)
 METASLAB_ACTIVE_MASK = (METASLAB_WEIGHT_PRIMARY | METASLAB_WEIGHT_SECONDARY |
                         METASLAB_WEIGHT_CLAIM)
+BTREE_LEAF_SIZE = 4096

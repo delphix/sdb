@@ -48,7 +48,7 @@ class Locator(sdb.Command):
 
     def no_input(self) -> Iterable[drgn.Object]:
         # pylint: disable=missing-docstring
-        raise TypeError('command "{}" requires an input'.format(self.names))
+        raise sdb.CommandError(self.name, 'command requires an input')
 
     def caller(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         """
@@ -100,13 +100,12 @@ class Locator(sdb.Command):
                 for obj in Walk(self.prog).call([i]):
                     yield drgn.cast(out_type, obj)
                 continue
-            except TypeError:
+            except sdb.CommandError:
                 pass
 
             # error
-            raise TypeError(
-                'command "{}" does not handle input of type {}'.format(
-                    self.names, i.type_))
+            raise sdb.CommandError(
+                self.name, 'no handler for input of type {}'.format(i.type_))
         if not has_input:
             yield from self.no_input()
 
@@ -121,13 +120,16 @@ class Locator(sdb.Command):
             yield from self.caller(objs)
 
 
-# pylint: disable=invalid-name
 T = TypeVar("T", bound=Locator)
 IH = Callable[[T, drgn.Object], Iterable[drgn.Object]]
 
 
 def InputHandler(typename: str) -> Callable[[IH[T]], IH[T]]:
-    # pylint: disable=invalid-name,missing-docstring
+    """
+    This is a decorator which should be applied to methods of subclasses of
+    Locator. The decorator causes this method to be called when the pipeline
+    passes an object of the specified type to this Locator.
+    """
 
     def decorator(func: IH[T]) -> IH[T]:
         func.input_typename_handled = typename  # type: ignore

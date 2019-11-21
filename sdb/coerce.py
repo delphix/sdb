@@ -52,8 +52,9 @@ class Coerce(sdb.Command):
         self.type = self.prog.type(" ".join(self.args.type))
 
         if self.type.kind is not drgn.TypeKind.POINTER:
-            raise TypeError("can only coerce to pointer types, not {}".format(
-                self.type))
+            raise sdb.CommandError(
+                self.name,
+                "can only coerce to pointer types, not {}".format(self.type))
 
     def coerce(self, obj: drgn.Object) -> drgn.Object:
         """
@@ -79,7 +80,8 @@ class Coerce(sdb.Command):
         ).type_ == self.type:
             return obj.address_of_()
 
-        raise TypeError("can not coerce {} to {}".format(obj.type_, self.type))
+        raise sdb.CommandError(
+            self.name, "can not coerce {} to {}".format(obj.type_, self.type))
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for obj in objs:

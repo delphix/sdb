@@ -29,6 +29,18 @@ class Walk(sdb.Command):
 
     names = ["walk"]
 
+    @staticmethod
+    def _help_message(input_type: drgn.Type = None) -> str:
+        msg = ""
+        if input_type is not None:
+            msg = msg + "no walker found for input of type {}\n".format(
+                input_type)
+        msg = msg + "The following types have walkers:\n"
+        msg = msg + "\t%-20s %-20s\n" % ("WALKER", "TYPE")
+        for type_, class_ in sdb.Walker.allWalkers.items():
+            msg = msg + "\t%-20s %-20s\n" % (class_.names[0], type_)
+        return msg
+
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         baked = [(self.prog.type(type_), class_)
                  for type_, class_ in sdb.Walker.allWalkers.items()]
@@ -44,17 +56,9 @@ class Walk(sdb.Command):
             except StopIteration:
                 continue
 
-            print("The following types have walkers:")
-            print("\t%-20s %-20s" % ("WALKER", "TYPE"))
-            for type_, class_ in baked:
-                print("\t%-20s %-20s" % (class_(self.prog).names[0], type_))
-            raise TypeError("no walker found for input of type {}".format(
-                i.type_))
+            raise sdb.CommandError(self.name, Walk._help_message(i.type_))
         # If we got no input and we're the last thing in the pipeline, we're
         # probably the first thing in the pipeline. Print out the available
         # walkers.
         if not has_input and self.islast:
-            print("The following types have walkers:")
-            print("\t%-20s %-20s" % ("WALKER", "TYPE"))
-            for type_, class_ in baked:
-                print("\t%-20s %-20s" % (class_(self.prog).names[0], type_))
+            print(Walk._help_message())
