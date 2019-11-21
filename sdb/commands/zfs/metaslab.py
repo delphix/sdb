@@ -24,7 +24,8 @@ import sdb
 from sdb.commands.zfs.internal import (
     METASLAB_ACTIVE_MASK, METASLAB_WEIGHT_CLAIM, METASLAB_WEIGHT_PRIMARY,
     METASLAB_WEIGHT_SECONDARY, METASLAB_WEIGHT_TYPE, WEIGHT_GET_COUNT,
-    WEIGHT_GET_INDEX, WEIGHT_IS_SPACEBASED, nicenum, print_histogram)
+    WEIGHT_GET_INDEX, WEIGHT_IS_SPACEBASED, BTREE_LEAF_SIZE, nicenum,
+    print_histogram)
 
 
 class Metaslab(sdb.Locator, sdb.PrettyPrinter):
@@ -137,10 +138,10 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
         uallocs = msp.ms_unflushed_allocs.rt_space
         free = free + ufrees - uallocs
 
-        uchanges_free_mem = msp.ms_unflushed_frees.rt_root.avl_numnodes
-        uchanges_free_mem *= prog.type("range_seg_t").type.size
-        uchanges_alloc_mem = msp.ms_unflushed_allocs.rt_root.avl_numnodes
-        uchanges_alloc_mem *= prog.type("range_seg_t").type.size
+        uchanges_free_mem = msp.ms_unflushed_frees.rt_root.bt_num_nodes
+        uchanges_free_mem *= BTREE_LEAF_SIZE
+        uchanges_alloc_mem = msp.ms_unflushed_allocs.rt_root.bt_num_nodes
+        uchanges_alloc_mem *= BTREE_LEAF_SIZE
         uchanges_mem = uchanges_free_mem + uchanges_alloc_mem
 
         print(
@@ -154,7 +155,7 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
         if msp.ms_fragmentation == -1:
             print("-".rjust(6), end="")
         else:
-            print((str(msp.ms_fragmentation) + "%").rjust(6), end="")
+            print((str(int(msp.ms_fragmentation)) + "%").rjust(6), end="")
         print(nicenum(uchanges_mem).rjust(9))
 
     def pretty_print(self, metaslabs, indent=0):
