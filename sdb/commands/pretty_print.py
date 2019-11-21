@@ -18,6 +18,7 @@
 
 from typing import Iterable
 
+import itertools
 import drgn
 import sdb
 
@@ -30,28 +31,27 @@ class PrettyPrint(sdb.Command):
     def call(self, objs: Iterable[drgn.Object]) -> None:  # type: ignore
         baked = [(self.prog.type(type_), class_)
                  for type_, class_ in sdb.PrettyPrinter.all_printers.items()]
-        has_input = False
-        for i in objs:
-            has_input = True
+        handlingClass = None
+        inputType = None
+        firstObj = next(iter(objs), None)
+        if firstObj:
+            inputType = firstObj.type_
+            for type_, class_ in baked:
+                if type_ == inputType and hasattr(class_, "pretty_print"):
+                    handlingClass = class_
+                    break
 
-            try:
-                for type_, class_ in baked:
-                    if i.type_ == type_ and hasattr(class_, "pretty_print"):
-                        class_(self.prog).pretty_print([i])
-                        raise StopIteration
-            except StopIteration:
-                continue
-
-            # error
-            raise TypeError(
-                'command "{}" does not handle input of type {}'.format(
-                    self.names, i.type_))
-        # If we got no input and we're the last thing in the pipeline, we're
-        # probably the first thing in the pipeline. Print out the available
-        # pretty-printers.
-        if not has_input and self.islast:
+        if not handlingClass:
             print("The following types have pretty-printers:")
             print("\t%-20s %-20s" % ("PRINTER", "TYPE"))
             for type_, class_ in baked:
                 if hasattr(class_, "pretty_print"):
-                    print("\t%-20s %-20s" % (class_(self.prog).names, type_))
+                    print("\t%-20s %-20s" % (class_.names[0], type_))
+            if inputType:
+                msg = 'could not find pretty-printer for type {}'.format(
+                    inputType)
+            else:
+                msg = 'could not find appropriate pretty-printer'
+            raise sdb.CommandError(self.name, msg)
+
+        handlingClass(self.prog).pretty_print(itertools.chain([firstObj], objs))

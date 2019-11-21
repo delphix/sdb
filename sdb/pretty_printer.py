@@ -54,8 +54,8 @@ class PrettyPrinter(sdb.Command):
         type_ = self.prog.type(self.input_type)
         for obj in objs:
             if obj.type_ != type_:
-                raise TypeError(
-                    'command "{}" does not handle input of type {}'.format(
-                        self.names, obj.type_))
+                raise sdb.CommandError(
+                    self.name,
+                    'no handler for input of type {}'.format(obj.type_))
 
             self.pretty_print([obj])
