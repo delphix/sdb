@@ -21,6 +21,8 @@ from typing import Iterable
 
 import drgn
 import sdb
+from sdb.commands.walk import Walk
+from sdb.commands.cast import Cast
 
 
 class Dbuf(sdb.Locator, sdb.PrettyPrinter):
@@ -90,18 +92,31 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
                 Dbuf.ObjsetName(dbuf.db_objset)))
 
     def argfilter(self, db: drgn.Object) -> bool:
-        if self.args.object and db.db.db_object != self.args.object:
+        # self.args.object (and friends) may be set to 0, indicating a search
+        # for object 0 (the meta-dnode). Therefore we need to check
+        # `is not None` rather than just the truthiness of self.args.object.
+        if self.args.object is not None and db.db.db_object != self.args.object:
             return False
-        if self.args.level and db.db_level != self.args.level:
+        if self.args.level is not None and db.db_level != self.args.level:
             return False
-        if self.args.blkid and db.db_blkid != self.args.blkid:
+        if self.args.blkid is not None and db.db_blkid != self.args.blkid:
             return False
         if self.args.has_holds and db.db_holds.rc_count == 0:
             return False
-        if self.args.dataset and Dbuf.ObjsetName(
+        if self.args.dataset is not None and Dbuf.ObjsetName(
                 db.db_objset) != self.args.dataset:
             return False
         return True
+
+    def all_dnode_dbufs(self, dn: drgn.Object) -> Iterable[drgn.Object]:
+        yield from sdb.execute_pipeline(
+            self.prog, [dn.dn_dbufs.address_of_()],
+            [Walk(self.prog),
+             Cast(self.prog, self.output_type)])
+
+    @sdb.InputHandler('dnode_t*')
+    def from_dnode(self, dn: drgn.Object) -> Iterable[drgn.Object]:
+        yield from filter(self.argfilter, self.all_dnode_dbufs(dn))
 
     def all_dbufs(self) -> Iterable[drgn.Object]:
         hash_map = self.prog["dbuf_hash_table"].address_of_()
