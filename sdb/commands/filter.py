@@ -35,9 +35,8 @@ class Filter(sdb.Command):
         parser.add_argument("expr", nargs=argparse.REMAINDER)
         return parser
 
-    def __init__(self, prog: drgn.Program, args: str = "",
-                 name: str = "_") -> None:
-        super().__init__(prog, args, name)
+    def __init__(self, args: str = "", name: str = "_") -> None:
+        super().__init__(args, name)
         if not self.args.expr:
             self.parser.error("the following arguments are required: expr")
 
@@ -96,7 +95,7 @@ class Filter(sdb.Command):
                 if isinstance(rhs, str):
                     lhs = lhs.string_().decode("utf-8")
                 elif isinstance(rhs, int):
-                    rhs = drgn.Object(self.prog, type=lhs.type_, value=rhs)
+                    rhs = drgn.Object(sdb.prog, type=lhs.type_, value=rhs)
                 elif isinstance(rhs, bool):
                     pass
                 elif isinstance(rhs, drgn.Object):

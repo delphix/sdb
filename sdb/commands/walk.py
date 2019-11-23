@@ -42,7 +42,7 @@ class Walk(sdb.Command):
         return msg
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        baked = [(self.prog.type(type_), class_)
+        baked = [(sdb.prog.type(type_), class_)
                  for type_, class_ in sdb.Walker.allWalkers.items()]
         has_input = False
         for i in objs:
@@ -51,7 +51,7 @@ class Walk(sdb.Command):
             try:
                 for type_, class_ in baked:
                     if i.type_ == type_:
-                        yield from class_(self.prog).walk(i)
+                        yield from class_().walk(i)
                         raise StopIteration
             except StopIteration:
                 continue

@@ -31,10 +31,10 @@ def is_hex(arg: str) -> bool:
         return False
 
 
-def resolve_for_address(prog: drgn.Program, arg: str) -> drgn.Object:
+def resolve_for_address(arg: str) -> drgn.Object:
     if is_hex(arg):
-        return drgn.Object(prog, "void *", value=int(arg, 16))
-    return prog[arg].address_of_()
+        return drgn.Object(sdb.prog, "void *", value=int(arg, 16))
+    return sdb.prog[arg].address_of_()
 
 
 class Address(sdb.Command):
@@ -71,6 +71,6 @@ class Address(sdb.Command):
 
         for symbol in self.args.symbols:
             try:
-                yield resolve_for_address(self.prog, symbol)
+                yield resolve_for_address(symbol)
             except KeyError:
                 raise sdb.SymbolNotFoundError(self.name, symbol)

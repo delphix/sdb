@@ -58,9 +58,8 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
         parser.add_argument("vdev_ids", nargs="*", type=int)
         return parser
 
-    def __init__(self, prog: drgn.Program, args: str = "",
-                 name: str = "_") -> None:
-        super().__init__(prog, args, name)
+    def __init__(self, args: str = "", name: str = "_") -> None:
+        super().__init__(args, name)
         self.arg_string = ""
         if self.args.histogram:
             self.arg_string += "-H "
@@ -88,10 +87,8 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
                 print(
                     "".ljust(indent),
                     hex(vdev).ljust(18),
-                    enum_lookup(self.prog, "vdev_state_t",
-                                vdev.vdev_state).ljust(7),
-                    enum_lookup(self.prog, "vdev_aux_t",
-                                vdev.vdev_stat.vs_aux).ljust(4),
+                    enum_lookup("vdev_state_t", vdev.vdev_state).ljust(7),
+                    enum_lookup("vdev_aux_t", vdev.vdev_stat.vs_aux).ljust(4),
                     "".ljust(level),
                     vdev.vdev_path.string_().decode("utf-8"),
                 )
@@ -100,18 +97,14 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
                 print(
                     "".ljust(indent),
                     hex(vdev).ljust(18),
-                    enum_lookup(self.prog, "vdev_state_t",
-                                vdev.vdev_state).ljust(7),
-                    enum_lookup(self.prog, "vdev_aux_t",
-                                vdev.vdev_stat.vs_aux).ljust(4),
+                    enum_lookup("vdev_state_t", vdev.vdev_state).ljust(7),
+                    enum_lookup("vdev_aux_t", vdev.vdev_stat.vs_aux).ljust(4),
                     "".ljust(level),
                     vdev.vdev_ops.vdev_op_type.string_().decode("utf-8"),
                 )
             if self.args.metaslab:
-                metaslabs = sdb.execute_pipeline(self.prog, [vdev],
-                                                 [Metaslab(self.prog)])
-                Metaslab(self.prog,
-                         self.arg_string).pretty_print(metaslabs, indent + 5)
+                metaslabs = sdb.execute_pipeline([vdev], [Metaslab()])
+                Metaslab(self.arg_string).pretty_print(metaslabs, indent + 5)
 
     @sdb.InputHandler("spa_t*")
     def from_spa(self, spa: drgn.Object) -> Iterable[drgn.Object]:

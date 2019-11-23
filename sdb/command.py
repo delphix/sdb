@@ -98,9 +98,7 @@ class Command:
 
     input_type: Optional[str] = None
 
-    def __init__(self, prog: drgn.Program, args: str = "",
-                 name: str = "_") -> None:
-        self.prog = prog
+    def __init__(self, args: str = "", name: str = "_") -> None:
         self.name = name
         self.islast = False
         self.ispipeable = False
@@ -142,7 +140,7 @@ class Command:
             return
 
         # If this Command doesn't expect a pointer, just call().
-        expected_type = self.prog.type(self.input_type)
+        expected_type = sdb.prog.type(self.input_type)
         if expected_type.kind is not drgn.TypeKind.POINTER:
             yield from self.call(objs)
             return
@@ -158,16 +156,15 @@ class Command:
                 # import at the top-level hits a cyclic import error which
                 # breaks everything. We may need to redesign how we do imports.
                 from sdb.commands.cast import Cast
-                yield from sdb.execute_pipeline(
-                    self.prog, objs, [Cast(self.prog, self.input_type), self])
+                yield from sdb.execute_pipeline(objs,
+                                                [Cast(self.input_type), self])
                 return
 
             # If we are passed a foo_t when we expect a foo_t*, use its address.
-            if self.prog.pointer_type(first_obj_type) == expected_type:
+            if sdb.prog.pointer_type(first_obj_type) == expected_type:
                 # pylint: disable=import-outside-toplevel
                 from sdb.commands.address import Address
-                yield from sdb.execute_pipeline(self.prog, objs,
-                                                [Address(self.prog), self])
+                yield from sdb.execute_pipeline(objs, [Address(), self])
                 return
 
         yield from self.call(objs)

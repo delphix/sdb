@@ -97,12 +97,12 @@ class SplKmemCaches(sdb.Locator, sdb.PrettyPrinter):
                 raise sdb.CommandInvalidInputError(
                     self.name, f"'{self.args.s}' is not a valid field")
             yield from sorted(
-                kmem.list_for_each_spl_kmem_cache(self.prog),
+                kmem.list_for_each_spl_kmem_cache(),
                 key=SplKmemCaches.FIELDS[self.args.s],
                 reverse=(self.args.s not in
                          SplKmemCaches.DEFAULT_INCREASING_ORDER_FIELDS))
         else:
-            yield from kmem.list_for_each_spl_kmem_cache(self.prog)
+            yield from kmem.list_for_each_spl_kmem_cache()
 
     FIELDS = {
         "address": lambda obj: hex(obj.value_()),

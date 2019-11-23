@@ -31,10 +31,10 @@ class DMesg(sdb.Locator, sdb.PrettyPrinter):
     output_type = "struct printk_log *"
 
     def no_input(self) -> Iterable[drgn.Object]:
-        log_idx = self.prog["log_first_idx"]
-        log_seq = self.prog["clear_seq"]
-        log_end = self.prog["log_next_seq"]
-        log_buf = self.prog["log_buf"]
+        log_idx = sdb.prog["log_first_idx"]
+        log_seq = sdb.prog["clear_seq"]
+        log_end = sdb.prog["log_next_seq"]
+        log_buf = sdb.prog["log_buf"]
 
         while log_seq < log_end:
             entry = drgn.cast('struct printk_log *', log_buf + log_idx)

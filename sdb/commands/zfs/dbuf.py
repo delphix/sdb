@@ -109,17 +109,16 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
         return True
 
     def all_dnode_dbufs(self, dn: drgn.Object) -> Iterable[drgn.Object]:
-        yield from sdb.execute_pipeline(
-            self.prog, [dn.dn_dbufs.address_of_()],
-            [Walk(self.prog),
-             Cast(self.prog, self.output_type)])
+        yield from sdb.execute_pipeline([dn.dn_dbufs.address_of_()],
+                                        [Walk(), Cast(self.output_type)])
 
     @sdb.InputHandler('dnode_t*')
     def from_dnode(self, dn: drgn.Object) -> Iterable[drgn.Object]:
         yield from filter(self.argfilter, self.all_dnode_dbufs(dn))
 
-    def all_dbufs(self) -> Iterable[drgn.Object]:
-        hash_map = self.prog["dbuf_hash_table"].address_of_()
+    @staticmethod
+    def all_dbufs() -> Iterable[drgn.Object]:
+        hash_map = sdb.prog["dbuf_hash_table"].address_of_()
         for i in range(hash_map.hash_table_mask):
             dbuf = hash_map.hash_table[i]
             while dbuf:

@@ -52,14 +52,13 @@ class Btree(sdb.Walker):
     names = ["zfs_btree"]
     input_type = "zfs_btree_t *"
 
-    def __init__(self, prog: drgn.Program, args: str = "",
-                 name: str = "_") -> None:
-        super().__init__(prog, args, name)
+    def __init__(self, args: str = "", name: str = "_") -> None:
+        super().__init__(args, name)
         self.elem_size = None
 
     def _val(self, start: int, idx: int) -> drgn.Object:
         location = start + (self.elem_size * idx)
-        return drgn.Object(self.prog, type="void *", value=location)
+        return drgn.Object(sdb.prog, type="void *", value=location)
 
     def _helper(self, node: drgn.Object) -> Iterable[drgn.Object]:
         if not node:
