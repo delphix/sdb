@@ -34,18 +34,6 @@ class Locator(sdb.Command):
 
     output_type: str = ""
 
-    def __init__(self, prog: drgn.Program, args: str = "",
-                 name: str = "_") -> None:
-        super().__init__(prog, args, name)
-        # We unset the input_type here so that the pipeline doesn't add a
-        # coerce before us and ruin our ability to dispatch based on multiple
-        # input types. For pure locators, and input_type wouldn't be set, but
-        # hybrid Locators and PrettyPrinters will set an input_type so that
-        # PrettyPrint can dispatch to them. By unsetting the input_type in the
-        # instance, after registration is complete, PrettyPrint continues to
-        # work, and the pipeline logic doesn't see an input_type to coerce to.
-        self.input_type = None
-
     def no_input(self) -> Iterable[drgn.Object]:
         # pylint: disable=missing-docstring
         raise sdb.CommandError(self.name, 'command requires an input')

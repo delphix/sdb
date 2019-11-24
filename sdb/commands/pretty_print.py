@@ -18,7 +18,6 @@
 
 from typing import Iterable
 
-import itertools
 import drgn
 import sdb
 
@@ -32,12 +31,10 @@ class PrettyPrint(sdb.Command):
         baked = [(self.prog.type(type_), class_)
                  for type_, class_ in sdb.PrettyPrinter.all_printers.items()]
         handlingClass = None
-        inputType = None
-        firstObj = next(iter(objs), None)
-        if firstObj:
-            inputType = firstObj.type_
+        first_obj_type, objs = sdb.get_first_type(objs)
+        if first_obj_type is not None:
             for type_, class_ in baked:
-                if type_ == inputType and hasattr(class_, "pretty_print"):
+                if type_ == first_obj_type and hasattr(class_, "pretty_print"):
                     handlingClass = class_
                     break
 
@@ -47,11 +44,11 @@ class PrettyPrint(sdb.Command):
             for type_, class_ in baked:
                 if hasattr(class_, "pretty_print"):
                     print("\t%-20s %-20s" % (class_.names[0], type_))
-            if inputType:
+            if first_obj_type:
                 msg = 'could not find pretty-printer for type {}'.format(
-                    inputType)
+                    first_obj_type)
             else:
                 msg = 'could not find appropriate pretty-printer'
             raise sdb.CommandError(self.name, msg)
 
-        handlingClass(self.prog).pretty_print(itertools.chain([firstObj], objs))
+        handlingClass(self.prog).pretty_print(objs)
