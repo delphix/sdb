@@ -73,25 +73,8 @@ def execute_pipeline(first_input: Iterable[drgn.Object],
     yield from pipeline[-1].massage_input_and_call(this_input)
 
 
-def execute_pipeline_term(first_input: Iterable[drgn.Object],
-                          pipeline: List["sdb.Command"]) -> None:
-    """
-    This function is very similar to execute_pipeline, with the
-    exception that it doesn't yield any results. This function should be
-    used (rather than execute_pipeline) when the last sdb.Command in the
-    pipeline doesn't yield any results.
-    """
-
-    if len(pipeline) == 1:
-        this_input = first_input
-    else:
-        this_input = execute_pipeline(first_input, pipeline[:-1])
-
-    pipeline[-1].massage_input_and_call(this_input)
-
-
 def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
-           line: str) -> Optional[Iterable[drgn.Object]]:
+           line: str) -> Iterable[drgn.Object]:
     """
     This function intends to integrate directly with the SDB REPL, such
     that the REPL will pass in the user-specified line, and this
@@ -165,10 +148,7 @@ def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
         sys.stdout = shell_proc.stdin  # type: ignore
 
     try:
-        if pipeline[-1].ispipeable:
-            yield from execute_pipeline(first_input, pipeline)
-        else:
-            execute_pipeline_term(first_input, pipeline)
+        yield from execute_pipeline(first_input, pipeline)
 
         if shell_cmd is not None:
             shell_proc.stdin.flush()

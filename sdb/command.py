@@ -101,11 +101,6 @@ class Command:
     def __init__(self, args: str = "", name: str = "_") -> None:
         self.name = name
         self.islast = False
-        self.ispipeable = False
-
-        if inspect.signature(
-                self.call).return_annotation == Iterable[drgn.Object]:
-            self.ispipeable = True
 
         self.parser = type(self)._init_parser(name)
         self.args = self.parser.parse_args(args.split())
@@ -125,8 +120,14 @@ class Command:
         # pylint: disable=missing-docstring
         raise NotImplementedError
 
+    def _call_and_yield(self,
+                        objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        result = self.call(objs)
+        if result is not None:
+            yield from result
+
     def massage_input_and_call(self, objs: Iterable[drgn.Object]
-                              ) -> Optional[Iterable[drgn.Object]]:
+                              ) -> Iterable[drgn.Object]:
         """
         Commands can declare that they accept input of type "foo_t*" by
         setting their input_type. They can be passed input of type "void *"
@@ -136,13 +137,13 @@ class Command:
 
         # If this Command doesn't expect any particular type, just call().
         if self.input_type is None:
-            yield from self.call(objs)
+            yield from self._call_and_yield(objs)
             return
 
         # If this Command doesn't expect a pointer, just call().
         expected_type = sdb.prog.type(self.input_type)
         if expected_type.kind is not drgn.TypeKind.POINTER:
-            yield from self.call(objs)
+            yield from self._call_and_yield(objs)
             return
 
         first_obj_type, objs = sdb.get_first_type(objs)
@@ -167,4 +168,4 @@ class Command:
                 yield from sdb.execute_pipeline(objs, [Address(), self])
                 return
 
-        yield from self.call(objs)
+        yield from self._call_and_yield(objs)

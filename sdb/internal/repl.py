@@ -82,11 +82,7 @@ class REPL:
         """
         # pylint: disable=broad-except
         try:
-            objs = sdb.invoke(self.target, [], input_)
-            if not objs:
-                return 0
-
-            for obj in objs:
+            for obj in sdb.invoke(self.target, [], input_):
                 print(obj)
         except sdb.CommandArgumentsError:
             #
