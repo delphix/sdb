@@ -49,8 +49,8 @@ jobs:
         with:
           python-version: '3.6'
       - run: ./.github/scripts/install-drgn.sh
-      - run: python3 -m pip install pytest
-      - run: pytest -v tests
+      - run: python3 -m pip install pytest pytest-cov
+      - run: pytest -v --cov sdb tests
   #
   # Verify "yapf" runs successfully.
   #
