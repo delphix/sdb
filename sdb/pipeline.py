@@ -25,8 +25,10 @@ from typing import Iterable, List, Optional, Tuple
 import drgn  # type: ignore
 import sdb
 
+prog: drgn.Program
 
-def execute_pipeline(prog: drgn.Program, first_input: Iterable[drgn.Object],
+
+def execute_pipeline(first_input: Iterable[drgn.Object],
                      pipeline: List["sdb.Command"]) -> Iterable[drgn.Object]:
     """
     This function executes the specified pipeline (i.e. the list of
@@ -38,15 +40,14 @@ def execute_pipeline(prog: drgn.Program, first_input: Iterable[drgn.Object],
     if len(pipeline) == 1:
         this_input = first_input
     else:
-        this_input = execute_pipeline(prog, first_input, pipeline[:-1])
+        this_input = execute_pipeline(first_input, pipeline[:-1])
 
     result = pipeline[-1].massage_input_and_call(this_input)
     if result is not None:
         yield from result
 
 
-def execute_pipeline_term(prog: drgn.Program,
-                          first_input: Iterable[drgn.Object],
+def execute_pipeline_term(first_input: Iterable[drgn.Object],
                           pipeline: List["sdb.Command"]) -> None:
     """
     This function is very similar to execute_pipeline, with the
@@ -58,12 +59,12 @@ def execute_pipeline_term(prog: drgn.Program,
     if len(pipeline) == 1:
         this_input = first_input
     else:
-        this_input = execute_pipeline(prog, first_input, pipeline[:-1])
+        this_input = execute_pipeline(first_input, pipeline[:-1])
 
     pipeline[-1].massage_input_and_call(this_input)
 
 
-def invoke(prog: drgn.Program, first_input: Iterable[drgn.Object],
+def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
            line: str) -> Optional[Iterable[drgn.Object]]:
     """
     This function intends to integrate directly with the SDB REPL, such
@@ -75,6 +76,8 @@ def invoke(prog: drgn.Program, first_input: Iterable[drgn.Object],
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
+
+    sdb.prog = myprog
 
     shell_cmd = None
     # Parse the argument string. Each pipeline stage is delimited by
@@ -111,7 +114,7 @@ def invoke(prog: drgn.Program, first_input: Iterable[drgn.Object],
         if name not in sdb.all_commands:
             raise sdb.CommandNotFoundError(name)
         try:
-            pipeline.append(sdb.all_commands[name](prog, args, name))
+            pipeline.append(sdb.all_commands[name](args, name))
         except SystemExit:
             # The passed in arguments to each command will be parsed in
             # the command object's constructor. We use "argparse" to do
@@ -137,9 +140,9 @@ def invoke(prog: drgn.Program, first_input: Iterable[drgn.Object],
 
     try:
         if pipeline[-1].ispipeable:
-            yield from execute_pipeline(prog, first_input, pipeline)
+            yield from execute_pipeline(first_input, pipeline)
         else:
-            execute_pipeline_term(prog, first_input, pipeline)
+            execute_pipeline_term(first_input, pipeline)
 
         if shell_cmd is not None:
             shell_proc.stdin.flush()
