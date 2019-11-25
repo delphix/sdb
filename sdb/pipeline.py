@@ -20,27 +20,10 @@ import subprocess
 import sys
 import itertools
 
-from typing import Dict, Iterable, List, Optional, Type, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 import drgn  # type: ignore
-
-from sdb.error import CommandArgumentsError, CommandNotFoundError
-
-#
-# The _register_command is used by the sdb.Command class when its
-# subclasses are initialized (the classes, not the objects), so we must
-# define it here, before we import those classes below.
-#
-all_commands: Dict[str, Type["sdb.Command"]] = {}
-
-
-def register_command(name: str, class_: Type["sdb.Command"]) -> None:
-    """
-    This function will register the specified command name and command
-    class, such that the command will be available from the SDB REPL.
-    """
-    # BEFORE: sdb.all_commands[name] = class_
-    all_commands[name] = class_
+import sdb
 
 
 def execute_pipeline(prog: drgn.Program, first_input: Iterable[drgn.Object],
@@ -125,10 +108,10 @@ def invoke(prog: drgn.Program, first_input: Iterable[drgn.Object],
     pipeline = []
     for stage in pipe_stages:
         (name, _, args) = stage.strip().partition(" ")
-        if name not in all_commands:
-            raise CommandNotFoundError(name)
+        if name not in sdb.all_commands:
+            raise sdb.CommandNotFoundError(name)
         try:
-            pipeline.append(all_commands[name](prog, args, name))
+            pipeline.append(sdb.all_commands[name](prog, args, name))
         except SystemExit:
             # The passed in arguments to each command will be parsed in
             # the command object's constructor. We use "argparse" to do
@@ -136,7 +119,7 @@ def invoke(prog: drgn.Program, first_input: Iterable[drgn.Object],
             # will throw this exception. Rather than exiting the entire
             # SDB session, we only abort this specific pipeline by raising
             # a CommandArgumentsError.
-            raise CommandArgumentsError(name)
+            raise sdb.CommandArgumentsError(name)
 
     pipeline[-1].islast = True
 

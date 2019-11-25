@@ -23,10 +23,11 @@ import drgn
 # We are very specific on what this package exports by being explicit
 # with our imports below.
 #
-from sdb.pipeline import all_commands, execute_pipeline, get_first_type, invoke, register_command
-from sdb.error import (Error, CommandNotFoundError, CommandError, CommandInvalidInputError,
-                       SymbolNotFoundError, CommandArgumentsError, CommandEvalSyntaxError)
-from sdb.command import Command
+from sdb.pipeline import execute_pipeline, get_first_type, invoke
+from sdb.error import (Error, CommandNotFoundError, CommandError,
+                       CommandInvalidInputError, SymbolNotFoundError,
+                       CommandArgumentsError, CommandEvalSyntaxError)
+from sdb.command import all_commands, register_command, Command
 from sdb.locator import Locator, InputHandler
 from sdb.pretty_printer import PrettyPrinter
 from sdb.walker import Walker

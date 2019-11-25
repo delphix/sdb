@@ -17,10 +17,26 @@
 
 import argparse
 import inspect
-from typing import Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Type
 
 import drgn
 import sdb
+
+#
+# The _register_command is used by the sdb.Command class when its
+# subclasses are initialized (the classes, not the objects), so we must
+# define it here, before we import those classes below.
+#
+all_commands: Dict[str, Type["sdb.Command"]] = {}
+
+
+def register_command(name: str, class_: Type["sdb.Command"]) -> None:
+    """
+    This function will register the specified command name and command
+    class, such that the command will be available from the SDB REPL.
+    """
+    # BEFORE: sdb.all_commands[name] = class_
+    all_commands[name] = class_
 
 
 class Command:
