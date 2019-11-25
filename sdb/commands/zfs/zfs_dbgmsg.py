@@ -56,12 +56,8 @@ class ZfsDbgmsg(sdb.Locator, sdb.PrettyPrinter):
                                 self.args.verbose >= 2)
 
     def no_input(self) -> Iterable[drgn.Object]:
-        proc_list = self.prog["zfs_dbgmsgs"].pl_list
+        proc_list = sdb.prog["zfs_dbgmsgs"].pl_list
         list_addr = proc_list.address_of_()
 
-        # pylint: disable=C0330
-        for obj in sdb.execute_pipeline(
-                self.prog, [list_addr],
-            [SPLList(self.prog),
-             Cast(self.prog, "zfs_dbgmsg_t *")]):
-            yield obj
+        yield from sdb.execute_pipeline(
+            [list_addr], [SPLList(), Cast("zfs_dbgmsg_t *")])

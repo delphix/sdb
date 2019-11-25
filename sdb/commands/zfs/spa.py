@@ -18,7 +18,6 @@
 
 import argparse
 
-import drgn
 import sdb
 from sdb.commands.cast import Cast
 from sdb.commands.spl.avl import Avl
@@ -52,9 +51,8 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
         parser.add_argument("poolnames", nargs="*")
         return parser
 
-    def __init__(self, prog: drgn.Program, args: str = "",
-                 name: str = "_") -> None:
-        super().__init__(prog, args, name)
+    def __init__(self, args: str = "", name: str = "_") -> None:
+        super().__init__(args, name)
         self.arg_string = ""
         if self.args.metaslab:
             self.arg_string += "-m "
@@ -70,15 +68,13 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
             print("{:18} {}".format(hex(spa),
                                     spa.spa_name.string_().decode("utf-8")))
             if self.args.vdevs:
-                vdevs = sdb.execute_pipeline(self.prog, [spa],
-                                             [Vdev(self.prog)])
-                Vdev(self.prog, self.arg_string).pretty_print(vdevs, 5)
+                vdevs = sdb.execute_pipeline([spa], [Vdev()])
+                Vdev(self.arg_string).pretty_print(vdevs, 5)
 
     def no_input(self):
         spas = sdb.execute_pipeline(
-            self.prog,
-            [self.prog["spa_namespace_avl"].address_of_()],
-            [Avl(self.prog), Cast(self.prog, "spa_t *")],
+            [sdb.prog["spa_namespace_avl"].address_of_()],
+            [Avl(), Cast("spa_t *")],
         )
         for spa in spas:
             if (self.args.poolnames and spa.spa_name.string_().decode("utf-8")

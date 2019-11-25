@@ -128,28 +128,27 @@ class Stacks(sdb.Command):
     # of the current frame.
     #
     @staticmethod
-    def find_module_memory_segment(prog: drgn.Program,
-                                   mod_name: str) -> Tuple[int, int]:
+    def find_module_memory_segment(mod_name: str) -> Tuple[int, int]:
         """
         Looks for the segment in memory where `mod_name` is
-        loaded within `prog`.
+        loaded.
 
         Returns:
             (<base_offset>, <size>) if `mod_name` is found.
             (-1, 0) otherwise.
         """
         for mod in list_for_each_entry('struct module',
-                                       prog['modules'].address_of_(), 'list'):
+                                       sdb.prog['modules'].address_of_(),
+                                       'list'):
             if mod.name.string_().decode("utf-8") == mod_name:
                 return (mod.core_layout.base.value_(),
                         mod.core_layout.size.value_())
         return (-1, 0)
 
-    def validate_args(self, prog: drgn.Program,
-                      args: argparse.Namespace) -> None:
+    def validate_args(self, args: argparse.Namespace) -> None:
         if args.function:
             try:
-                func = prog[args.function]
+                func = sdb.prog[args.function]
             except KeyError:
                 raise sdb.CommandError(
                     self.name,
@@ -169,7 +168,7 @@ class Stacks(sdb.Command):
                 format(args.tstate, ", ".join(task_states)))
 
         if args.module and Stacks.find_module_memory_segment(
-                self.prog, args.module)[0] == -1:
+                args.module)[0] == -1:
             raise sdb.CommandError(
                 self.name,
                 "module '{:s}' doesn't exist or isn't currently loaded".format(
@@ -186,10 +185,10 @@ class Stacks(sdb.Command):
         # that follows into its own function and switch to the correct
         # codepath depending on the target.
         #
-        if not self.prog.flags & drgn.ProgramFlags.IS_LINUX_KERNEL:
+        if not sdb.prog.flags & drgn.ProgramFlags.IS_LINUX_KERNEL:
             raise sdb.CommandError(self.name,
                                    "userland targets are not supported yet")
-        self.validate_args(self.prog, self.args)
+        self.validate_args(self.args)
 
         #
         # Resolve TSTATE shortcut and/or sanitize it to standard uppercase
@@ -205,7 +204,7 @@ class Stacks(sdb.Command):
         mod_start, mod_end = -1, -1
         if self.args.module:
             mod_start, mod_size = Stacks.find_module_memory_segment(
-                self.prog, self.args.module)
+                self.args.module)
             assert mod_start != -1
             mod_end = mod_start + mod_size
 
@@ -219,15 +218,15 @@ class Stacks(sdb.Command):
         # We inspect and group the tasks by recording their state and
         # stack frames once in the following loop. We do this because
         # on live systems state can change under us, thus running
-        # something like self.prog.stack_trace(task) twice (once for
+        # something like sdb.prog.stack_trace(task) twice (once for
         # grouping and once for printing) could yield different stack
         # traces resulting into misleading output.
         #
         stack_aggr = defaultdict(list)
-        for task in for_each_task(self.prog):
+        for task in for_each_task(sdb.prog):
             stack_key = [Stacks.task_struct_get_state(task)]
             try:
-                for frame in self.prog.stack_trace(task):
+                for frame in sdb.prog.stack_trace(task):
                     stack_key.append(frame.pc)
             except ValueError:
                 #
@@ -273,7 +272,7 @@ class Stacks(sdb.Command):
                     mod_match = True
 
                 try:
-                    sym = self.prog.symbol(frame_pc)
+                    sym = sdb.prog.symbol(frame_pc)
                     func, offset = sym.name, frame_pc - sym.address
                     if self.args.function and self.args.function == func:
                         func_match = True

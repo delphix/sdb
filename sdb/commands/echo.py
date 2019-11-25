@@ -43,4 +43,4 @@ class Echo(sdb.Command):
                 value_ = int(addr, 0)
             except ValueError:
                 raise sdb.CommandInvalidInputError(self.name, addr)
-            yield drgn.Object(self.prog, "void *", value=value_)
+            yield drgn.Object(sdb.prog, "void *", value=value_)

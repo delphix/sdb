@@ -41,15 +41,14 @@ class Cast(sdb.Command):
         parser.add_argument("type", nargs=argparse.REMAINDER)
         return parser
 
-    def __init__(self, prog: drgn.Program, args: str = "",
-                 name: str = "_") -> None:
-        super().__init__(prog, args, name)
+    def __init__(self, args: str = "", name: str = "_") -> None:
+        super().__init__(args, name)
         if not self.args.type:
             self.parser.error("the following arguments are required: <type>")
 
         tname = " ".join(self.args.type)
         try:
-            self.type = self.prog.type(tname)
+            self.type = sdb.prog.type(tname)
         except LookupError:
             raise sdb.CommandError(self.name, f"could not find type '{tname}'")
 

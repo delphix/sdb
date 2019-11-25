@@ -30,5 +30,4 @@ class MultiList(sdb.Walker):
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         for i in range(obj.ml_num_sublists):
             sublist = obj.ml_sublists[i].mls_list.address_of_()
-            yield from sdb.execute_pipeline(self.prog, [sublist],
-                                            [SPLList(self.prog)])
+            yield from sdb.execute_pipeline([sublist], [SPLList()])

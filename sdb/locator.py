@@ -44,7 +44,7 @@ class Locator(sdb.Command):
         based on the type of the input we receive.
         """
 
-        out_type = self.prog.type(self.output_type)
+        out_type = sdb.prog.type(self.output_type)
         has_input = False
         for i in objs:
             has_input = True
@@ -60,7 +60,7 @@ class Locator(sdb.Command):
                     # function that this method is bound to (same place
                     # the input_typename_handled attribute is set).
                     if not hasattr(method, "input_type_handled"):
-                        method.__func__.input_type_handled = self.prog.type(
+                        method.__func__.input_type_handled = sdb.prog.type(
                             method.input_typename_handled)
 
                     if i.type_ == method.input_type_handled:
@@ -85,7 +85,7 @@ class Locator(sdb.Command):
                 # everything. We should reconsider how we
                 # handle all our imports.
                 from sdb.commands.walk import Walk
-                for obj in Walk(self.prog).call([i]):
+                for obj in Walk().call([i]):
                     yield drgn.cast(out_type, obj)
                 continue
             except sdb.CommandError:

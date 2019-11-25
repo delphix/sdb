@@ -28,7 +28,7 @@ class PrettyPrint(sdb.Command):
     names = ["pretty_print", "pp"]
 
     def call(self, objs: Iterable[drgn.Object]) -> None:  # type: ignore
-        baked = [(self.prog.type(type_), class_)
+        baked = [(sdb.prog.type(type_), class_)
                  for type_, class_ in sdb.PrettyPrinter.all_printers.items()]
         handlingClass = None
         first_obj_type, objs = sdb.get_first_type(objs)
@@ -51,4 +51,4 @@ class PrettyPrint(sdb.Command):
                 msg = 'could not find appropriate pretty-printer'
             raise sdb.CommandError(self.name, msg)
 
-        handlingClass(self.prog).pretty_print(objs)
+        handlingClass().pretty_print(objs)

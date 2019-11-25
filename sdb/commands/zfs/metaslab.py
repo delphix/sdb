@@ -115,7 +115,7 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
             print("", (count + " x " + size).rjust(12))
 
     @staticmethod
-    def print_metaslab(prog: drgn.Program, msp, print_header, indent):
+    def print_metaslab(msp, print_header, indent):
         spacemap = msp.ms_sm
 
         if print_header:
@@ -131,7 +131,7 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
             print("".ljust(indent), "-" * 65)
 
         free = msp.ms_size
-        if spacemap != drgn.NULL(prog, spacemap.type_):
+        if spacemap != drgn.NULL(sdb.prog, spacemap.type_):
             free -= spacemap.sm_phys.smp_alloc
 
         ufrees = msp.ms_unflushed_frees.rt_space
@@ -162,10 +162,10 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
         first_time = True
         for msp in metaslabs:
             if not self.args.histogram and not self.args.weight:
-                Metaslab.print_metaslab(self.prog, msp, first_time, indent)
+                Metaslab.print_metaslab(msp, first_time, indent)
             if self.args.histogram:
                 spacemap = msp.ms_sm
-                if spacemap != drgn.NULL(self.prog, spacemap.type_):
+                if spacemap != drgn.NULL(sdb.prog, spacemap.type_):
                     histogram = spacemap.sm_phys.smp_histogram
                     print_histogram(histogram, 32, spacemap.sm_shift)
             if self.args.weight:

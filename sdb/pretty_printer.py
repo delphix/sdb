@@ -51,7 +51,7 @@ class PrettyPrinter(sdb.Command):
         """
 
         assert self.input_type is not None
-        type_ = self.prog.type(self.input_type)
+        type_ = sdb.prog.type(self.input_type)
         for obj in objs:
             if obj.type_ != type_:
                 raise sdb.CommandError(

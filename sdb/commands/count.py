@@ -28,6 +28,6 @@ class Count(sdb.Command):
     names = ["count", "cnt", "wc"]
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        yield drgn.Object(self.prog,
+        yield drgn.Object(sdb.prog,
                           type='unsigned long long',
                           value=sum(1 for _ in objs))
