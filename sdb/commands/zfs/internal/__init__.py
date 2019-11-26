@@ -26,7 +26,7 @@ import sdb
 def enum_lookup(enum_type_name: str, value: int):
     """return a string which is the short name of the enum value
     (truncating off the common prefix) """
-    fields = sdb.prog.type(enum_type_name).type.enumerators
+    fields = sdb.get_type(enum_type_name).type.enumerators
     prefix = os.path.commonprefix([f[0] for f in fields])
     return fields[value][0][prefix.rfind("_") + 1:]
 

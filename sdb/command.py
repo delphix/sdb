@@ -13,14 +13,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-"""This module contains the "sdb.Command" class."""
+"""
+This module contains the "sdb.Command" class, its direct subclasses
+(e.g. Walker, PrettyPrinter, Locator), a few very primitive commands
+(e.g. Walk, Cast, Address) that are used internally by those templates
+but are also exposed, and the functions to manipulate the table of
+registered commands during a session.
+"""
 
 import argparse
 import inspect
-from typing import Iterable, List, Optional
+from typing import Callable, Dict, Iterable, List, Optional, Type, TypeVar
 
 import drgn
-import sdb
+
+from sdb.error import CommandError, SymbolNotFoundError
+import sdb.target as target
+
+#
+# The register_command is used by the Command class when its
+# subclasses are initialized (the classes, not the objects),
+# so we must define it here, before we import those classes below.
+#
+all_commands: Dict[str, Type["Command"]] = {}
+
+
+def register_command(name: str, class_: Type["Command"]) -> None:
+    """
+    Register the specified command name and command class, such that the
+    command will be available from the SDB REPL.
+    """
+    # pylint: disable=global-statement
+    global all_commands
+    all_commands[name] = class_
+
+
+def get_registered_commands() -> Dict[str, Type["Command"]]:
+    """
+    Return a dictionary of command names to command classes.
+    """
+    # pylint: disable=global-statement
+    global all_commands
+    return all_commands
 
 
 class Command:
@@ -113,59 +147,390 @@ class Command:
         """
         super().__init_subclass__(**kwargs)
         for name in cls.names:
-            sdb.register_command(name, cls)
+            register_command(name, cls)
 
-    def call(self,
-             objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+    def _call(self,
+              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         # pylint: disable=missing-docstring
         raise NotImplementedError
 
-    def _call_and_yield(self,
-                        objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        result = self.call(objs)
+    def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        # pylint: disable=missing-docstring
+        result = self._call(objs)
         if result is not None:
             yield from result
 
-    def massage_input_and_call(
-            self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        """
-        Commands can declare that they accept input of type "foo_t*" by
-        setting their input_type. They can be passed input of type "void *"
-        or "foo_t" and this method will automatically convert the input
-        objects to the expected type (foo_t*).
-        """
 
-        # If this Command doesn't expect any particular type, just call().
-        if self.input_type is None:
-            yield from self._call_and_yield(objs)
-            return
+class Cast(Command):
+    """
+    Cast input objects to specified type
 
-        # If this Command doesn't expect a pointer, just call().
-        expected_type = sdb.prog.type(self.input_type)
-        if expected_type.kind is not drgn.TypeKind.POINTER:
-            yield from self._call_and_yield(objs)
-            return
+    EXAMPLES
 
-        first_obj_type, objs = sdb.get_first_type(objs)
-        if first_obj_type is not None:
-            # If we are passed a void*, cast it to the expected type.
-            if (first_obj_type.kind is drgn.TypeKind.POINTER and
-                    first_obj_type.type.primitive is drgn.PrimitiveType.C_VOID):
-                # pylint: disable=import-outside-toplevel
+        sdb> echo 0xffffdeadbeef | cast uintptr_t
+        (uintptr_t)281474417671919
+    """
+
+    names = ["cast"]
+
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        #
+        # We use REMAINDER here to allow the type to be specified
+        # without the user having to worry about escaping whitespace.
+        # The drawback of this is an error will not be automatically
+        # thrown if no type is provided. To workaround this, we check
+        # the parsed arguments, and explicitly throw an error if needed.
+        #
+        parser.add_argument("type", nargs=argparse.REMAINDER)
+        return parser
+
+    def __init__(self, args: str = "", name: str = "_") -> None:
+        super().__init__(args, name)
+        if not self.args.type:
+            self.parser.error("the following arguments are required: <type>")
+
+        tname = " ".join(self.args.type)
+        try:
+            self.type = target.get_type(tname)
+        except LookupError:
+            raise CommandError(self.name, f"could not find type '{tname}'")
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        for obj in objs:
+            try:
+                yield drgn.cast(self.type, obj)
+            except TypeError as err:
+                raise CommandError(self.name, str(err))
+
+
+class Address(Command):
+    """
+    Return address of the given object
+
+    DESCRIPTION
+        The command accepts input from both the pipe and the SDB CLI.
+
+        For objects passed from the pipe, their address is returned
+        only if they are legitimate objects created from the target
+        program being examined. If the objects were created on the
+        fly with something like echo and thus don't have an actual
+        address in the address space of the program being examined,
+        this command just passes on their values as pointers.
+
+        The user can specify one or more inputs as arguments to the
+        command. That input can be either the name of a symbol in
+        the target (e.g. "jiffies" for vmlinux) or an address (at
+        which point this command acts like `echo`).
+
+    EXAMPLES
+        Return address of the "jiffies" sumbol:
+
+            sdb> addr jiffies
+            *(volatile unsigned long *)0xffffffff97205000 = 4901248625
+
+        Return address of "jiffies", "slab_caches", and also echo
+        0xffffdeadbeef.
+
+            sdb> addr jiffies slab_caches 0xffffdeadbeef
+            *(volatile unsigned long *)0xffffffff97205000 = 4901290268
+            *(struct list_head *)0xffffffff973014c0 = {
+                    .next = (struct list_head *)0xffff9d0ada3ca968,
+                    .prev = (struct list_head *)0xffff9d0af7002068,
+            }
+            (void *)0xffffdeadbeef
+
+        Return the addresses of all the root slab caches in the system:
+
+            sdb> slabs | address ! head
+            *(struct kmem_cache *)0xffff9d09d40e9500 = {
+                    .cpu_slab = (struct kmem_cache_cpu *)0x41d000035820,
+                    .flags = (slab_flags_t)1073872896,
+            ...
+    """
+
+    names = ["address", "addr"]
+
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        parser.add_argument("symbols", nargs="*", metavar="<symbol>")
+        return parser
+
+    @staticmethod
+    def is_hex(arg: str) -> bool:
+        # pylint: disable=missing-docstring
+        try:
+            int(arg, 16)
+            return True
+        except ValueError:
+            return False
+
+    @staticmethod
+    def resolve_for_address(arg: str) -> drgn.Object:
+        # pylint: disable=missing-docstring
+        if Address.is_hex(arg):
+            return target.create_object("void *", int(arg, 16))
+        return target.get_object(arg).address_of_()
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        for obj in objs:
+            if obj.address_ is None:
                 #
-                # The reason we have to import here is that putting the the
-                # import at the top-level hits a cyclic import error which
-                # breaks everything. We may need to redesign how we do imports.
-                from sdb.commands.cast import Cast
-                yield from sdb.execute_pipeline(objs,
-                                                [Cast(self.input_type), self])
-                return
+                # This may not be very intuitive. How can we have
+                # an object that doesn't have an address? The answer
+                # is that this object was created from sdb (most
+                # probably through an echo command that is piped
+                # to us) and thus doesn't exist in the address space
+                # of our target. This is a weird and rare use-case
+                # but it keeps things simple for now. If we ever
+                # see this causing problems we should definitely
+                # rethink this as being the default behavior. An
+                # alternative for example could be that we throw
+                # an error that the object doesn't exist in the
+                # address space of the target.
+                #
+                yield obj
+            else:
+                yield obj.address_of_()
 
-            # If we are passed a foo_t when we expect a foo_t*, use its address.
-            if sdb.prog.pointer_type(first_obj_type) == expected_type:
-                # pylint: disable=import-outside-toplevel
-                from sdb.commands.address import Address
-                yield from sdb.execute_pipeline(objs, [Address(), self])
-                return
+        for symbol in self.args.symbols:
+            try:
+                yield Address.resolve_for_address(symbol)
+            except KeyError:
+                raise SymbolNotFoundError(self.name, symbol)
 
-        yield from self._call_and_yield(objs)
+
+class Walk(Command):
+    """
+    Dispatch the appropriate walker based on the type of input
+
+    DESCRIPTION
+        This command can be used to walk data structures when
+        a specific walker for them already exists. There are
+        two scenarios when this command is preferable to using
+        a specific walker:
+        [1] When objects of different types are passed at once
+            through a pipe, this walker can dispatch the
+            appropriate walker for each of them so the user
+            won't need to care about the underlying data
+            structure implementations.
+        [2] Commands that depend on a data structure being
+            traversed can use this command, to reduce the
+            lines of code changed when the underlying data
+            structure chages.
+
+    EXAMPLES
+
+        sdb> addr spa_namespace_avl | walk
+        (void *)0xffff9d0adbe2c000
+        (void *)0xffff9d0a2dd28000
+        (void *)0xffff9d0ae5040000
+        (void *)0xffff9d0a2bdb0000
+    """
+
+    names = ["walk"]
+
+    @staticmethod
+    def _help_message(input_type: drgn.Type = None) -> str:
+        msg = ""
+        if input_type is not None:
+            msg = msg + "no walker found for input of type {}\n".format(
+                input_type)
+        msg = msg + "The following types have walkers:\n"
+        msg = msg + "\t%-20s %-20s\n" % ("WALKER", "TYPE")
+        for type_, class_ in Walker.allWalkers.items():
+            msg = msg + "\t%-20s %-20s\n" % (class_.names[0], type_)
+        return msg
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        baked = [(target.get_type(type_), class_)
+                 for type_, class_ in Walker.allWalkers.items()]
+        has_input = False
+        for i in objs:
+            has_input = True
+
+            try:
+                for type_, class_ in baked:
+                    if i.type_ == type_:
+                        yield from class_().walk(i)
+                        raise StopIteration
+            except StopIteration:
+                continue
+
+            raise CommandError(self.name, Walk._help_message(i.type_))
+        # If we got no input and we're the last thing in the pipeline, we're
+        # probably the first thing in the pipeline. Print out the available
+        # walkers.
+        if not has_input and self.islast:
+            print(Walk._help_message())
+
+
+class Walker(Command):
+    """
+    A walker is a command that is designed to iterate over data
+    structures that contain arbitrary data types.
+    """
+
+    allWalkers: Dict[str, Type["Walker"]] = {}
+
+    # When a subclass is created, register it
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        assert cls.input_type is not None
+        Walker.allWalkers[cls.input_type] = cls
+
+    def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
+        # pylint: disable=missing-docstring
+        raise NotImplementedError
+
+    # Iterate over the inputs and call the walk command on each of them,
+    # verifying the types as we go.
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        """
+        This function will call walk() on each input object, verifying
+        the types as we go.
+        """
+        assert self.input_type is not None
+        type_ = target.get_type(self.input_type)
+        for obj in objs:
+            if obj.type_ != type_:
+                raise CommandError(
+                    self.name,
+                    'expected input of type {}, but received {}'.format(
+                        type_, obj.type_))
+
+            yield from self.walk(obj)
+
+
+class PrettyPrinter(Command):
+    """
+    A pretty printer is a command that is designed to format and print
+    out a specific type of data, in a human readable way.
+    """
+
+    all_printers: Dict[str, Type["PrettyPrinter"]] = {}
+
+    # When a subclass is created, register it
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        assert cls.input_type is not None
+        PrettyPrinter.all_printers[cls.input_type] = cls
+
+    def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
+        # pylint: disable=missing-docstring
+        raise NotImplementedError
+
+    def _call(self, objs: Iterable[drgn.Object]) -> None:
+        """
+        This function will call pretty_print() on each input object,
+        verifying the types as we go.
+        """
+
+        assert self.input_type is not None
+        type_ = target.get_type(self.input_type)
+        for obj in objs:
+            if obj.type_ != type_:
+                raise CommandError(
+                    self.name,
+                    'no handler for input of type {}'.format(obj.type_))
+
+            self.pretty_print([obj])
+
+
+class Locator(Command):
+    """
+    A Locator is a command that locates objects of a given type.
+    Subclasses declare that they produce a given output type (the type
+    being located), and they provide a method for each input type that
+    they can search for objects of this type. Additionally, many
+    locators are also PrettyPrinters, and can pretty print the things
+    they find. There is some logic here to support that workflow.
+    """
+
+    output_type: str = ""
+
+    def no_input(self) -> Iterable[drgn.Object]:
+        # pylint: disable=missing-docstring
+        raise CommandError(self.name, 'command requires an input')
+
+    def caller(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        """
+        This method will dispatch to the appropriate instance function
+        based on the type of the input we receive.
+        """
+
+        out_type = target.get_type(self.output_type)
+        has_input = False
+        for i in objs:
+            has_input = True
+
+            # try subclass-specified input types first, so that they can
+            # override any other behavior
+            try:
+                for (_, method) in inspect.getmembers(self, inspect.ismethod):
+                    if not hasattr(method, "input_typename_handled"):
+                        continue
+
+                    # Cache parsed type by setting an attribute on the
+                    # function that this method is bound to (same place
+                    # the input_typename_handled attribute is set).
+                    if not hasattr(method, "input_type_handled"):
+                        method.__func__.input_type_handled = target.get_type(
+                            method.input_typename_handled)
+
+                    if i.type_ == method.input_type_handled:
+                        yield from method(i)
+                        raise StopIteration
+            except StopIteration:
+                continue
+
+            # try passthrough of output type
+            # note, this may also be handled by subclass-specified input types
+            if i.type_ == out_type:
+                yield i
+                continue
+
+            # try walkers
+            try:
+                # pylint: disable=protected-access
+                for obj in Walk()._call([i]):
+                    yield drgn.cast(out_type, obj)
+                continue
+            except CommandError:
+                pass
+
+            # error
+            raise CommandError(
+                self.name, 'no handler for input of type {}'.format(i.type_))
+        if not has_input:
+            yield from self.no_input()
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        # pylint: disable=missing-docstring
+        # If this is a hybrid locator/pretty printer, this is where that is
+        # leveraged.
+        if self.islast and isinstance(self, PrettyPrinter):
+            # pylint: disable=no-member
+            self.pretty_print(self.caller(objs))
+        else:
+            yield from self.caller(objs)
+
+
+T = TypeVar("T", bound=Locator)
+IH = Callable[[T, drgn.Object], Iterable[drgn.Object]]
+
+
+def InputHandler(typename: str) -> Callable[[IH[T]], IH[T]]:
+    """
+    This is a decorator which should be applied to methods of subclasses of
+    Locator. The decorator causes this method to be called when the pipeline
+    passes an object of the specified type to this Locator.
+    """
+
+    def decorator(func: IH[T]) -> IH[T]:
+        func.input_typename_handled = typename  # type: ignore
+        return func
+
+    return decorator

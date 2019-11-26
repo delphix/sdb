@@ -31,5 +31,5 @@ class SPLList(sdb.Walker):
         first_node = obj.list_head.address_of_()
         node = first_node.next
         while node != first_node:
-            yield drgn.Object(sdb.prog, type="void *", value=int(node) - offset)
+            yield sdb.create_object("void *", int(node) - offset)
             node = node.next

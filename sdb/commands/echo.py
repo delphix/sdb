@@ -24,7 +24,6 @@ import sdb
 
 
 class Echo(sdb.Command):
-    # pylint: disable=too-few-public-methods
 
     names = ["echo", "cc"]
 
@@ -34,7 +33,7 @@ class Echo(sdb.Command):
         parser.add_argument("addrs", nargs="*", metavar="<address>")
         return parser
 
-    def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for obj in objs:
             yield obj
 
@@ -43,4 +42,4 @@ class Echo(sdb.Command):
                 value_ = int(addr, 0)
             except ValueError:
                 raise sdb.CommandInvalidInputError(self.name, addr)
-            yield drgn.Object(sdb.prog, "void *", value=value_)
+            yield sdb.create_object("void *", value_)

@@ -24,7 +24,6 @@ import sdb
 
 
 class PyFilter(sdb.Command):
-    # pylint: disable=too-few-public-methods
 
     names = ["pyfilter"]
 
@@ -44,7 +43,7 @@ class PyFilter(sdb.Command):
         except SyntaxError as err:
             raise sdb.CommandEvalSyntaxError(self.name, err)
 
-    def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         # pylint: disable=eval-used
         func = lambda obj: eval(self.code, {'__builtins__': None}, {'obj': obj})
         try:

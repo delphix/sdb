@@ -19,15 +19,16 @@
 from typing import Iterable
 
 import drgn
-import sdb
 from drgn.helpers.linux.list import list_for_each_entry
+
+import sdb
 from sdb.commands.linux.internal import slub_helpers as slub
 
 
 def list_for_each_spl_kmem_cache() -> Iterable[drgn.Object]:
     yield from list_for_each_entry(
-        "spl_kmem_cache_t", sdb.prog["spl_kmem_cache_list"].address_of_(),
-        "skc_list")
+        "spl_kmem_cache_t",
+        sdb.get_object("spl_kmem_cache_list").address_of_(), "skc_list")
 
 
 def backed_by_linux_cache(cache: drgn.Object) -> bool:

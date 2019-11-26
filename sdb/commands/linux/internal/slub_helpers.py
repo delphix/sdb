@@ -19,8 +19,8 @@
 from typing import Iterable
 
 import drgn
-import sdb
 from drgn.helpers.linux.list import list_for_each_entry
+import sdb
 
 
 def is_root_cache(cache: drgn.Object) -> bool:
@@ -29,9 +29,10 @@ def is_root_cache(cache: drgn.Object) -> bool:
 
 
 def for_each_root_cache() -> Iterable[drgn.Object]:
-    yield from list_for_each_entry("struct kmem_cache",
-                                   sdb.prog["slab_root_caches"].address_of_(),
-                                   "memcg_params.__root_caches_node")
+    yield from list_for_each_entry(
+        "struct kmem_cache",
+        sdb.get_object("slab_root_caches").address_of_(),
+        "memcg_params.__root_caches_node")
 
 
 def for_each_child_cache(root_cache: drgn.Object) -> Iterable[drgn.Object]:
