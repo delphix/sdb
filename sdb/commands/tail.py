@@ -25,7 +25,6 @@ import sdb
 
 
 class Tail(sdb.Command):
-    # pylint: disable=too-few-public-methods
 
     names = ["tail"]
 
@@ -35,7 +34,7 @@ class Tail(sdb.Command):
         parser.add_argument("count", nargs="?", default=10, type=int)
         return parser
 
-    def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         queue: Deque[drgn.Object] = deque(maxlen=self.args.count)
         for obj in objs:
             queue.append(obj)

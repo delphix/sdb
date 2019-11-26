@@ -30,7 +30,7 @@ class ARCStats(sdb.Locator, sdb.PrettyPrinter):
     @staticmethod
     def print_stats(obj: drgn.Object) -> None:
         names = [
-            tuple_[1] for tuple_ in sdb.prog.type('struct arc_stats').members
+            tuple_[1] for tuple_ in sdb.get_type('struct arc_stats').members
         ]
 
         for name in names:
@@ -41,4 +41,4 @@ class ARCStats(sdb.Locator, sdb.PrettyPrinter):
             self.print_stats(obj)
 
     def no_input(self) -> Iterable[drgn.Object]:
-        yield sdb.prog["arc_stats"].address_of_()
+        yield sdb.get_object("arc_stats").address_of_()

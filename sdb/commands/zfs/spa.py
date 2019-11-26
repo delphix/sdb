@@ -19,7 +19,6 @@
 import argparse
 
 import sdb
-from sdb.commands.cast import Cast
 from sdb.commands.spl.avl import Avl
 from sdb.commands.zfs.vdev import Vdev
 
@@ -73,8 +72,8 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
 
     def no_input(self):
         spas = sdb.execute_pipeline(
-            [sdb.prog["spa_namespace_avl"].address_of_()],
-            [Avl(), Cast("spa_t *")],
+            [sdb.get_object("spa_namespace_avl").address_of_()],
+            [Avl(), sdb.Cast("spa_t *")],
         )
         for spa in spas:
             if (self.args.poolnames and spa.spa_name.string_().decode("utf-8")

@@ -38,7 +38,7 @@ class History(sdb.Command):
         parser.add_argument("count", nargs="?", type=int)
         return parser
 
-    def call(self, objs: Iterable[drgn.Object]) -> None:
+    def _call(self, objs: Iterable[drgn.Object]) -> None:
         stop = readline.get_current_history_length() + 1
         if self.args.count is not None:
             start = stop - self.args.count

@@ -58,7 +58,7 @@ class Btree(sdb.Walker):
 
     def _val(self, start: int, idx: int) -> drgn.Object:
         location = start + (self.elem_size * idx)
-        return drgn.Object(sdb.prog, type="void *", value=location)
+        return sdb.create_object("void *", location)
 
     def _helper(self, node: drgn.Object) -> Iterable[drgn.Object]:
         if not node:

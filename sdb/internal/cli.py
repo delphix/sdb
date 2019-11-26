@@ -209,7 +209,7 @@ def main() -> None:
         print("sdb: " + str(err))
         return
 
-    repl = REPL(prog, sdb.all_commands)
+    repl = REPL(prog, sdb.get_registered_commands())
     if args.eval:
         exit_code = repl.eval_cmd(args.eval)
         sys.exit(exit_code)

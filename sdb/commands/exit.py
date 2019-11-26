@@ -23,11 +23,10 @@ import sdb
 
 
 class Exit(sdb.Command):
-    # pylint: disable=too-few-public-methods
 
     "Exit the application"
 
     names = ["exit", "quit"]
 
-    def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         raise SystemExit

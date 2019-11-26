@@ -23,11 +23,8 @@ import sdb
 
 
 class Count(sdb.Command):
-    # pylint: disable=too-few-public-methods
 
     names = ["count", "cnt", "wc"]
 
-    def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        yield drgn.Object(sdb.prog,
-                          type='unsigned long long',
-                          value=sum(1 for _ in objs))
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        yield sdb.create_object('unsigned long long', sum(1 for _ in objs))

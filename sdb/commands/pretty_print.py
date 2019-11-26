@@ -23,12 +23,11 @@ import sdb
 
 
 class PrettyPrint(sdb.Command):
-    # pylint: disable=too-few-public-methods
 
     names = ["pretty_print", "pp"]
 
-    def call(self, objs: Iterable[drgn.Object]) -> None:  # type: ignore
-        baked = [(sdb.prog.type(type_), class_)
+    def _call(self, objs: Iterable[drgn.Object]) -> None:  # type: ignore
+        baked = [(sdb.get_type(type_), class_)
                  for type_, class_ in sdb.PrettyPrinter.all_printers.items()]
         handlingClass = None
         first_obj_type, objs = sdb.get_first_type(objs)

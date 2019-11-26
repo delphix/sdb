@@ -117,7 +117,6 @@ class Member(sdb.Command):
             (struct mm_struct *)0x0
 
     """
-    # pylint: disable=too-few-public-methods
 
     names = ["member"]
 
@@ -321,7 +320,7 @@ class Member(sdb.Command):
                     raise sdb.CommandError(self.name, str(err))
         return obj, ""
 
-    def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for obj in objs:
             for member in self.args.members:
                 tokens = Member._lex_member_tokens(member)

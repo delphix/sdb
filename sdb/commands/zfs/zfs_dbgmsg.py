@@ -22,7 +22,6 @@ from typing import Iterable
 
 import drgn
 import sdb
-from sdb.commands.cast import Cast
 from sdb.commands.spl.spl_list import SPLList
 
 
@@ -57,8 +56,8 @@ class ZfsDbgmsg(sdb.Locator, sdb.PrettyPrinter):
                                 self.args.verbose >= 2)
 
     def no_input(self) -> Iterable[drgn.Object]:
-        proc_list = sdb.prog["zfs_dbgmsgs"].pl_list
+        proc_list = sdb.get_object("zfs_dbgmsgs").pl_list
         list_addr = proc_list.address_of_()
 
         yield from sdb.execute_pipeline(
-            [list_addr], [SPLList(), Cast("zfs_dbgmsg_t *")])
+            [list_addr], [SPLList(), sdb.Cast("zfs_dbgmsg_t *")])

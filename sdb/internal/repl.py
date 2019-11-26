@@ -21,10 +21,10 @@ import os
 import readline
 import traceback
 
-import sdb
+from sdb.error import Error, CommandArgumentsError
+from sdb.pipeline import invoke
 
 
-# pylint: disable=too-few-public-methods
 class REPL:
     """
     The class that provides the REPL for sdb. It is essentially a wrapper
@@ -82,16 +82,16 @@ class REPL:
         """
         # pylint: disable=broad-except
         try:
-            for obj in sdb.invoke(self.target, [], input_):
+            for obj in invoke(self.target, [], input_):
                 print(obj)
-        except sdb.CommandArgumentsError:
+        except CommandArgumentsError:
             #
             # We skip printing anything for this specific error
             # as argparse should have already printed a helpful
             # message to the REPL for us.
             #
             return 2
-        except sdb.Error as err:
+        except Error as err:
             print(err.text)
             return 1
         except KeyboardInterrupt:

@@ -24,7 +24,6 @@ import sdb
 
 
 class Help(sdb.Command):
-    # pylint: disable=too-few-public-methods
 
     names = ["help"]
 
@@ -34,8 +33,8 @@ class Help(sdb.Command):
         parser.add_argument("cmd", type=str)
         return parser
 
-    def call(self, objs: Iterable[drgn.Object]) -> None:
+    def _call(self, objs: Iterable[drgn.Object]) -> None:
         try:
-            sdb.all_commands[self.args.cmd].help(self.args.cmd)
+            sdb.get_registered_commands()[self.args.cmd].help(self.args.cmd)
         except KeyError:
             raise sdb.error.CommandNotFoundError(self.args.cmd)

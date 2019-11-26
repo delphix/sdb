@@ -29,7 +29,6 @@ from sdb.commands.linux.internal import slub_helpers as slub
 
 
 class Slabs(sdb.Locator, sdb.PrettyPrinter):
-    # pylint: disable=too-few-public-methods
 
     names = ["slabs"]
 

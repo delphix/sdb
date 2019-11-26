@@ -29,13 +29,13 @@ class Avl(sdb.Walker):
     input_type = "avl_tree_t *"
 
     def _helper(self, node: drgn.Object, offset: int) -> Iterable[drgn.Object]:
-        if node == drgn.NULL(sdb.prog, node.type_):
+        if node == sdb.get_typed_null(node.type_):
             return
 
         lchild = node.avl_child[0]
         yield from self._helper(lchild, offset)
 
-        obj = drgn.Object(sdb.prog, type="void *", value=int(node) - offset)
+        obj = sdb.create_object("void *", int(node) - offset)
         yield obj
 
         rchild = node.avl_child[1]

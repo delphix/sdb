@@ -24,7 +24,6 @@ import sdb
 
 
 class Filter(sdb.Command):
-    # pylint: disable=too-few-public-methods
     # pylint: disable=eval-used
 
     names = ["filter"]
@@ -80,7 +79,7 @@ class Filter(sdb.Command):
 
         self.compare = self.args.expr[index]
 
-    def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         try:
             for obj in objs:
                 lhs = eval(self.lhs_code, {'__builtins__': None}, {'obj': obj})
@@ -95,7 +94,7 @@ class Filter(sdb.Command):
                 if isinstance(rhs, str):
                     lhs = lhs.string_().decode("utf-8")
                 elif isinstance(rhs, int):
-                    rhs = drgn.Object(sdb.prog, type=lhs.type_, value=rhs)
+                    rhs = sdb.create_object(lhs.type_, rhs)
                 elif isinstance(rhs, bool):
                     pass
                 elif isinstance(rhs, drgn.Object):

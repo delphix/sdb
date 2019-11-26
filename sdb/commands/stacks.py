@@ -52,7 +52,6 @@ import sdb
 # future iterations.
 #
 class Stacks(sdb.Command):
-    # pylint: disable=too-few-public-methods
 
     names = ["stacks"]
 
@@ -138,7 +137,7 @@ class Stacks(sdb.Command):
             (-1, 0) otherwise.
         """
         for mod in list_for_each_entry('struct module',
-                                       sdb.prog['modules'].address_of_(),
+                                       sdb.get_object('modules').address_of_(),
                                        'list'):
             if mod.name.string_().decode("utf-8") == mod_name:
                 return (mod.core_layout.base.value_(),
@@ -148,7 +147,7 @@ class Stacks(sdb.Command):
     def validate_args(self, args: argparse.Namespace) -> None:
         if args.function:
             try:
-                func = sdb.prog[args.function]
+                func = sdb.get_object(args.function)
             except KeyError:
                 raise sdb.CommandError(
                     self.name,
@@ -174,7 +173,7 @@ class Stacks(sdb.Command):
                 "module '{:s}' doesn't exist or isn't currently loaded".format(
                     args.module))
 
-    def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         # pylint: disable=too-many-locals
         # pylint: disable=too-many-branches
 
@@ -185,7 +184,7 @@ class Stacks(sdb.Command):
         # that follows into its own function and switch to the correct
         # codepath depending on the target.
         #
-        if not sdb.prog.flags & drgn.ProgramFlags.IS_LINUX_KERNEL:
+        if not sdb.get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL:
             raise sdb.CommandError(self.name,
                                    "userland targets are not supported yet")
         self.validate_args(self.args)
@@ -218,15 +217,15 @@ class Stacks(sdb.Command):
         # We inspect and group the tasks by recording their state and
         # stack frames once in the following loop. We do this because
         # on live systems state can change under us, thus running
-        # something like sdb.prog.stack_trace(task) twice (once for
+        # something like sdb.get_prog().stack_trace(task) twice (once for
         # grouping and once for printing) could yield different stack
         # traces resulting into misleading output.
         #
         stack_aggr = defaultdict(list)
-        for task in for_each_task(sdb.prog):
+        for task in for_each_task(sdb.get_prog()):
             stack_key = [Stacks.task_struct_get_state(task)]
             try:
-                for frame in sdb.prog.stack_trace(task):
+                for frame in sdb.get_prog().stack_trace(task):
                     stack_key.append(frame.pc)
             except ValueError:
                 #
@@ -272,7 +271,7 @@ class Stacks(sdb.Command):
                     mod_match = True
 
                 try:
-                    sym = sdb.prog.symbol(frame_pc)
+                    sym = sdb.get_symbol(frame_pc)
                     func, offset = sym.name, frame_pc - sym.address
                     if self.args.function and self.args.function == func:
                         func_match = True

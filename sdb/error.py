@@ -29,7 +29,6 @@ class Error(Exception):
 
 
 class CommandNotFoundError(Error):
-    # pylint: disable=too-few-public-methods
     # pylint: disable=missing-docstring
 
     command: str = ""
@@ -40,7 +39,6 @@ class CommandNotFoundError(Error):
 
 
 class CommandError(Error):
-    # pylint: disable=too-few-public-methods
     # pylint: disable=missing-docstring
 
     command: str = ""
@@ -53,7 +51,6 @@ class CommandError(Error):
 
 
 class CommandInvalidInputError(CommandError):
-    # pylint: disable=too-few-public-methods
     # pylint: disable=missing-docstring
 
     argument: str = ""
@@ -64,7 +61,6 @@ class CommandInvalidInputError(CommandError):
 
 
 class SymbolNotFoundError(CommandError):
-    # pylint: disable=too-few-public-methods
     # pylint: disable=missing-docstring
 
     symbol: str = ""
@@ -75,7 +71,6 @@ class SymbolNotFoundError(CommandError):
 
 
 class CommandArgumentsError(CommandError):
-    # pylint: disable=too-few-public-methods
     # pylint: disable=missing-docstring
 
     def __init__(self, command: str) -> None:
@@ -84,7 +79,6 @@ class CommandArgumentsError(CommandError):
 
 
 class CommandEvalSyntaxError(CommandError):
-    # pylint: disable=too-few-public-methods
     # pylint: disable=missing-docstring
 
     def __init__(self, command: str, err: SyntaxError) -> None:

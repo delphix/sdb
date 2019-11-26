@@ -21,8 +21,6 @@ from typing import Iterable
 
 import drgn
 import sdb
-from sdb.commands.walk import Walk
-from sdb.commands.cast import Cast
 
 
 class Dbuf(sdb.Locator, sdb.PrettyPrinter):
@@ -109,8 +107,9 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
         return True
 
     def all_dnode_dbufs(self, dn: drgn.Object) -> Iterable[drgn.Object]:
-        yield from sdb.execute_pipeline([dn.dn_dbufs.address_of_()],
-                                        [Walk(), Cast(self.output_type)])
+        yield from sdb.execute_pipeline(
+            [dn.dn_dbufs.address_of_()],
+            [sdb.Walk(), sdb.Cast(self.output_type)])
 
     @sdb.InputHandler('dnode_t*')
     def from_dnode(self, dn: drgn.Object) -> Iterable[drgn.Object]:
@@ -118,7 +117,7 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
 
     @staticmethod
     def all_dbufs() -> Iterable[drgn.Object]:
-        hash_map = sdb.prog["dbuf_hash_table"].address_of_()
+        hash_map = sdb.get_object("dbuf_hash_table").address_of_()
         for i in range(hash_map.hash_table_mask):
             dbuf = hash_map.hash_table[i]
             while dbuf:
