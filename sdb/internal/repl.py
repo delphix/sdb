@@ -103,6 +103,12 @@ class REPL:
             #
             print()
             return 1
+        except BrokenPipeError:
+            #
+            # If a shell process (invoked by !) exits before reading all
+            # of its input, that's OK.
+            #
+            return 1
         except Exception:
             #
             # Ideally it would be great if all commands had no issues and

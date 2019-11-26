@@ -154,8 +154,6 @@ def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
             shell_proc.stdin.flush()
             shell_proc.stdin.close()
 
-    except BrokenPipeError:
-        pass
     finally:
         if shell_cmd is not None:
             sys.stdout = old_stdout
