@@ -76,8 +76,13 @@ class Command:
         # does have a docstring. This is not the behavior we want, so we
         # first check "cls.__doc__" before using "inspect.getdoc".
         #
+        # Note: If "cls.__doc__" exists, then "inspect.getdoc" will not
+        #       return thus we ignore the type check warning us that we
+        #       may be calling splitlines() for None.
+        #
         if cls.__doc__:
-            summary = inspect.getdoc(cls).splitlines()[0].strip()
+            summary = inspect.getdoc(  # type: ignore[union-attr]
+                cls).splitlines()[0].strip()
         else:
             summary = None
         return argparse.ArgumentParser(prog=name, description=summary)
@@ -113,13 +118,18 @@ class Command:
         # does have a docstring. This is not the behavior we want, so we
         # first check "cls.__doc__" before using "inspect.getdoc".
         #
+        # Note: If "cls.__doc__" exists, then "inspect.getdoc" will not
+        #       return thus we ignore the type check warning us that we
+        #       may be calling splitlines() for None.
+        #
         if cls.__doc__:
             #
             # The first line of the docstring is the summary, which is
             # already be included in the parser description. The second
             # line should be empty. Thus, we skip these two lines.
             #
-            for line in inspect.getdoc(cls).splitlines()[2:]:
+            for line in inspect.getdoc(  # type: ignore[union-attr]
+                    cls).splitlines()[2:]:
                 print("{}".format(line))
             print()
 
@@ -422,7 +432,9 @@ class PrettyPrinter(Command):
         # pylint: disable=missing-docstring
         raise NotImplementedError
 
-    def _call(self, objs: Iterable[drgn.Object]) -> None:
+    def _call(  # type: ignore[return]
+            self,
+            objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         """
         This function will call pretty_print() on each input object,
         verifying the types as we go.
@@ -510,7 +522,8 @@ class Locator(Command):
         if not has_input:
             yield from self.no_input()
 
-    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def _call(self,
+              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         # pylint: disable=missing-docstring
         # If this is a hybrid locator/pretty printer, this is where that is
         # leveraged.

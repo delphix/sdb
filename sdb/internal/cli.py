@@ -22,6 +22,8 @@ import argparse
 import os
 import sys
 
+from typing import List
+
 import drgn
 import sdb
 from sdb.internal.repl import REPL
@@ -124,7 +126,7 @@ def parse_arguments() -> argparse.Namespace:
     return args
 
 
-def load_debug_info(prog: drgn.Program, dpaths: [str]) -> None:
+def load_debug_info(prog: drgn.Program, dpaths: List[str]) -> None:
     """
     Iterates over all the paths provided (`dpaths`) and attempts
     to load any debug information it finds. If the path provided

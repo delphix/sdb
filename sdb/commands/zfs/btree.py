@@ -54,7 +54,7 @@ class Btree(sdb.Walker):
 
     def __init__(self, args: str = "", name: str = "_") -> None:
         super().__init__(args, name)
-        self.elem_size = None
+        self.elem_size: drgn.Object = None
 
     def _val(self, start: int, idx: int) -> drgn.Object:
         location = start + (self.elem_size * idx)

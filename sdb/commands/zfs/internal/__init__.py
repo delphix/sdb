@@ -55,7 +55,7 @@ def nicenum(num: int, suffix: str = "B") -> str:
     for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
         if num < 1024:
             return "{}{}{}".format(int(num), unit, suffix)
-        num /= 1024
+        num = int(num / 1024)
     return "{}{}{}".format(int(num), "Y", suffix)
 
 
@@ -72,7 +72,7 @@ def BF64_GET(x: drgn.Object, low: int, length: int) -> int:
 
 
 def WEIGHT_IS_SPACEBASED(weight: int) -> bool:
-    return weight == 0 or BF64_GET(weight, 60, 1)
+    return weight == 0 or (BF64_GET(weight, 60, 1) != 0)
 
 
 def WEIGHT_GET_INDEX(weight: int) -> int:

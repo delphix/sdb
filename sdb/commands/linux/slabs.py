@@ -18,7 +18,7 @@
 
 import argparse
 import textwrap
-from typing import Any, Callable, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Tuple
 
 import drgn
 
@@ -140,8 +140,7 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
     #
     DEFAULT_INCREASING_ORDER_FIELDS = ["name", "address"]
 
-    def __pp_parse_args(
-            self) -> (str, List[str], Dict[str, Callable[[Any], str]]):
+    def __pp_parse_args(self) -> Tuple[str, List[str], Dict[str, Any]]:
         fields = self.DEFAULT_FIELDS
         if self.args.o:
             #
