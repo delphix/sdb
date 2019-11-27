@@ -17,7 +17,7 @@
 # pylint: disable=missing-docstring
 
 import argparse
-from typing import Iterable, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 from collections import defaultdict
 
 import drgn
@@ -176,6 +176,7 @@ class Stacks(sdb.Command):
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         # pylint: disable=too-many-locals
         # pylint: disable=too-many-branches
+        # pylint: disable=too-many-statements
 
         #
         # As the exception explains the code that follows this statement
@@ -221,7 +222,7 @@ class Stacks(sdb.Command):
         # grouping and once for printing) could yield different stack
         # traces resulting into misleading output.
         #
-        stack_aggr = defaultdict(list)
+        stack_aggr: Dict[Any, List[drgn.Object]] = defaultdict(list)
         for task in for_each_task(sdb.get_prog()):
             stack_key = [Stacks.task_struct_get_state(task)]
             try:
@@ -266,7 +267,16 @@ class Stacks(sdb.Command):
                     hex(tasks[0].value_()), task_state, len(tasks))
 
             mod_match, func_match = False, False
-            for frame_pc in stack_key[1:]:
+
+            #
+            # Note on the type-check being ignored:
+            # The original `stack_key` type is a list where the first
+            # element is a string and the rest of them are integers
+            # but this is not easily expressed in mypy, thus we ignore
+            # the assignment error below.
+            #
+            frame_pcs: List[int] = stack_key[1:]  #type: ignore[assignment]
+            for frame_pc in frame_pcs:
                 if mod_start != -1 and mod_start <= frame_pc < mod_end:
                     mod_match = True
 

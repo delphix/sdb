@@ -82,8 +82,11 @@ class CommandEvalSyntaxError(CommandError):
     # pylint: disable=missing-docstring
 
     def __init__(self, command: str, err: SyntaxError) -> None:
-        spacing = list(' ' * len(err.text))
-        spacing[err.offset - 1] = '^'
-        indicator = ''.join(spacing)
-        super().__init__(command,
-                         "{}:\n\t{}\n\t{}".format(err.msg, err.text, indicator))
+        msg = f"{err.msg}:\n\t{err.text}"
+        if err.offset is not None and err.text is not None:
+            nspaces: int = err.offset - 1
+            spaces_str = list(' ' * len(err.text))
+            spaces_str[nspaces] = '^'
+            indicator = ''.join(spaces_str)
+            msg += f"\n\t{indicator}"
+        super().__init__(command, msg)

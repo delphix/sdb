@@ -26,7 +26,7 @@ class PrettyPrint(sdb.Command):
 
     names = ["pretty_print", "pp"]
 
-    def _call(self, objs: Iterable[drgn.Object]) -> None:  # type: ignore
+    def _call(self, objs: Iterable[drgn.Object]) -> None:
         baked = [(sdb.get_type(type_), class_)
                  for type_, class_ in sdb.PrettyPrinter.all_printers.items()]
         handlingClass = None

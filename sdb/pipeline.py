@@ -155,7 +155,11 @@ def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
                                       stdin=subprocess.PIPE,
                                       encoding="utf-8")
         old_stdout = sys.stdout
-        sys.stdout = shell_proc.stdin  # type: ignore
+        #
+        # The type ignore below is due to the following false positive:
+        # https://github.com/python/typeshed/issues/1229
+        #
+        sys.stdout = shell_proc.stdin  # type: ignore[assignment]
 
     try:
         yield from execute_pipeline(first_input, pipeline)
