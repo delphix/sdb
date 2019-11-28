@@ -52,6 +52,9 @@ import sdb
 # future iterations.
 #
 class Stacks(sdb.Command):
+    """
+    Print the stack traces for the current threads
+    """
 
     names = ["stacks"]
 

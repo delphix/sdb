@@ -24,6 +24,9 @@ import sdb
 
 
 class Echo(sdb.Command):
+    """
+    ???
+    """
 
     names = ["echo", "cc"]
 

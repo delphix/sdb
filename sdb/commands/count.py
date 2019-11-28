@@ -23,6 +23,22 @@ import sdb
 
 
 class Count(sdb.Command):
+    """
+    Return a count of the number of objects in the pipeline
+
+    EXAMPLES
+        Print the number of addresses given
+
+            sdb> addr 0 | count
+            (unsigned long long)1
+            sdb> addr 0 | addr 1 | count
+            (unsigned long long)2
+        
+        Print the number of dbufs
+
+            sdb> dbuf | count
+            (unsigned long long)19
+    """
 
     names = ["count", "cnt", "wc"]
 

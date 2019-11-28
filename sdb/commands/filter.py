@@ -24,6 +24,22 @@ import sdb
 
 
 class Filter(sdb.Command):
+    """
+    Return objects matching expression
+
+    EXAMPLES
+        Print addresses greater than or equal to 4
+
+            sdb> addr 0 1 2 3 4 5 6 | filter obj >= 4
+            (void *)0x4
+            (void *)0x5
+            (void *)0x6
+
+        Print only pool "jax"
+
+            sdb> spa | filter obj.spa_name == "jax" | member spa_name
+            (char [256])"jax"
+    """
     # pylint: disable=eval-used
 
     names = ["filter"]

@@ -24,6 +24,9 @@ import sdb
 
 
 class PyFilter(sdb.Command):
+    """
+    TODO
+    """
 
     names = ["pyfilter"]
 
