@@ -33,7 +33,7 @@ class Count(sdb.Command):
             (unsigned long long)1
             sdb> addr 0 | addr 1 | count
             (unsigned long long)2
-        
+
         Print the number of dbufs
 
             sdb> dbuf | count
