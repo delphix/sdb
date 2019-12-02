@@ -126,8 +126,8 @@ class Command:
         if result is not None:
             yield from result
 
-    def massage_input_and_call(self, objs: Iterable[drgn.Object]
-                              ) -> Iterable[drgn.Object]:
+    def massage_input_and_call(
+            self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         """
         Commands can declare that they accept input of type "foo_t*" by
         setting their input_type. They can be passed input of type "void *"

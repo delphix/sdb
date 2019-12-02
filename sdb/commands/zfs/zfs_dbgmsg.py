@@ -39,7 +39,8 @@ class ZfsDbgmsg(sdb.Locator, sdb.PrettyPrinter):
 
     # obj is a zfs_dbgmsg_t*
     @staticmethod
-    def print_msg(obj: drgn.Object, timestamp: bool = False,
+    def print_msg(obj: drgn.Object,
+                  timestamp: bool = False,
                   addr: bool = False) -> None:
         if addr:
             print("{} ".format(hex(obj)), end="")  # type: ignore

@@ -281,9 +281,9 @@ class Member(sdb.Command):
             warn_msg = f"index out of bounds for array of type '{type_}' (requested index: {idx})"
             print(f"warning: {self.name}: {warn_msg}")
 
-    def _eval_member_terms(self, initial_obj: drgn.Object,
-                           terms: List[Tuple[str, str]]
-                          ) -> Tuple[drgn.Object, str]:
+    def _eval_member_terms(
+            self, initial_obj: drgn.Object,
+            terms: List[Tuple[str, str]]) -> Tuple[drgn.Object, str]:
         """
         Evaluates member terms passed to us by _parse_member_tokens()
         """

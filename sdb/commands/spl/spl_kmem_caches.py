@@ -144,8 +144,8 @@ class SplKmemCaches(sdb.Locator, sdb.PrettyPrinter):
     #
     DEFAULT_INCREASING_ORDER_FIELDS = ["name", "address"]
 
-    def __pp_parse_args(self
-                       ) -> (str, List[str], Dict[str, Callable[[Any], str]]):
+    def __pp_parse_args(
+            self) -> (str, List[str], Dict[str, Callable[[Any], str]]):
         fields = SplKmemCaches.DEFAULT_FIELDS
         if self.args.o:
             #
