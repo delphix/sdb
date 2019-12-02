@@ -27,11 +27,19 @@ class Table:
 
     __slots__ = "fields", "rjustfields", "formatters", "maxfieldlen", "lines"
 
-    def __init__(self,
-                 fields: List[str],
-                 rjustfields: Optional[Set[str]] = None,
-                 formatters: Optional[Dict[str, Callable[[Any], str]]] = None
-                ) -> None:
+    #
+    # The "yapf" tool expects 4 spaces for the continuation lines here,
+    # where "pylint" expects 8 spaces. To reconcile the difference in
+    # expectations of both tools, we disable the pylint error, and
+    # adhere to the yapf format.
+    #
+    # pylint: disable=bad-continuation
+    def __init__(
+        self,
+        fields: List[str],
+        rjustfields: Optional[Set[str]] = None,
+        formatters: Optional[Dict[str, Callable[[Any], str]]] = None
+    ) -> None:
         self.fields = fields
 
         if rjustfields is None:

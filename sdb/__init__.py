@@ -160,8 +160,8 @@ def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
             shell_proc.wait()
 
 
-def get_first_type(objs: Iterable[drgn.Object]
-                  ) -> Tuple[drgn.Type, Iterable[drgn.Object]]:
+def get_first_type(
+        objs: Iterable[drgn.Object]) -> Tuple[drgn.Type, Iterable[drgn.Object]]:
     """
     Determine the type of the first object in the iterable. The first element
     in the iterable will be consumed. Therefore, a tuple is returned with the
