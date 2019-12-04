@@ -449,7 +449,7 @@ class Locator(Command):
     they find. There is some logic here to support that workflow.
     """
 
-    output_type: str = ""
+    output_type: Optional[str] = None
 
     def no_input(self) -> Iterable[drgn.Object]:
         # pylint: disable=missing-docstring
@@ -461,7 +461,9 @@ class Locator(Command):
         based on the type of the input we receive.
         """
 
-        out_type = target.get_type(self.output_type)
+        out_type = None
+        if self.output_type is not None:
+            out_type = target.get_type(self.output_type)
         has_input = False
         for i in objs:
             has_input = True
@@ -493,13 +495,14 @@ class Locator(Command):
                 continue
 
             # try walkers
-            try:
-                # pylint: disable=protected-access
-                for obj in Walk()._call([i]):
-                    yield drgn.cast(out_type, obj)
-                continue
-            except CommandError:
-                pass
+            if out_type is not None:
+                try:
+                    # pylint: disable=protected-access
+                    for obj in Walk()._call([i]):
+                        yield drgn.cast(out_type, obj)
+                    continue
+                except CommandError:
+                    pass
 
             # error
             raise CommandError(
