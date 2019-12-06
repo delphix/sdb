@@ -39,7 +39,10 @@ jobs:
   #
   # Note, we need to have "drgn" installed in order to "pytest". Thus,
   # prior to running "pytest" we have to clone, build, and install the
-  # "drgn" from source (there's no package currently available).
+  # "drgn" from source (there's no package currently available). In
+  # addition, we install "libkdumpfile" in the same way beforehand
+  # (there's no package currently for libkdumpfile either) so "drgn"
+  # can open kdump-compressed crash dumps for the integration tests.
   #
   pytest:
     runs-on: ubuntu-18.04
@@ -48,8 +51,10 @@ jobs:
       - uses: actions/setup-python@v1
         with:
           python-version: '3.6'
+      - run: python3 -m pip install aws python-config pytest pytest-cov
+      - run: ./.github/scripts/install-libkdumpfile.sh
       - run: ./.github/scripts/install-drgn.sh
-      - run: python3 -m pip install pytest pytest-cov
+      - run: ./.github/scripts/download-dump-from-s3.sh dump-201912060006.tar.lzma
       - run: pytest -v --cov sdb --cov-report xml tests
       - uses: codecov/codecov-action@v1
         with:
@@ -93,3 +98,4 @@ jobs:
       - run: ./.github/scripts/install-drgn.sh
       - run: python3 -m pip install mypy==0.730
       - run: python3 -m mypy --ignore-missing-imports --show-error-codes -p sdb
+      - run: python3 -m mypy --ignore-missing-imports --show-error-codes -p tests

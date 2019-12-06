@@ -20,7 +20,7 @@ import pytest
 import drgn
 import sdb
 
-from tests import invoke, MOCK_PROGRAM
+from tests.unit import invoke, MOCK_PROGRAM
 
 
 def test_empty():

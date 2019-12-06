@@ -1,0 +1,5 @@
+mmp.c:249:mmp_thread_start(): MMP thread started pool 'meta-domain' gethrtime 284829459463
+spa_history.c:306:spa_history_log_sync(): command: zpool create meta-domain raidz /tmp/dks0 /tmp/dks1 /tmp/dks2 cache /tmp/dks3
+spa_history.c:314:spa_history_log_sync(): txg 8 create meta-domain/fs-tmp (id 69)  
+spa_history.c:339:spa_history_log_sync(): ioctl create
+spa_history.c:306:spa_history_log_sync(): command: zfs create meta-domain/fs-tmp

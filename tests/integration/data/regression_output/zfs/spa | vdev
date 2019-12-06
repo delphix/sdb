@@ -1,0 +1,14 @@
+ ADDR               STATE   AUX  DESCRIPTION
+ ------------------------------------------------------------
+ 0xffffa089486fc000 HEALTHY NONE  root
+ 0xffffa08949ff4000 HEALTHY NONE    mirror
+ 0xffffa08948af8000 HEALTHY NONE      /dev/sdb1
+ 0xffffa08949ff8000 HEALTHY NONE      /dev/sdc1
+ 0xffffa08949e58000 HEALTHY NONE    /dev/sdd1
+ 0xffffa08953aa4000 HEALTHY NONE  root
+ 0xffffa08953aa8000 HEALTHY NONE    raidz
+ 0xffffa08953aac000 HEALTHY NONE      /tmp/dks0
+ 0xffffa08953ab0000 HEALTHY NONE      /tmp/dks1
+ 0xffffa08953ab4000 HEALTHY NONE      /tmp/dks2
+ 0xffffa08952efc000 HEALTHY NONE  root
+ 0xffffa08953300000 HEALTHY NONE    /dev/sda1

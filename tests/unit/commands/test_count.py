@@ -18,7 +18,7 @@
 
 import drgn
 
-from tests import invoke, MOCK_PROGRAM
+from tests.unit import invoke, MOCK_PROGRAM
 
 
 def test_empty():
