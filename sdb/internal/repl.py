@@ -57,18 +57,18 @@ class REPL:
         self.closing = closing
         self.vocabulary = vocabulary
         self.target = target
-
-        histfile = os.path.expanduser('~/.sdb_history')
-        try:
-            readline.read_history_file(histfile)
-        except FileNotFoundError:
-            pass
-
-        readline.parse_and_bind("tab: complete")
-        readline.set_history_length(1000)
+        self.histfile = ""
         readline.set_completer(REPL.__make_completer(vocabulary))
 
-        atexit.register(readline.write_history_file, histfile)
+    def enable_history(self, history_file='~/.sdb_history'):
+        self.histfile = os.path.expanduser(history_file)
+        try:
+            readline.read_history_file(self.histfile)
+        except FileNotFoundError:
+            pass
+        readline.parse_and_bind("tab: complete")
+        readline.set_history_length(1000)
+        atexit.register(readline.write_history_file, self.histfile)
 
     def eval_cmd(self, input_: str) -> int:
         """

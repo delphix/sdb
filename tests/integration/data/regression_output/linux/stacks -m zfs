@@ -1,0 +1,100 @@
+TASK_STRUCT        STATE             COUNT
+==========================================
+0xffffa0895684c500 INTERRUPTIBLE        13
+                  __schedule+0x2c0
+                  schedule+0x2c
+                  cv_wait_common+0x11f
+                  __cv_wait_sig+0x15
+                  zthr_procedure+0x51
+                  thread_generic_wrapper+0x74
+                  kthread+0x121
+                  ret_from_fork+0x1f
+
+0xffffa08957e3c500 INTERRUPTIBLE         3
+                  __schedule+0x2c0
+                  schedule+0x2c
+                  cv_wait_common+0x11f
+                  __cv_wait_sig+0x15
+                  txg_thread_wait.isra.5+0x1d
+                  txg_quiesce_thread+0x152
+                  thread_generic_wrapper+0x74
+                  kthread+0x121
+                  ret_from_fork+0x1f
+
+0xffffa08957da9700 INTERRUPTIBLE         3
+                  __schedule+0x2c0
+                  schedule+0x2c
+                  schedule_timeout+0x169
+                  __cv_timedwait_common+0xdf
+                  __cv_timedwait_sig+0x16
+                  txg_thread_wait.isra.5+0x31
+                  txg_sync_thread+0x15e
+                  thread_generic_wrapper+0x74
+                  kthread+0x121
+                  ret_from_fork+0x1f
+
+0xffffa08952e5ae00 INTERRUPTIBLE         3
+                  __schedule+0x2c0
+                  schedule+0x2c
+                  schedule_hrtimeout_range_clock+0xb9
+                  schedule_hrtimeout_range+0x13
+                  __cv_timedwait_hires+0x11b
+                  cv_timedwait_hires_common+0x4b
+                  cv_timedwait_sig_hires+0x14
+                  mmp_thread+0x2c3
+                  thread_generic_wrapper+0x74
+                  kthread+0x121
+                  ret_from_fork+0x1f
+
+0xffffa08956849700 INTERRUPTIBLE         1
+                  __schedule+0x2c0
+                  schedule+0x2c
+                  schedule_hrtimeout_range_clock+0xb9
+                  schedule_hrtimeout_range+0x13
+                  __cv_timedwait_hires+0x11b
+                  cv_timedwait_hires_common+0x4b
+                  cv_timedwait_sig_hires+0x14
+                  zthr_procedure+0xa4
+                  thread_generic_wrapper+0x74
+                  kthread+0x121
+                  ret_from_fork+0x1f
+
+0xffffa0895684dc00 INTERRUPTIBLE         1
+                  __schedule+0x2c0
+                  schedule+0x2c
+                  schedule_hrtimeout_range_clock+0xb9
+                  schedule_hrtimeout_range+0x13
+                  __cv_timedwait_hires+0x11b
+                  cv_timedwait_hires_common+0x4b
+                  cv_timedwait_sig_hires+0x14
+                  dbuf_evict_thread+0x5e
+                  thread_generic_wrapper+0x74
+                  kthread+0x121
+                  ret_from_fork+0x1f
+
+0xffffa089580b1700 INTERRUPTIBLE         1
+                  __schedule+0x2c0
+                  schedule+0x2c
+                  schedule_timeout+0x169
+                  __cv_timedwait_common+0xdf
+                  __cv_timedwait_sig+0x16
+                  l2arc_feed_thread+0x66
+                  thread_generic_wrapper+0x74
+                  kthread+0x121
+                  ret_from_fork+0x1f
+
+0xffffa089408fdc00 INTERRUPTIBLE         1
+                  __schedule+0x2c0
+                  schedule+0x2c
+                  cv_wait_common+0x11f
+                  __cv_wait_sig+0x15
+                  zfs_zevent_wait+0x45
+                  zfs_ioc_events_next+0x64
+                  zfsdev_ioctl_common+0x529
+                  zfsdev_ioctl+0x52
+                  do_vfs_ioctl+0xa9
+                  ksys_ioctl+0x75
+                  __x64_sys_ioctl+0x1a
+                  do_syscall_64+0x5a
+                  entry_SYSCALL_64+0x7c
+

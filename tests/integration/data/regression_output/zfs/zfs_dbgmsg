@@ -1,0 +1,99 @@
+spa.c:6142:spa_tryimport(): spa_tryimport: importing rpool
+spa_misc.c:410:spa_load_note(): spa_load($import, config trusted): LOADING
+vdev.c:135:vdev_dbgmsg(): disk vdev '/dev/sda1': best uberblock found for spa $import. txg 1544
+spa_misc.c:410:spa_load_note(): spa_load($import, config untrusted): using uberblock with txg=1544
+spa_misc.c:410:spa_load_note(): spa_load($import, config trusted): LOADED
+spa_misc.c:410:spa_load_note(): spa_load($import, config trusted): UNLOADING
+spa.c:5994:spa_import(): spa_import: importing rpool
+spa_misc.c:410:spa_load_note(): spa_load(rpool, config trusted): LOADING
+vdev.c:135:vdev_dbgmsg(): disk vdev '/dev/sda1': best uberblock found for spa rpool. txg 1544
+spa_misc.c:410:spa_load_note(): spa_load(rpool, config untrusted): using uberblock with txg=1544
+spa_misc.c:410:spa_load_note(): spa_load(rpool, config trusted): read 0 log space maps (0 total blocks - blksz = 131072 bytes) in 0 ms
+spa_misc.c:410:spa_load_note(): spa_load(rpool, config trusted): spa_load_verify found 0 metadata errors and 3 data errors
+mmp.c:249:mmp_thread_start(): MMP thread started pool 'rpool' gethrtime 11897024835
+spa.c:8103:spa_async_request(): spa=rpool async request task=1
+spa_misc.c:410:spa_load_note(): spa_load(rpool, config trusted): LOADED
+spa_history.c:319:spa_history_log_sync(): txg 1546 open pool version 28; software version 5827876-dirty; uts localhost.localdomain 5.0.0-36-generic #39~18.04.1-Ubuntu SMP Tue Nov 12 11:09:50 UTC 2019 x86_64
+spa.c:8103:spa_async_request(): spa=rpool async request task=32
+spa_history.c:319:spa_history_log_sync(): txg 1548 import pool version 28; software version 5827876-dirty; uts localhost.localdomain 5.0.0-36-generic #39~18.04.1-Ubuntu SMP Tue Nov 12 11:09:50 UTC 2019 x86_64
+spa_history.c:306:spa_history_log_sync(): command: zpool import -N rpool
+spa.c:6142:spa_tryimport(): spa_tryimport: importing data
+spa.c:6147:spa_tryimport(): spa_tryimport: using cachefile '/etc/zfs/zpool.cache'
+spa_misc.c:410:spa_load_note(): spa_load($import, config trusted): LOADING
+vdev.c:135:vdev_dbgmsg(): disk vdev '/dev/sdb1': best uberblock found for spa $import. txg 605
+spa_misc.c:410:spa_load_note(): spa_load($import, config untrusted): using uberblock with txg=605
+spa_misc.c:410:spa_load_note(): spa_load($import, config trusted): LOADED
+spa_misc.c:410:spa_load_note(): spa_load($import, config trusted): UNLOADING
+spa.c:6142:spa_tryimport(): spa_tryimport: importing meta-domain
+spa.c:6147:spa_tryimport(): spa_tryimport: using cachefile '/etc/zfs/zpool.cache'
+spa_misc.c:410:spa_load_note(): spa_load($import, config trusted): LOADING
+spa_misc.c:410:spa_load_note(): spa_load($import, config untrusted): vdev tree has 1 missing top-level vdevs.
+spa_misc.c:410:spa_load_note(): spa_load($import, config untrusted): current settings allow for maximum 2 missing top-level vdevs at this stage.
+spa_misc.c:395:spa_load_failed(): spa_load($import, config untrusted): FAILED: unable to open vdev tree [error=2]
+vdev.c:189:vdev_dbgmsg_print_tree():   vdev 0: root, guid: 15253241554095729441, path: N/A, can't open
+vdev.c:189:vdev_dbgmsg_print_tree():     vdev 0: raidz, guid: 14414036546298600357, path: N/A, can't open
+vdev.c:189:vdev_dbgmsg_print_tree():       vdev 0: file, guid: 5097887099686918327, path: /tmp/dks0, can't open
+vdev.c:189:vdev_dbgmsg_print_tree():       vdev 1: file, guid: 6472752718065828654, path: /tmp/dks1, can't open
+vdev.c:189:vdev_dbgmsg_print_tree():       vdev 2: file, guid: 17291893288386860984, path: /tmp/dks2, can't open
+spa_misc.c:410:spa_load_note(): spa_load($import, config untrusted): UNLOADING
+spa.c:5994:spa_import(): spa_import: importing data
+spa_misc.c:410:spa_load_note(): spa_load(data, config trusted): LOADING
+vdev.c:135:vdev_dbgmsg(): disk vdev '/dev/sdb1': best uberblock found for spa data. txg 605
+spa_misc.c:410:spa_load_note(): spa_load(data, config untrusted): using uberblock with txg=605
+spa_misc.c:410:spa_load_note(): spa_load(data, config trusted): read 9 log space maps (9 total blocks - blksz = 131072 bytes) in 35 ms
+mmp.c:249:mmp_thread_start(): MMP thread started pool 'data' gethrtime 28274840477
+spa.c:8103:spa_async_request(): spa=data async request task=1
+spa_misc.c:410:spa_load_note(): spa_load(data, config trusted): LOADED
+spa_history.c:319:spa_history_log_sync(): txg 607 open pool version 5000; software version 5827876-dirty; uts localhost 5.0.0-36-generic #39~18.04.1-Ubuntu SMP Tue Nov 12 11:09:50 UTC 2019 x86_64
+metaslab.c:3601:metaslab_condense(): condensing: txg 1562, msp[102] ffffa089533f2000, vdev id 0, spa rpool, smp size 16456, segments 34, forcing condense=FALSE
+space_map.c:859:space_map_truncate(): txg 1562, spa rpool, sm ffffa0895339a280, reallocating object[190]: old bonus 24, old blocksz 4096
+spa.c:8103:spa_async_request(): spa=data async request task=32
+spa_history.c:319:spa_history_log_sync(): txg 609 import pool version 5000; software version 5827876-dirty; uts localhost 5.0.0-36-generic #39~18.04.1-Ubuntu SMP Tue Nov 12 11:09:50 UTC 2019 x86_64
+spa.c:5994:spa_import(): spa_import: importing meta-domain
+spa_misc.c:410:spa_load_note(): spa_load(meta-domain, config trusted): LOADING
+spa_misc.c:410:spa_load_note(): spa_load(meta-domain, config untrusted): vdev tree has 1 missing top-level vdevs.
+spa_misc.c:410:spa_load_note(): spa_load(meta-domain, config untrusted): current settings allow for maximum 0 missing top-level vdevs at this stage.
+spa_misc.c:395:spa_load_failed(): spa_load(meta-domain, config untrusted): FAILED: unable to open vdev tree [error=2]
+vdev.c:189:vdev_dbgmsg_print_tree():   vdev 0: root, guid: 15253241554095729441, path: N/A, can't open
+vdev.c:189:vdev_dbgmsg_print_tree():     vdev 0: raidz, guid: 14414036546298600357, path: N/A, can't open
+vdev.c:189:vdev_dbgmsg_print_tree():       vdev 0: file, guid: 5097887099686918327, path: /tmp/dks0, can't open
+vdev.c:189:vdev_dbgmsg_print_tree():       vdev 1: file, guid: 6472752718065828654, path: /tmp/dks1, can't open
+vdev.c:189:vdev_dbgmsg_print_tree():       vdev 2: file, guid: 17291893288386860984, path: /tmp/dks2, can't open
+spa_misc.c:410:spa_load_note(): spa_load(meta-domain, config untrusted): UNLOADING
+spa_history.c:319:spa_history_log_sync(): txg 4 create pool version 5000; software version 5827876-dirty; uts exist2crash.dcenter 5.0.0-36-generic #39~18.04.1-Ubuntu SMP Tue Nov 12 11:09:50 UTC 2019 x86_64
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@async_destroy=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@empty_bpobj=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@lz4_compress=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@multi_vdev_crash_dump=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@spacemap_histogram=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@enabled_txg=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@hole_birth=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@extensible_dataset=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@embedded_data=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@bookmarks=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@filesystem_limits=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@large_blocks=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@large_dnode=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@sha512=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@skein=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@edonr=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@userobj_accounting=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@encryption=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@project_quota=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@device_removal=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@obsolete_counts=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@zpool_checkpoint=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@spacemap_v2=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@allocation_classes=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@resilver_defer=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@bookmark_v2=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@redaction_bookmarks=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@redacted_datasets=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@bookmark_written=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@log_spacemap=enabled
+spa_history.c:319:spa_history_log_sync(): txg 4 set feature@livelist=enabled
+mmp.c:249:mmp_thread_start(): MMP thread started pool 'meta-domain' gethrtime 284829459463
+spa_history.c:306:spa_history_log_sync(): command: zpool create meta-domain raidz /tmp/dks0 /tmp/dks1 /tmp/dks2 cache /tmp/dks3
+spa_history.c:314:spa_history_log_sync(): txg 8 create meta-domain/fs-tmp (id 69)  
+spa_history.c:339:spa_history_log_sync(): ioctl create
+spa_history.c:306:spa_history_log_sync(): command: zfs create meta-domain/fs-tmp

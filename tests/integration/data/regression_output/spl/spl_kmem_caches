@@ -1,0 +1,140 @@
+name                     entry_size active_objs active_memory                         source total_memory util
+------------------------ ---------- ----------- ------------- ------------------------------ ------------ ----
+zio_data_buf_131072          135680        2416       312.6MB      zio_data_buf_131072[SPL ]      345.7MB   90
+zio_data_buf_512                512      262175       128.0MB         zio_data_buf_512[SLUB]      128.0MB   99
+zio_buf_131072               135680         339        43.9MB           zio_buf_131072[SPL ]       68.3MB   64
+zfs_znode_cache                1088       21605        22.4MB          zfs_znode_cache[SLUB]       22.4MB   99
+zio_buf_16384                 16384        1268        19.8MB            zio_buf_16384[SLUB]       20.2MB   98
+dnode_t                         912       22125        19.2MB                  dnode_t[SLUB]       19.3MB   99
+arc_buf_hdr_t_full              328       31047         9.7MB       arc_buf_hdr_t_full[SLUB]        9.7MB   99
+dmu_buf_impl_t                  360       25853         8.9MB           dmu_buf_impl_t[SLUB]        9.8MB   90
+zio_data_buf_65536            70144          88         5.9MB       zio_data_buf_65536[SPL ]       14.4MB   40
+zio_data_buf_114688          119296          48         5.5MB      zio_data_buf_114688[SPL ]        8.2MB   66
+sa_cache                        248       21594         5.1MB                 sa_cache[SLUB]        5.1MB   99
+zio_data_buf_98304           102912          39         3.8MB       zio_data_buf_98304[SPL ]        7.1MB   54
+zio_data_buf_81920            86528          46         3.8MB       zio_data_buf_81920[SPL ]        9.2MB   41
+zio_data_buf_57344            61952          51         3.0MB       zio_data_buf_57344[SPL ]        6.6MB   45
+zio_data_buf_49152            53760          54         2.8MB       zio_data_buf_49152[SPL ]        6.2MB   45
+zio_data_buf_40960            45568          63         2.7MB       zio_data_buf_40960[SPL ]        6.6MB   41
+zio_buf_114688               119296          18         2.0MB           zio_buf_114688[SPL ]        2.7MB   75
+zio_buf_81920                 86528          24         2.0MB            zio_buf_81920[SPL ]        2.6MB   75
+zio_buf_98304                102912          20         2.0MB            zio_buf_98304[SPL ]        2.4MB   83
+zio_data_buf_28672            33280          51         1.6MB       zio_data_buf_28672[SPL ]        4.3MB   37
+zio_data_buf_32768            37376          45         1.6MB       zio_data_buf_32768[SPL ]        4.0MB   40
+zio_data_buf_24576            29184          56         1.6MB       zio_data_buf_24576[SPL ]        4.5MB   35
+zio_buf_512                     512        2907         1.4MB              zio_buf_512[SLUB]        1.5MB   97
+abd_t                            40       31047         1.2MB                    abd_t[SLUB]        1.2MB   96
+ddt_cache                     24904          46         1.1MB                ddt_cache[SPL ]        1.1MB   95
+zio_data_buf_1024              1024        1035         1.0MB        zio_data_buf_1024[SLUB]        1.1MB   95
+zio_buf_65536                 70144          15         1.0MB            zio_buf_65536[SPL ]        1.1MB   93
+zio_data_buf_20480            25088          40       980.0KB       zio_data_buf_20480[SPL ]        3.3MB   29
+zio_buf_57344                 61952          15       907.5KB            zio_buf_57344[SPL ]      968.0KB   93
+zio_buf_40960                 45568          16       712.0KB            zio_buf_40960[SPL ]        1.0MB   66
+zfs_btree_leaf_cache           4096         172       688.0KB     zfs_btree_leaf_cache[SLUB]      832.0KB   82
+zio_buf_24576                 29184          23       655.5KB            zio_buf_24576[SPL ]      684.0KB   95
+zio_buf_49152                 53760          10       525.0KB            zio_buf_49152[SPL ]      840.0KB   62
+zio_buf_32768                 37376          12       438.0KB            zio_buf_32768[SPL ]      584.0KB   75
+zio_buf_20480                 25088          17       416.5KB            zio_buf_20480[SPL ]      588.0KB   70
+zio_buf_28672                 33280          12       390.0KB            zio_buf_28672[SPL ]      520.0KB   75
+arc_buf_t                        80        4046       316.1KB                arc_buf_t[SLUB]      529.9KB   59
+zio_buf_1024                   1024         217       217.0KB             zio_buf_1024[SLUB]      352.0KB   61
+zil_lwb_cache                   376         222        81.5KB            zil_lwb_cache[SLUB]       84.8KB   96
+zio_buf_4096                   4096          12        48.0KB             zio_buf_4096[SLUB]      192.0KB   25
+zio_cache                      1248          18        21.9KB                zio_cache[SLUB]      237.7KB    9
+zio_buf_2048                   2048           8        16.0KB             zio_buf_2048[SLUB]      160.0KB   10
+zio_buf_1536                   1536           5         7.5KB             zio_buf_1536[SLUB]      126.0KB    5
+zio_data_buf_4096              4096           1         4.0KB        zio_data_buf_4096[SLUB]      192.0KB    2
+zio_data_buf_3072              3072           1         3.0KB        zio_data_buf_3072[SLUB]      360.0KB    0
+mod_hash_entries                 24          35        840.0B         mod_hash_entries[SLUB]        4.0KB   20
+zio_link_cache                   48           0          0.0B           zio_link_cache[SLUB]      127.5KB    0
+zio_data_buf_917504          922112           0          0.0B      zio_data_buf_917504[SPL ]         0.0B    0
+zio_data_buf_8388608        8394069           0          0.0B     zio_data_buf_8388608[SPL ]         0.0B    0
+zio_data_buf_8192              8192           0          0.0B        zio_data_buf_8192[SLUB]      384.0KB    0
+zio_data_buf_786432          791040           0          0.0B      zio_data_buf_786432[SPL ]         0.0B    0
+zio_data_buf_7340032        7345152           0          0.0B     zio_data_buf_7340032[SPL ]         0.0B    0
+zio_data_buf_7168              8192           0          0.0B        zio_data_buf_7168[SLUB]      288.0KB    0
+zio_data_buf_655360          659968           0          0.0B      zio_data_buf_655360[SPL ]         0.0B    0
+zio_data_buf_6291456        6296371           0          0.0B     zio_data_buf_6291456[SPL ]         0.0B    0
+zio_data_buf_6144              8192           0          0.0B        zio_data_buf_6144[SLUB]      288.0KB    0
+zio_data_buf_5242880        5247658           0          0.0B     zio_data_buf_5242880[SPL ]         0.0B    0
+zio_data_buf_524288          528896           0          0.0B      zio_data_buf_524288[SPL ]         0.0B    0
+zio_data_buf_5120              8192           0          0.0B        zio_data_buf_5120[SLUB]      288.0KB    0
+zio_data_buf_458752          463360           0          0.0B      zio_data_buf_458752[SPL ]         0.0B    0
+zio_data_buf_4194304        4198985           0          0.0B     zio_data_buf_4194304[SPL ]         0.0B    0
+zio_data_buf_393216          397824           0          0.0B      zio_data_buf_393216[SPL ]         0.0B    0
+zio_data_buf_3670016        3674624           0          0.0B     zio_data_buf_3670016[SPL ]         0.0B    0
+zio_data_buf_3584              3584           0          0.0B        zio_data_buf_3584[SLUB]      315.0KB    0
+zio_data_buf_327680          332288           0          0.0B      zio_data_buf_327680[SPL ]         0.0B    0
+zio_data_buf_3145728        3150336           0          0.0B     zio_data_buf_3145728[SPL ]         0.0B    0
+zio_data_buf_2621440        2626048           0          0.0B     zio_data_buf_2621440[SPL ]         0.0B    0
+zio_data_buf_262144          266752           0          0.0B      zio_data_buf_262144[SPL ]         0.0B    0
+zio_data_buf_2560              2560           0          0.0B        zio_data_buf_2560[SLUB]      330.0KB    0
+zio_data_buf_229376          233984           0          0.0B      zio_data_buf_229376[SPL ]         0.0B    0
+zio_data_buf_2097152        2101760           0          0.0B     zio_data_buf_2097152[SPL ]         0.0B    0
+zio_data_buf_2048              2048           0          0.0B        zio_data_buf_2048[SLUB]      320.0KB    0
+zio_data_buf_196608          201216           0          0.0B      zio_data_buf_196608[SPL ]         0.0B    0
+zio_data_buf_1835008        1839616           0          0.0B     zio_data_buf_1835008[SPL ]         0.0B    0
+zio_data_buf_16777216      16785408           0          0.0B    zio_data_buf_16777216[SPL ]         0.0B    0
+zio_data_buf_163840          168448           0          0.0B      zio_data_buf_163840[SPL ]         0.0B    0
+zio_data_buf_16384            16384           0          0.0B       zio_data_buf_16384[SLUB]      352.0KB    0
+zio_data_buf_1572864        1577472           0          0.0B     zio_data_buf_1572864[SPL ]         0.0B    0
+zio_data_buf_1536              1536           0          0.0B        zio_data_buf_1536[SLUB]      315.0KB    0
+zio_data_buf_14680064      14686208           0          0.0B    zio_data_buf_14680064[SPL ]         0.0B    0
+zio_data_buf_14336            16384           0          0.0B       zio_data_buf_14336[SLUB]      384.0KB    0
+zio_data_buf_1310720        1315328           0          0.0B     zio_data_buf_1310720[SPL ]         0.0B    0
+zio_data_buf_12582912      12589056           0          0.0B    zio_data_buf_12582912[SPL ]         0.0B    0
+zio_data_buf_12288            12288           0          0.0B       zio_data_buf_12288[SLUB]      288.0KB    0
+zio_data_buf_10485760      10491221           0          0.0B    zio_data_buf_10485760[SPL ]         0.0B    0
+zio_data_buf_1048576        1053184           0          0.0B     zio_data_buf_1048576[SPL ]         0.0B    0
+zio_data_buf_10240            12288           0          0.0B       zio_data_buf_10240[SLUB]      264.0KB    0
+zio_buf_917504               922112           0          0.0B           zio_buf_917504[SPL ]         0.0B    0
+zio_buf_8388608             8394069           0          0.0B          zio_buf_8388608[SPL ]         0.0B    0
+zio_buf_8192                   8192           0          0.0B             zio_buf_8192[SLUB]       64.0KB    0
+zio_buf_786432               791040           0          0.0B           zio_buf_786432[SPL ]         0.0B    0
+zio_buf_7340032             7345152           0          0.0B          zio_buf_7340032[SPL ]         0.0B    0
+zio_buf_7168                   8192           0          0.0B             zio_buf_7168[SLUB]       64.0KB    0
+zio_buf_655360               659968           0          0.0B           zio_buf_655360[SPL ]         0.0B    0
+zio_buf_6291456             6296371           0          0.0B          zio_buf_6291456[SPL ]         0.0B    0
+zio_buf_6144                   8192           0          0.0B             zio_buf_6144[SLUB]       64.0KB    0
+zio_buf_5242880             5247658           0          0.0B          zio_buf_5242880[SPL ]         0.0B    0
+zio_buf_524288               528896           0          0.0B           zio_buf_524288[SPL ]         0.0B    0
+zio_buf_5120                   8192           0          0.0B             zio_buf_5120[SLUB]      192.0KB    0
+zio_buf_458752               463360           0          0.0B           zio_buf_458752[SPL ]         0.0B    0
+zio_buf_4194304             4198985           0          0.0B          zio_buf_4194304[SPL ]         0.0B    0
+zio_buf_393216               397824           0          0.0B           zio_buf_393216[SPL ]         0.0B    0
+zio_buf_3670016             3674624           0          0.0B          zio_buf_3670016[SPL ]         0.0B    0
+zio_buf_3584                   3584           0          0.0B             zio_buf_3584[SLUB]       63.0KB    0
+zio_buf_327680               332288           0          0.0B           zio_buf_327680[SPL ]         0.0B    0
+zio_buf_3145728             3150336           0          0.0B          zio_buf_3145728[SPL ]         0.0B    0
+zio_buf_3072                   3072           0          0.0B             zio_buf_3072[SLUB]      180.0KB    0
+zio_buf_2621440             2626048           0          0.0B          zio_buf_2621440[SPL ]         0.0B    0
+zio_buf_262144               266752           0          0.0B           zio_buf_262144[SPL ]         0.0B    0
+zio_buf_2560                   2560           0          0.0B             zio_buf_2560[SLUB]      300.0KB    0
+zio_buf_229376               233984           0          0.0B           zio_buf_229376[SPL ]         0.0B    0
+zio_buf_2097152             2101760           0          0.0B          zio_buf_2097152[SPL ]         0.0B    0
+zio_buf_196608               201216           0          0.0B           zio_buf_196608[SPL ]         0.0B    0
+zio_buf_1835008             1839616           0          0.0B          zio_buf_1835008[SPL ]         0.0B    0
+zio_buf_16777216           16785408           0          0.0B         zio_buf_16777216[SPL ]         0.0B    0
+zio_buf_163840               168448           0          0.0B           zio_buf_163840[SPL ]         0.0B    0
+zio_buf_1572864             1577472           0          0.0B          zio_buf_1572864[SPL ]         0.0B    0
+zio_buf_14680064           14686208           0          0.0B         zio_buf_14680064[SPL ]         0.0B    0
+zio_buf_14336                 16384           0          0.0B            zio_buf_14336[SLUB]       96.0KB    0
+zio_buf_1310720             1315328           0          0.0B          zio_buf_1310720[SPL ]         0.0B    0
+zio_buf_12582912           12589056           0          0.0B         zio_buf_12582912[SPL ]         0.0B    0
+zio_buf_12288                 12288           0          0.0B            zio_buf_12288[SLUB]       96.0KB    0
+zio_buf_10485760           10491221           0          0.0B         zio_buf_10485760[SPL ]         0.0B    0
+zio_buf_1048576             1053184           0          0.0B          zio_buf_1048576[SPL ]         0.0B    0
+zio_buf_10240                 12288           0          0.0B            zio_buf_10240[SLUB]      144.0KB    0
+zil_zcw_cache                   152           0          0.0B            zil_zcw_cache[SLUB]        7.7KB    0
+zfs_znode_hold_cache             88           0          0.0B     zfs_znode_hold_cache[SLUB]        7.9KB    0
+spl_zlib_workspace_cache     268152           0          0.0B spl_zlib_workspace_cache[SPL ]         0.0B    0
+sio_cache_2                     168           0          0.0B              sio_cache_2[SLUB]         0.0B    0
+sio_cache_1                     152           0          0.0B              sio_cache_1[SLUB]         0.0B    0
+sio_cache_0                     136           0          0.0B              sio_cache_0[SLUB]         0.0B    0
+lz4_cache                     16384           0          0.0B                lz4_cache[SLUB]       64.0KB    0
+kcf_sreq_cache                  192           0          0.0B           kcf_sreq_cache[SLUB]         0.0B    0
+kcf_context_cache               192           0          0.0B        kcf_context_cache[SLUB]         0.0B    0
+kcf_areq_cache                  512           0          0.0B           kcf_areq_cache[SLUB]         0.0B    0
+ddt_entry_cache                 448           0          0.0B          ddt_entry_cache[SLUB]         0.0B    0
+arc_buf_hdr_t_l2only             96           0          0.0B     arc_buf_hdr_t_l2only[SLUB]        3.9KB    0
+arc_buf_hdr_t_full_crypt        392           0          0.0B arc_buf_hdr_t_full_crypt[SLUB]         0.0B    0

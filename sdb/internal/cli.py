@@ -212,6 +212,7 @@ def main() -> None:
         return
 
     repl = REPL(prog, sdb.get_registered_commands())
+    repl.enable_history()
     if args.eval:
         exit_code = repl.eval_cmd(args.eval)
         sys.exit(exit_code)

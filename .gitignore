@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# crash-dump related files
+tests/integration/data/dump.*
+tests/integration/data/vmlinux-*
+tests/integration/data/mods/
