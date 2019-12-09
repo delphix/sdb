@@ -27,6 +27,7 @@ from typing import Callable, Dict, Iterable, List, Optional, Type, TypeVar
 
 import drgn
 
+from sdb.target import type_canonicalize_name, type_canonical_name
 from sdb.error import CommandError, SymbolNotFoundError
 import sdb.target as target
 
@@ -355,21 +356,19 @@ class Walk(Command):
         return msg
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        baked = [(target.get_type(type_), class_)
-                 for type_, class_ in Walker.allWalkers.items()]
+        baked = {
+            type_canonicalize_name(type_): class_
+            for type_, class_ in Walker.allWalkers.items()
+        }
         has_input = False
         for i in objs:
             has_input = True
+            this_type_name = type_canonical_name(i.type_)
+            if this_type_name not in baked:
+                raise CommandError(self.name, Walk._help_message(i.type_))
 
-            try:
-                for type_, class_ in baked:
-                    if i.type_ == type_:
-                        yield from class_().walk(i)
-                        raise StopIteration
-            except StopIteration:
-                continue
+            yield from baked[this_type_name]().walk(i)
 
-            raise CommandError(self.name, Walk._help_message(i.type_))
         # If we got no input and we're the last thing in the pipeline, we're
         # probably the first thing in the pipeline. Print out the available
         # walkers.
@@ -441,12 +440,13 @@ class PrettyPrinter(Command):
         """
 
         assert self.input_type is not None
-        type_ = target.get_type(self.input_type)
+        type_name = type_canonicalize_name(self.input_type)
         for obj in objs:
-            if obj.type_ != type_:
+            if type_canonical_name(obj.type_) != type_name:
                 raise CommandError(
                     self.name,
-                    'no handler for input of type {}'.format(obj.type_))
+                    f'exepected input of type {self.input_type}, but received '
+                    f'type {obj.type_}')
 
             self.pretty_print([obj])
 
@@ -476,33 +476,27 @@ class Locator(Command):
         out_type = None
         if self.output_type is not None:
             out_type = target.get_type(self.output_type)
+        baked = dict()
+        for (_, method) in inspect.getmembers(self, inspect.ismethod):
+            if not hasattr(method, "input_typename_handled"):
+                continue
+            baked[type_canonicalize_name(
+                method.input_typename_handled)] = method
+
         has_input = False
         for i in objs:
             has_input = True
+            obj_type_name = type_canonical_name(i.type_)
 
             # try subclass-specified input types first, so that they can
             # override any other behavior
-            try:
-                for (_, method) in inspect.getmembers(self, inspect.ismethod):
-                    if not hasattr(method, "input_typename_handled"):
-                        continue
-
-                    # Cache parsed type by setting an attribute on the
-                    # function that this method is bound to (same place
-                    # the input_typename_handled attribute is set).
-                    if not hasattr(method, "input_type_handled"):
-                        method.__func__.input_type_handled = target.get_type(
-                            method.input_typename_handled)
-
-                    if i.type_ == method.input_type_handled:
-                        yield from method(i)
-                        raise StopIteration
-            except StopIteration:
+            if obj_type_name in baked:
+                yield from baked[obj_type_name](i)
                 continue
 
             # try passthrough of output type
             # note, this may also be handled by subclass-specified input types
-            if i.type_ == out_type:
+            if obj_type_name == type_canonical_name(out_type):
                 yield i
                 continue
 

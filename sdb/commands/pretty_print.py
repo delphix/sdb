@@ -27,27 +27,28 @@ class PrettyPrint(sdb.Command):
     names = ["pretty_print", "pp"]
 
     def _call(self, objs: Iterable[drgn.Object]) -> None:
-        baked = [(sdb.get_type(type_), class_)
-                 for type_, class_ in sdb.PrettyPrinter.all_printers.items()]
-        handlingClass = None
+        baked = {
+            sdb.type_canonicalize_name(type_): class_
+            for type_, class_ in sdb.PrettyPrinter.all_printers.items()
+        }
+
+        handling_class = None
         first_obj_type, objs = sdb.get_first_type(objs)
         if first_obj_type is not None:
-            for type_, class_ in baked:
-                if type_ == first_obj_type and hasattr(class_, "pretty_print"):
-                    handlingClass = class_
-                    break
+            first_obj_type_name = sdb.type_canonical_name(first_obj_type)
+            if first_obj_type_name in baked:
+                handling_class = baked[first_obj_type_name]
 
-        if not handlingClass:
-            print("The following types have pretty-printers:")
-            print("\t%-20s %-20s" % ("PRINTER", "TYPE"))
-            for type_, class_ in baked:
-                if hasattr(class_, "pretty_print"):
-                    print("\t%-20s %-20s" % (class_.names[0], type_))
-            if first_obj_type:
-                msg = 'could not find pretty-printer for type {}'.format(
+        if handling_class is None:
+            if first_obj_type is not None:
+                msg = 'could not find pretty-printer for type {}\n'.format(
                     first_obj_type)
             else:
-                msg = 'could not find appropriate pretty-printer'
+                msg = 'could not find pretty-printer\n'
+            msg += "The following types have pretty-printers:\n"
+            msg += f"\t{'PRINTER':<20s} {'TYPE':<20s}\n"
+            for type_name, class_ in sdb.PrettyPrinter.all_printers.items():
+                msg += f"\t{class_.names[0]:<20s} {type_name:<20s}\n"
             raise sdb.CommandError(self.name, msg)
 
-        handlingClass().pretty_print(objs)
+        handling_class().pretty_print(objs)
