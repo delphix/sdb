@@ -35,10 +35,15 @@ class Filter(sdb.Command):
             (void *)0x5
             (void *)0x6
 
-        Print only pool "jax"
+        Find the SPA object of the ZFS pool named "jax" and print its 'spa_name'
 
             sdb> spa | filter obj.spa_name == "jax" | member spa_name
             (char [256])"jax"
+
+        Print the number of level 3 log statements in the kernel log buffer
+
+            sdb> dmesg | filter obj.level == 3 | count
+            (unsigned long long)24
     """
     # pylint: disable=eval-used
 
