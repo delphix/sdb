@@ -50,7 +50,10 @@ jobs:
           python-version: '3.6'
       - run: ./.github/scripts/install-drgn.sh
       - run: python3 -m pip install pytest pytest-cov
-      - run: pytest -v --cov sdb tests
+      - run: pytest -v --cov sdb --cov-report xml tests
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
   #
   # Verify "yapf" runs successfully.
   #
