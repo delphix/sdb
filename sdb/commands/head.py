@@ -30,7 +30,7 @@ class Head(sdb.Command):
     EXAMPLES
         Print the name of the first pool
 
-            sdb> spa | head 1 | spa_name
+            sdb> spa | head 1 | member spa_name
             (char [256])"domain0"
     """
 
