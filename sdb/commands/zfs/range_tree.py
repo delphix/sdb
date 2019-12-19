@@ -64,6 +64,13 @@ class RangeTree(sdb.PrettyPrinter):
 
 
 class RangeSeg(sdb.Locator):
+    """
+    Locate the range seg's associated with a range tree.
+
+    Given a 'range_tree_t*', locate the range_seg's assocated with it.
+    These may be type range_seg32_t*, range_seg64_t*, or range_seg_gap_t*,
+    depending on what kind of range_tree_t this is.
+    """
     names = ['range_seg']
 
     #pylint: disable=no-self-use

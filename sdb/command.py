@@ -23,6 +23,7 @@ registered commands during a session.
 
 import argparse
 import inspect
+import textwrap
 from typing import Callable, Dict, Iterable, List, Optional, Type, TypeVar
 
 import drgn
@@ -95,6 +96,7 @@ class Command:
         command class that it's called on. The docstring and parser for
         the class is used to populate the contents of the message.
         """
+        # pylint: disable=too-many-branches
         parser = cls._init_parser(name)
 
         print("SUMMARY")
@@ -111,6 +113,67 @@ class Command:
         if len(cls.names) > 1:
             print("ALIASES")
             print("    {}".format(", ".join(cls.names)))
+            print()
+
+        indent = "    "
+        if issubclass(cls, PrettyPrinter):
+            print(
+                textwrap.fill(
+                    f"If this command is used to end a pipeline, it will print a"
+                    f" human-readable decoding of the '{cls.input_type}' objects."
+                    f" For the 'raw' object contents, pipe the output of this"
+                    f" command into 'echo'.",
+                    initial_indent=indent,
+                    subsequent_indent=indent))
+            print()
+
+        if issubclass(cls, Walker):
+            print(
+                textwrap.fill(
+                    f"This is a Walker for {cls.input_type}. See 'help walk'.",
+                    initial_indent=indent,
+                    subsequent_indent=indent))
+            print()
+
+        if cls.input_type is not None:
+            it_text = f"This command accepts inputs of type 'void *',"
+            if cls.input_type[-1] == '*':
+                it_text += f" and '{cls.input_type[:-1].strip()}',"
+            it_text += f" which will be converted to '{cls.input_type}'."
+
+            print(
+                textwrap.fill(it_text,
+                              initial_indent=indent,
+                              subsequent_indent=indent))
+            print()
+
+        if issubclass(cls, Locator):
+            # pylint: disable=no-member
+            loc_text = (
+                f"This is a Locator for {cls.output_type}.  It finds objects"
+                f" of this type and outputs or pretty-prints them.  It accepts"
+                f" any Walkable type (run 'walk' for a list).")
+            if cls.no_input != Locator.no_input:
+                loc_text += (
+                    f" This command can be used to start a pipeline, in which"
+                    f" case it will consume no objects as input; instead it"
+                    f" will locate all objects of type '{cls.output_type}',"
+                    f" and emit them as output.")
+            types = list()
+            for (_, method) in inspect.getmembers(cls, inspect.isroutine):
+                if hasattr(method, "input_typename_handled"):
+                    types.append(method.input_typename_handled)
+            if len(types) != 0:
+                loc_text += (
+                    f" Input of the following types is also accepted,"
+                    f" in which case the objects of type {cls.output_type}"
+                    f" which are associated with them will be located:")
+            print(
+                textwrap.fill(loc_text,
+                              initial_indent=indent,
+                              subsequent_indent=indent))
+            for type_name in types:
+                print(f"{indent}{indent}{type_name}")
             print()
 
         #
@@ -331,6 +394,8 @@ class Walk(Command):
             traversed can use this command, to reduce the
             lines of code changed when the underlying data
             structure chages.
+
+        For a list of walkers, run 'walk' with no input.
 
     EXAMPLES
 
