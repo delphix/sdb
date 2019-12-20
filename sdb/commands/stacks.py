@@ -55,9 +55,14 @@ class Stacks(sdb.Command):
     """
     Print the stack traces for the active tasks / threads
 
-    By default, this command prints stack aggregations printed in
-    descending order of occurrence ('COUNT'). The command can
-    optionally filter by module, function, and thread state.
+    By default, the command will aggregate similar call stacks
+    printing them in descending order of frequency. The output
+    includes the `struct task_struct` address, thread state, and
+    aggregation count.
+
+    Optionally, the command can filter stacks, displaying only
+    those that match a given thread state, containing a given
+    function, or belonging to a given kernel module.
 
     EXAMPLES
         Print the call stacks for all tasks
