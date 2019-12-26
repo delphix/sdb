@@ -23,9 +23,6 @@ import sdb
 
 
 class PrettyPrint(sdb.Command):
-    """
-    TODO
-    """
 
     names = ["pretty_print", "pp"]
 

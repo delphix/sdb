@@ -25,7 +25,7 @@ import sdb
 
 class Echo(sdb.Command):
     """
-    Creates an object of type (void *) from the give address or addresses
+    Creates an object of type (void *) from the given address or addresses
     """
 
     names = ["echo", "cc"]

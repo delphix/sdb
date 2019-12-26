@@ -55,74 +55,74 @@ class Stacks(sdb.Command):
     """
     Print the stack traces for the active tasks / threads
 
-    By default, the command will aggregate similar call stacks
-    printing them in descending order of frequency. The output
-    includes the `struct task_struct` address, thread state, and
-    aggregation count.
+        By default, the command will aggregate similar call stacks
+        printing them in descending order of frequency. The output
+        includes the `struct task_struct` address, thread state, and
+        aggregation count.
 
-    Optionally, the command can filter stacks, displaying only
-    those that match a given thread state, containing a given
-    function, or belonging to a given kernel module.
+        Optionally, the command can filter stacks, displaying only
+        those that match a given thread state, containing a given
+        function, or belonging to a given kernel module.
 
-    EXAMPLES
-        Print the call stacks for all tasks
+        EXAMPLES
+            Print the call stacks for all tasks
 
-        sdb> stacks
-        TASK_STRUCT        STATE             COUNT
-        ==========================================
-        0xffff9521bb3c3b80 IDLE                394
-                          __schedule+0x24e
-                          schedule+0x2c
-                          worker_thread+0xba
-                          kthread+0x121
-                          ret_from_fork+0x35
-
-        0xffff9521bb3cbb80 INTERRUPTIBLE       384
-                          __schedule+0x24e
-                          schedule+0x2c
-                          smpboot_thread_fn+0x166
-                          kthread+0x121
-                          ret_from_fork+0x35
-        ...
-
-        Print stacks containing functions from the zfs module
-
-            sdb> stacks -m zfs
+            sdb> stacks
             TASK_STRUCT        STATE             COUNT
             ==========================================
-            0xffff952130515940 INTERRUPTIBLE         1
+            0xffff9521bb3c3b80 IDLE                394
                               __schedule+0x24e
                               schedule+0x2c
-                              cv_wait_common+0x11f
-                              __cv_wait_sig+0x15
-                              zthr_procedure+0x51
-                              thread_generic_wrapper+0x74
+                              worker_thread+0xba
+                              kthread+0x121
+                              ret_from_fork+0x35
+
+            0xffff9521bb3cbb80 INTERRUPTIBLE       384
+                              __schedule+0x24e
+                              schedule+0x2c
+                              smpboot_thread_fn+0x166
                               kthread+0x121
                               ret_from_fork+0x35
             ...
 
-        Print stacks containing the l2arc_feed_thread function
+            Print stacks containing functions from the zfs module
 
-            sdb> stacks -c l2arc_feed_thread
-            TASK_STRUCT        STATE             COUNT
-            ==========================================
-            0xffff9521b3f43b80 INTERRUPTIBLE         1
-                              __schedule+0x24e
-                              schedule+0x2c
-                              schedule_timeout+0x15d
-                              __cv_timedwait_common+0xdf
-                              __cv_timedwait_sig+0x16
-                              l2arc_feed_thread+0x66
-                              thread_generic_wrapper+0x74
-                              kthread+0x121
-                              ret_from_fork+0x35
+                sdb> stacks -m zfs
+                TASK_STRUCT        STATE             COUNT
+                ==========================================
+                0xffff952130515940 INTERRUPTIBLE         1
+                                  __schedule+0x24e
+                                  schedule+0x2c
+                                  cv_wait_common+0x11f
+                                  __cv_wait_sig+0x15
+                                  zthr_procedure+0x51
+                                  thread_generic_wrapper+0x74
+                                  kthread+0x121
+                                  ret_from_fork+0x35
+                ...
 
-        Print stacks of threads in the RUNNING state
+            Print stacks containing the l2arc_feed_thread function
 
-            sdb> stacks -t RUNNING
-            TASK_STRUCT        STATE             COUNT
-            ==========================================
-            0xffff95214ff31dc0 RUNNING               1
+                sdb> stacks -c l2arc_feed_thread
+                TASK_STRUCT        STATE             COUNT
+                ==========================================
+                0xffff9521b3f43b80 INTERRUPTIBLE         1
+                                  __schedule+0x24e
+                                  schedule+0x2c
+                                  schedule_timeout+0x15d
+                                  __cv_timedwait_common+0xdf
+                                  __cv_timedwait_sig+0x16
+                                  l2arc_feed_thread+0x66
+                                  thread_generic_wrapper+0x74
+                                  kthread+0x121
+                                  ret_from_fork+0x35
+
+            Print stacks of threads in the RUNNING state
+
+                sdb> stacks -t RUNNING
+                TASK_STRUCT        STATE             COUNT
+                ==========================================
+                0xffff95214ff31dc0 RUNNING               1
     """
 
     names = ["stacks"]
