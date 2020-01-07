@@ -24,6 +24,27 @@ import sdb
 
 
 class Filter(sdb.Command):
+    """
+    Return objects matching expression
+
+    EXAMPLES
+        Print addresses greater than or equal to 4
+
+            sdb> addr 0 1 2 3 4 5 6 | filter obj >= 4
+            (void *)0x4
+            (void *)0x5
+            (void *)0x6
+
+        Find the SPA object of the ZFS pool named "jax" and print its 'spa_name'
+
+            sdb> spa | filter obj.spa_name == "jax" | member spa_name
+            (char [256])"jax"
+
+        Print the number of level 3 log statements in the kernel log buffer
+
+            sdb> dmesg | filter obj.level == 3 | count
+            (unsigned long long)24
+    """
     # pylint: disable=eval-used
 
     names = ["filter"]

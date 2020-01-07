@@ -25,6 +25,15 @@ import sdb
 
 
 class Tail(sdb.Command):
+    """
+    Return the last COUNT objects passed in the pipeline
+
+    EXAMPLES
+        Print the name of the last pool
+
+            sdb> spa | tail 1 | spa_name
+            (char [256])"domain9"
+    """
 
     names = ["tail"]
 

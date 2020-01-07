@@ -24,6 +24,15 @@ import sdb
 
 
 class Head(sdb.Command):
+    """
+    Return the first COUNT objects passed in the pipeline
+
+    EXAMPLES
+        Print the name of the first pool
+
+            sdb> spa | head 1 | member spa_name
+            (char [256])"domain0"
+    """
 
     names = ["head"]
 

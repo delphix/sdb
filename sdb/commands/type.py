@@ -23,6 +23,15 @@ import sdb
 
 
 class Type(sdb.Command):
+    """
+    Print the type of the objects passed in the pipeline
+
+    EXAMPLES
+        Print the object type returned by the spa command
+
+            sdb> spa | type
+            spa_t *
+    """
 
     names = ["type"]
 
