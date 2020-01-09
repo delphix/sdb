@@ -22,6 +22,8 @@ import pytest
 from tests.integration.infra import repl_invoke, dump_exists, slurp_output_file
 
 POS_CMDS = [
+    "addr init_task | member thread_pid.tasks[3] | lxhlist task_struct pid_links[3] | member comm",
+    "addr modules | lxlist module list | member name",
     "slabs",
     "slabs -v",
     "slabs -s util",
@@ -43,6 +45,10 @@ STRIPPED_POS_CMDS = [
 ]
 
 NEG_CMDS = [
+    "addr init_task | member thread_pid.tasks[3] | lxhlist bogus_type pid_links[3] | member comm",
+    "addr init_task | member thread_pid.tasks[3] | lxhlist task_struct bogus_member | member comm",
+    "addr modules | lxlist bogus_type list | member name",
+    "addr modules | lxlist module bogus_member | member name",
     "slabs -s bogus",
     "slabs -o bogus",
     "slabs -s active_objs -o util",
