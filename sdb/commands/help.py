@@ -25,7 +25,7 @@ import sdb
 
 class Help(sdb.Command):
 
-    names = ["help"]
+    names = ["help", "man"]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
