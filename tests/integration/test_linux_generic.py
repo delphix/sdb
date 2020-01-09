@@ -22,6 +22,7 @@ import pytest
 from tests.integration.infra import repl_invoke, dump_exists, slurp_output_file
 
 POS_CMDS = [
+    "addr init_task | member comm | addr | container_of task_struct comm | cast void *",
     "addr init_task | member thread_pid.tasks[3] | lxhlist task_struct pid_links[3] | member comm",
     "addr modules | lxlist module list | member name",
     "slabs",
@@ -45,6 +46,14 @@ STRIPPED_POS_CMDS = [
 ]
 
 NEG_CMDS = [
+    "addr init_task | member comm | addr | container_of task_struct bogus_member | cast void *",
+    "addr init_task | member comm | addr | container_of bogus_type comm | cast void *",
+    # not passing pointer - skips addr command in pipe
+    "addr init_task | member comm | container_of task_struct comm | cast void *",
+    # using a scalar type instead of composite (structure, etc..)
+    "addr init_task | member comm | addr | container_of int comm | cast void *",
+    # using an incorrect structure
+    "addr init_task | member comm | addr | container_of pid comm | cast void *",
     "addr init_task | member thread_pid.tasks[3] | lxhlist bogus_type pid_links[3] | member comm",
     "addr init_task | member thread_pid.tasks[3] | lxhlist task_struct bogus_member | member comm",
     "addr modules | lxlist bogus_type list | member name",

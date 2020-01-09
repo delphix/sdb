@@ -30,39 +30,7 @@ from drgn.helpers.linux.list import list_for_each_entry
 from drgn.helpers.linux.list import hlist_for_each_entry
 
 import sdb
-
-
-def _get_valid_struct_name(cmd: sdb.Command, tname: str) -> str:
-    """
-    If tname is a name of a type that's a typedef to a
-    struct, the function return it as is. If this is a
-    name of a struct, then it returns the canonical name
-    (e.g. adds "struct" prefix). Otherwise, raises an
-    error.
-
-    Used for shorthands in providing names of structure
-    types to be consumed by drgn interfaces in string
-    form.
-    """
-    try:
-        type_ = sdb.get_prog().type(tname)
-    except LookupError:
-        # Check for struct
-        struct_name = f"struct {tname}"
-        try:
-            type_ = sdb.get_prog().type(struct_name)
-        except LookupError as err:
-            raise sdb.CommandError(cmd.name, str(err))
-        return struct_name
-
-    # Check for typedef to struct
-    if type_.kind != drgn.TypeKind.TYPEDEF:
-        raise sdb.CommandError(
-            cmd.name, f"{tname} is not a struct nor a typedef to a struct")
-    if sdb.type_canonicalize(type_).kind != drgn.TypeKind.STRUCT:
-        raise sdb.CommandError(cmd.name,
-                               f"{tname} is not a typedef to a struct")
-    return tname
+from sdb.commands.internal.util import get_valid_struct_name
 
 
 class LxList(sdb.Command):
@@ -107,7 +75,7 @@ class LxList(sdb.Command):
         return parser
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        sname = _get_valid_struct_name(self, self.args.struct_name)
+        sname = get_valid_struct_name(self, self.args.struct_name)
         for obj in objs:
             try:
                 yield from list_for_each_entry(sname, obj, self.args.member)
@@ -150,7 +118,7 @@ class LxHList(sdb.Command):
         return parser
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        sname = _get_valid_struct_name(self, self.args.struct_name)
+        sname = get_valid_struct_name(self, self.args.struct_name)
         for obj in objs:
             try:
                 yield from hlist_for_each_entry(sname, obj, self.args.member)
