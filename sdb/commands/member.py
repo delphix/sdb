@@ -202,12 +202,6 @@ class Member(sdb.Command):
                 terms.append((sep, idx))
         return terms
 
-    @staticmethod
-    def _typedef_to_base_kind(type_: drgn.Type) -> drgn.TypeKind:
-        while type_.kind == drgn.TypeKind.TYPEDEF:
-            type_ = type_.type
-        return type_.kind
-
     def _validate_type_dereference(self, obj: drgn.Object,
                                    sep: MemberExprSep) -> None:
         """
@@ -235,7 +229,7 @@ class Member(sdb.Command):
         that are switching between DRGN and SDB during development and
         people coming from Acid.
         """
-        kind = self._typedef_to_base_kind(obj.type_)
+        kind = sdb.type_canonicalize(obj.type_).kind
 
         # This is the first term, no need to do validation.
         if sep == MemberExprSep.START:
@@ -274,7 +268,8 @@ class Member(sdb.Command):
         when we encounter an index that is out-of-bounds we print a
         warning and move on instead of raising an error.
         """
-        base_kind = Member._typedef_to_base_kind(type_)
+        base_kind = sdb.type_canonicalize(type_).kind
+
         if base_kind == drgn.TypeKind.POINTER:
             return
         assert base_kind == drgn.TypeKind.ARRAY
