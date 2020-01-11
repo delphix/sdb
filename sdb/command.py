@@ -28,7 +28,7 @@ from typing import Callable, Dict, Iterable, List, Optional, Type, TypeVar
 
 import drgn
 
-from sdb.target import type_canonicalize_name, type_canonical_name
+from sdb.target import type_canonicalize_name, type_canonical_name, type_canonicalize, get_prog
 from sdb.error import CommandError, SymbolNotFoundError
 import sdb.target as target
 
@@ -277,6 +277,54 @@ class Cast(Command):
                 yield drgn.cast(self.type, obj)
             except TypeError as err:
                 raise CommandError(self.name, str(err))
+
+
+class Dereference(Command):
+    """
+    Dereference the given object (must be pointer).
+
+    EXAMPLES
+        Dereference the value of 'jiffies' given the address of it:
+
+            sdb> addr jiffies | deref
+            (volatile unsigned long)4905392949
+
+    """
+
+    names = ["deref"]
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        for obj in objs:
+            #
+            # We canonicalize the type just in case it is a typedef
+            # to a pointer (e.g. typedef char* char_p).
+            #
+            obj_type = type_canonicalize(obj.type_)
+            if obj_type.kind != drgn.TypeKind.POINTER:
+                raise CommandError(
+                    self.name,
+                    f"'{obj.type_.type_name()}' is not a valid pointer type")
+            if obj_type.type.type_name() == 'void':
+                raise CommandError(self.name,
+                                   "cannot dereference a void pointer")
+            try:
+                #
+                # Note that under normal circumstances where there pointer
+                # is valid we wouldn't need the call to read_(), and we
+                # could leave that assignment as is. Unfortunately that
+                # wouldn't catch the cases where the pointer points to
+                # invalid memory (like NULL). Thus, calling read_() is
+                # required, so such cases throw a drgn.FaultError here
+                # within this command were it is ok to catch it.
+                #
+                dobj = drgn.Object(get_prog(),
+                                   type=obj.type_.type,
+                                   address=obj.value_()).read_()
+            except drgn.FaultError as err:
+                raise CommandError(
+                    self.name,
+                    f"invalid memory access at address {hex(obj.value_())}")
+            yield dobj
 
 
 class Address(Command):
