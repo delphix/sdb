@@ -22,6 +22,22 @@ import pytest
 from tests.integration.infra import repl_invoke, dump_exists, slurp_output_file
 
 POS_CMDS = [
+    # array
+    "spa | member spa_zio_taskq[0][0].stqs_taskq | array 2",
+    "zfs_dbgmsg | head 1 | member zdm_msg | array",
+    "zfs_dbgmsg | head 1 | member zdm_msg | array 2",
+    "zfs_dbgmsg | head 1 | member zdm_msg | array -1",
+    "zfs_dbgmsg | head 1 | member zdm_msg | array 0",
+    #
+    # bad dereferences with array:
+    # The following test case for array semantically belongs
+    # to NEG_CMDS. That said, see similar comment for the
+    # member command on why the following command is listed
+    # here.
+    #
+    # [neg] array passed a NULL-pointer array
+    "echo 0x0 | cast int * | array 1",
+
     # deref
     "addr jiffies | deref",
 
@@ -69,7 +85,8 @@ POS_CMDS = [
     # on the comment within the _call() method of the command,
     # where we prefer just throwing warning (as opposed to errors
     # and then halting) when dereferencing bad addresses to make
-    # pipelines that use member more usable.
+    # pipelines that use member more usable (please refer to
+    # SingleInputCommad class for more info).
     #
     "echo 0x0 | cast spa_t * | member spa_name",
     "echo 0x1234 | cast dmu_recv_cookie_t * | member drc_os",
@@ -78,6 +95,13 @@ POS_CMDS = [
 ]
 
 NEG_CMDS = [
+    # array needs number of elements for pointer arrays
+    "spa | member spa_zio_taskq[0][0].stqs_taskq | array",
+    # array passed non-pointer type
+    "echo 1234 | cast int | array",
+    # array passed a "pointer" array that is of type void (e.g. incomplete)
+    "echo 0x0 | cast void * | array 1",
+
     # dereference void *
     "echo 0xffff90cc11b28000 | deref",
     # dereference NULL

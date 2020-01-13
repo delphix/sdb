@@ -1,0 +1,288 @@
+*(taskq_t *)0xffffa0893876bf00 = {
+	.tq_lock = (spinlock_t){
+		.rlock = (struct raw_spinlock){
+			.raw_lock = (arch_spinlock_t){
+				.val = (atomic_t){
+					.counter = (int)0,
+				},
+				.locked = (u8)0,
+				.pending = (u8)0,
+				.locked_pending = (u16)0,
+				.tail = (u16)0,
+			},
+		},
+	},
+	.tq_name = (char *)0xffffa08942a76940 = "z_null_iss",
+	.tq_instance = (int)1,
+	.tq_thread_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0894a6f69c0,
+		.prev = (struct list_head *)0xffffa0894a6f69c0,
+	},
+	.tq_active_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0893876bf28,
+		.prev = (struct list_head *)0xffffa0893876bf28,
+	},
+	.tq_nactive = (int)0,
+	.tq_nthreads = (int)1,
+	.tq_nspawn = (int)0,
+	.tq_maxthreads = (int)1,
+	.tq_pri = (int)100,
+	.tq_minalloc = (int)50,
+	.tq_maxalloc = (int)2147483647,
+	.tq_nalloc = (int)0,
+	.tq_flags = (uint_t)2147483652,
+	.tq_next_id = (taskqid_t)58,
+	.tq_lowest_id = (taskqid_t)58,
+	.tq_free_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0893876bf70,
+		.prev = (struct list_head *)0xffffa0893876bf70,
+	},
+	.tq_pend_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0893876bf80,
+		.prev = (struct list_head *)0xffffa0893876bf80,
+	},
+	.tq_prio_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0893876bf90,
+		.prev = (struct list_head *)0xffffa0893876bf90,
+	},
+	.tq_delay_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0893876bfa0,
+		.prev = (struct list_head *)0xffffa0893876bfa0,
+	},
+	.tq_taskqs = (struct list_head){
+		.next = (struct list_head *)0xffffa0893876b9b0,
+		.prev = (struct list_head *)0xffffa08952259cb0,
+	},
+	.tq_work_waitq = (spl_wait_queue_head_t){
+		.lock = (spinlock_t){
+			.rlock = (struct raw_spinlock){
+				.raw_lock = (arch_spinlock_t){
+					.val = (atomic_t){
+						.counter = (int)0,
+					},
+					.locked = (u8)0,
+					.pending = (u8)0,
+					.locked_pending = (u16)0,
+					.tail = (u16)0,
+				},
+			},
+		},
+		.head = (struct list_head){
+			.next = (struct list_head *)0xffffb38f02a03e30,
+			.prev = (struct list_head *)0xffffb38f02a03e30,
+		},
+	},
+	.tq_wait_waitq = (spl_wait_queue_head_t){
+		.lock = (spinlock_t){
+			.rlock = (struct raw_spinlock){
+				.raw_lock = (arch_spinlock_t){
+					.val = (atomic_t){
+						.counter = (int)0,
+					},
+					.locked = (u8)0,
+					.pending = (u8)0,
+					.locked_pending = (u16)0,
+					.tail = (u16)0,
+				},
+			},
+		},
+		.head = (struct list_head){
+			.next = (struct list_head *)0xffffa0893876bfe0,
+			.prev = (struct list_head *)0xffffa0893876bfe0,
+		},
+	},
+	.tq_lock_class = (tq_lock_role_t)TQ_LOCK_GENERAL,
+}
+(taskq_t *)0x8710003233616d64
+*(taskq_t *)0xffffa0894d9ebc00 = {
+	.tq_lock = (spinlock_t){
+		.rlock = (struct raw_spinlock){
+			.raw_lock = (arch_spinlock_t){
+				.val = (atomic_t){
+					.counter = (int)0,
+				},
+				.locked = (u8)0,
+				.pending = (u8)0,
+				.locked_pending = (u16)0,
+				.tail = (u16)0,
+			},
+		},
+	},
+	.tq_name = (char *)0xffffa0894e1bf6e0 = "z_null_iss",
+	.tq_instance = (int)2,
+	.tq_thread_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0891fcc17e0,
+		.prev = (struct list_head *)0xffffa0891fcc17e0,
+	},
+	.tq_active_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0894d9ebc28,
+		.prev = (struct list_head *)0xffffa0894d9ebc28,
+	},
+	.tq_nactive = (int)0,
+	.tq_nthreads = (int)1,
+	.tq_nspawn = (int)0,
+	.tq_maxthreads = (int)1,
+	.tq_pri = (int)100,
+	.tq_minalloc = (int)50,
+	.tq_maxalloc = (int)2147483647,
+	.tq_nalloc = (int)0,
+	.tq_flags = (uint_t)2147483652,
+	.tq_next_id = (taskqid_t)158,
+	.tq_lowest_id = (taskqid_t)158,
+	.tq_free_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0894d9ebc70,
+		.prev = (struct list_head *)0xffffa0894d9ebc70,
+	},
+	.tq_pend_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0894d9ebc80,
+		.prev = (struct list_head *)0xffffa0894d9ebc80,
+	},
+	.tq_prio_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0894d9ebc90,
+		.prev = (struct list_head *)0xffffa0894d9ebc90,
+	},
+	.tq_delay_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0894d9ebca0,
+		.prev = (struct list_head *)0xffffa0894d9ebca0,
+	},
+	.tq_taskqs = (struct list_head){
+		.next = (struct list_head *)0xffffa0894d9eb3b0,
+		.prev = (struct list_head *)0xffffa0894659e0b0,
+	},
+	.tq_work_waitq = (spl_wait_queue_head_t){
+		.lock = (spinlock_t){
+			.rlock = (struct raw_spinlock){
+				.raw_lock = (arch_spinlock_t){
+					.val = (atomic_t){
+						.counter = (int)0,
+					},
+					.locked = (u8)0,
+					.pending = (u8)0,
+					.locked_pending = (u16)0,
+					.tail = (u16)0,
+				},
+			},
+		},
+		.head = (struct list_head){
+			.next = (struct list_head *)0xffffb38f047c3e30,
+			.prev = (struct list_head *)0xffffb38f047c3e30,
+		},
+	},
+	.tq_wait_waitq = (spl_wait_queue_head_t){
+		.lock = (spinlock_t){
+			.rlock = (struct raw_spinlock){
+				.raw_lock = (arch_spinlock_t){
+					.val = (atomic_t){
+						.counter = (int)0,
+					},
+					.locked = (u8)0,
+					.pending = (u8)0,
+					.locked_pending = (u16)0,
+					.tail = (u16)0,
+				},
+			},
+		},
+		.head = (struct list_head){
+			.next = (struct list_head *)0xffffa0894d9ebce0,
+			.prev = (struct list_head *)0xffffa0894d9ebce0,
+		},
+	},
+	.tq_lock_class = (tq_lock_role_t)TQ_LOCK_GENERAL,
+}
+(taskq_t *)0x87100a2a7aab6d9b
+*(taskq_t *)0xffffa0895334d200 = {
+	.tq_lock = (spinlock_t){
+		.rlock = (struct raw_spinlock){
+			.raw_lock = (arch_spinlock_t){
+				.val = (atomic_t){
+					.counter = (int)0,
+				},
+				.locked = (u8)0,
+				.pending = (u8)0,
+				.locked_pending = (u16)0,
+				.tail = (u16)0,
+			},
+		},
+	},
+	.tq_name = (char *)0xffffa0895335cec0 = "z_null_iss",
+	.tq_instance = (int)0,
+	.tq_thread_list = (struct list_head){
+		.next = (struct list_head *)0xffffa089522cc420,
+		.prev = (struct list_head *)0xffffa089522cc420,
+	},
+	.tq_active_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0895334d228,
+		.prev = (struct list_head *)0xffffa0895334d228,
+	},
+	.tq_nactive = (int)0,
+	.tq_nthreads = (int)1,
+	.tq_nspawn = (int)0,
+	.tq_maxthreads = (int)1,
+	.tq_pri = (int)100,
+	.tq_minalloc = (int)50,
+	.tq_maxalloc = (int)2147483647,
+	.tq_nalloc = (int)0,
+	.tq_flags = (uint_t)2147483652,
+	.tq_next_id = (taskqid_t)292,
+	.tq_lowest_id = (taskqid_t)292,
+	.tq_free_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0895334d270,
+		.prev = (struct list_head *)0xffffa0895334d270,
+	},
+	.tq_pend_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0895334d280,
+		.prev = (struct list_head *)0xffffa0895334d280,
+	},
+	.tq_prio_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0895334d290,
+		.prev = (struct list_head *)0xffffa0895334d290,
+	},
+	.tq_delay_list = (struct list_head){
+		.next = (struct list_head *)0xffffa0895334d2a0,
+		.prev = (struct list_head *)0xffffa0895334d2a0,
+	},
+	.tq_taskqs = (struct list_head){
+		.next = (struct list_head *)0xffffa0895334dcb0,
+		.prev = (struct list_head *)0xffffa089566a19b0,
+	},
+	.tq_work_waitq = (spl_wait_queue_head_t){
+		.lock = (spinlock_t){
+			.rlock = (struct raw_spinlock){
+				.raw_lock = (arch_spinlock_t){
+					.val = (atomic_t){
+						.counter = (int)0,
+					},
+					.locked = (u8)0,
+					.pending = (u8)0,
+					.locked_pending = (u16)0,
+					.tail = (u16)0,
+				},
+			},
+		},
+		.head = (struct list_head){
+			.next = (struct list_head *)0xffffb38f01297e30,
+			.prev = (struct list_head *)0xffffb38f01297e30,
+		},
+	},
+	.tq_wait_waitq = (spl_wait_queue_head_t){
+		.lock = (spinlock_t){
+			.rlock = (struct raw_spinlock){
+				.raw_lock = (arch_spinlock_t){
+					.val = (atomic_t){
+						.counter = (int)0,
+					},
+					.locked = (u8)0,
+					.pending = (u8)0,
+					.locked_pending = (u16)0,
+					.tail = (u16)0,
+				},
+			},
+		},
+		.head = (struct list_head){
+			.next = (struct list_head *)0xffffa0895334d2e0,
+			.prev = (struct list_head *)0xffffa0895334d2e0,
+		},
+	},
+	.tq_lock_class = (tq_lock_role_t)TQ_LOCK_GENERAL,
+}
+(taskq_t *)0x746c7561666564
