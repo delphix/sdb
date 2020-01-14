@@ -1,0 +1,1 @@
+warning: member: cannot dereference member of type 'char [256]' at invalid address 0x0

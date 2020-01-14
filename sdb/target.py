@@ -144,3 +144,24 @@ def type_equals(a: drgn.Type, b: drgn.Type) -> bool:
     check if each of their "struct bar"s are actually the same.
     """
     return type_canonical_name(a) == type_canonical_name(b)
+
+
+def is_valid_memory_access(obj: drgn.Object) -> bool:
+    """
+    This function checks whether we can get a valid value
+    object from the passed drgn object. This tests ensures
+    that the drgn object is not pointer to an invalid
+    memory address/region.
+    """
+    #
+    # In general, we don't want to catch drgn.FaultError
+    # but in this context it is ok, as we expect read_()
+    # to only throw it when the underlying memory that
+    # we want to access is invalid (which is also the
+    # whole purpose of this helper function).
+    #
+    try:
+        obj.read_()
+    except drgn.FaultError:
+        return False
+    return True

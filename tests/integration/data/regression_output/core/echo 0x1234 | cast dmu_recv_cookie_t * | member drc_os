@@ -1,0 +1,1 @@
+warning: member: cannot dereference member of type 'objset_t *' at invalid address 0x12c4

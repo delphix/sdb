@@ -28,7 +28,8 @@ from typing import Callable, Dict, Iterable, List, Optional, Type, TypeVar
 
 import drgn
 
-from sdb.target import type_canonicalize_name, type_canonical_name, type_canonicalize, get_prog
+from sdb.target import type_canonicalize_name, type_canonical_name, type_canonicalize
+from sdb.target import get_prog, is_valid_memory_access
 from sdb.error import CommandError, SymbolNotFoundError
 import sdb.target as target
 
@@ -307,20 +308,17 @@ class Dereference(Command):
             if obj_type.type.type_name() == 'void':
                 raise CommandError(self.name,
                                    "cannot dereference a void pointer")
-            try:
-                #
-                # Note that under normal circumstances where there pointer
-                # is valid we wouldn't need the call to read_(), and we
-                # could leave that assignment as is. Unfortunately that
-                # wouldn't catch the cases where the pointer points to
-                # invalid memory (like NULL). Thus, calling read_() is
-                # required, so such cases throw a drgn.FaultError here
-                # within this command were it is ok to catch it.
-                #
-                dobj = drgn.Object(get_prog(),
-                                   type=obj.type_.type,
-                                   address=obj.value_()).read_()
-            except drgn.FaultError as err:
+
+            #
+            # We want to check that the dereferencing this object
+            # leads us to reading from valid memory. If the memory
+            # pointed is invalid, we want to handle this here (as
+            # opposed to the pipeline or REPL logic).
+            #
+            dobj = drgn.Object(get_prog(),
+                               type=obj.type_.type,
+                               address=obj.value_())
+            if not is_valid_memory_access(dobj):
                 raise CommandError(
                     self.name,
                     f"invalid memory access at address {hex(obj.value_())}")

@@ -289,16 +289,17 @@ class Member(sdb.Command):
             self._validate_type_dereference(obj, sep)
 
             #
-            # Ensure we are not trying to dereference NULL.
+            # Ensure we are not trying to dereference NULL or
+            # any kind of invalid memory.
             #
-            if obj.value_() == 0x0:
-                warning = f"cannot dereference NULL member of type '{obj.type_}'"
+            if not sdb.is_valid_memory_access(obj):
+                warning = f"cannot dereference member of type '{obj.type_}'"
                 if not obj.address_ is None:
                     #
                     # This is possible when the object was piped to
                     # us through `echo`.
                     #
-                    warning += f" at address {hex(obj.address_of_().value_())}"
+                    warning += f" at invalid address {hex(obj.address_of_().value_())}"
                 return initial_obj, warning
 
             if sep == MemberExprSep.ARRAY:
@@ -315,6 +316,15 @@ class Member(sdb.Command):
                     # as-is.
                     #
                     raise sdb.CommandError(self.name, str(err))
+
+        #
+        # See comment in similar predicate above.
+        #
+        if not sdb.is_valid_memory_access(obj):
+            warning = f"cannot dereference member of type '{obj.type_}'"
+            if not obj.address_ is None:
+                warning += f" at invalid address {hex(obj.address_of_().value_())}"
+            return initial_obj, warning
         return obj, ""
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
@@ -337,4 +347,5 @@ class Member(sdb.Command):
                 if skip_entry_warning:
                     print(f"warning: {self.name}: {skip_entry_warning}")
                     continue
+                sdb.is_valid_memory_access(resulting_obj)
                 yield resulting_obj
