@@ -1,1 +1,1 @@
-sdb: deref: invalid memory access at address 0x0
+sdb: deref: invalid memory access: addresss 0x0

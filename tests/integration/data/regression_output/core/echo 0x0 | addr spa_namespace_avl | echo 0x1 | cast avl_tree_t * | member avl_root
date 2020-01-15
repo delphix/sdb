@@ -1,0 +1,6 @@
+sdb: member: invalid memory access: addresss 0x0
+*(struct avl_node *)0xffffa089413b8108 = {
+	.avl_child = (struct avl_node *[2]){ 0xffffa0894e720108, 0xffffa08955c44108 },
+	.avl_pcb = (uintptr_t)1,
+}
+sdb: member: invalid memory access: addresss 0x1
