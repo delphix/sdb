@@ -28,6 +28,19 @@ class Error(Exception):
         super().__init__(self.text)
 
 
+class CommandNotImplementedError(Error):
+    """
+    Used for commands that don't implement _call() and/or
+    _call_one().
+    """
+
+    command: str = ""
+
+    def __init__(self, command: str) -> None:
+        self.command = command
+        super().__init__(f"{command}: no call method implemented")
+
+
 class CommandNotFoundError(Error):
     # pylint: disable=missing-docstring
 
@@ -35,7 +48,7 @@ class CommandNotFoundError(Error):
 
     def __init__(self, command: str) -> None:
         self.command = command
-        super().__init__('cannot recognize command: {}'.format(command))
+        super().__init__("cannot recognize command: {command}")
 
 
 class CommandError(Error):
@@ -47,7 +60,7 @@ class CommandError(Error):
     def __init__(self, command: str, message: str) -> None:
         self.command = command
         self.message = message
-        super().__init__('{}: {}'.format(command, message))
+        super().__init__(f"{command}: {message}")
 
 
 class CommandInvalidInputError(CommandError):
@@ -57,7 +70,7 @@ class CommandInvalidInputError(CommandError):
 
     def __init__(self, command: str, argument: str) -> None:
         self.argument = argument
-        super().__init__(command, 'invalid input: {}'.format(argument))
+        super().__init__(command, f"invalid input: {argument}")
 
 
 class SymbolNotFoundError(CommandError):
@@ -67,7 +80,7 @@ class SymbolNotFoundError(CommandError):
 
     def __init__(self, command: str, symbol: str) -> None:
         self.symbol = symbol
-        super().__init__(command, 'symbol not found: {}'.format(symbol))
+        super().__init__(command, "symbol not found: {symbol}")
 
 
 class CommandArgumentsError(CommandError):

@@ -29,7 +29,7 @@ from typing import Callable, Dict, Iterable, List, Optional, Type, TypeVar
 import drgn
 
 from sdb.target import type_canonicalize_name, type_canonical_name, type_canonicalize, get_prog
-from sdb.error import CommandError, SymbolNotFoundError
+from sdb.error import CommandError, CommandNotImplementedError, SymbolNotFoundError
 import sdb.target as target
 
 #
@@ -136,6 +136,15 @@ class Command:
             print()
 
         if cls.input_type is not None:
+            #
+            # The pylint error below is a new false-positive because
+            # we initialize cls.input type as None by default. A
+            # future change could be that everything would work if
+            # we initialized it to the empty string instead of None
+            # as they have the same semantics as predicates in
+            # conditional control flow.
+            #
+            # pylint: disable=unsubscriptable-object
             it_text = f"This command accepts inputs of type 'void *',"
             if cls.input_type[-1] == '*':
                 it_text += f" and '{cls.input_type[:-1].strip()}',"
@@ -225,14 +234,148 @@ class Command:
 
     def _call(self,
               objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
-        # pylint: disable=missing-docstring
-        raise NotImplementedError
+        """
+        Optionally implemented by the subclass.
+
+        Commands that expect to accept all of the objects from the
+        previous pipeline stage as an iterable and maintain state
+        between the analysis/manipulation of each object, should
+        implement this method.
+
+        Subclasses should override either this method or _call_one()
+        but not both - see call() method for more information.
+        """
+        #
+        # We should never get here!
+        #
+        assert self.name is None
+        assert False
+        return objs
+
+    def _call_one(self, obj: drgn.Object) -> Optional[Iterable[drgn.Object]]:
+        """
+        Optionally implemented by the subclass.
+
+        Commands that are expected to recover from bad memory accesses
+        implicitly by the sdb infrastructure and move on to the next
+        object should implement this method.
+
+        Subclasses should override either this method or _call()
+        but not both - see call() method for more information.
+
+        Note: In the future, this API may allow an optional argument
+              that will be passing state between invocations of this
+              method by the pipeline.
+        """
+        #
+        # We should never get here!
+        #
+        assert self.name is None
+        assert obj
+        assert False
+        yield obj
+
+    def __invalid_memory_objects_check(self, objs: Iterable[drgn.Object],
+                                       fatal: bool) -> Iterable[drgn.Object]:
+        """
+        A filter method for objects passed through the pipeline that
+        are backed by invalid memory. When `fatal` is set to True
+        we raise an error which will stop this control flow when
+        such objects are encountered. If `fatal` is False we just
+        print the error and go on.
+        """
+        for obj in objs:
+            try:
+                obj.read_()
+            except drgn.FaultError as err:
+                if obj.address_ is None:
+                    #
+                    # This is possible when the object was created `echo`.
+                    #
+                    err_msg = str(err)
+                else:
+                    err_msg = f"addresss {hex(obj.address_of_().value_())}"
+                err = CommandError(self.name,
+                                   f"invalid memory access: {err_msg}")
+                if fatal:
+                    raise err
+                print(err.text)
+                continue
+            yield obj
+
+    def __call_for_each(self,
+                        objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        """
+        Helper function that wraps around _call_one() to:
+        [1] Maintain the interface expected by __invalid_memory_objects_check
+            that expects Iterables/Generators.
+        [2] Give object-specific error reporting when handling invalid
+            memory access thrown by the command being executed.
+        [3] In the event that we implement any shared state between invocations
+            of _call_one() in the future, that logic can be self-contained here.
+        """
+        for obj in objs:
+            #
+            # Even though we have __invalid_memory_objects_check() to
+            # ensure that the objects returned are valid, we still
+            # need to account for invalid accesses happening while
+            # the command is running.
+            #
+            try:
+                result = self._call_one(obj)
+            except drgn.FaultError as err:
+                if obj.address_ is None:
+                    #
+                    # This is possible when the object was created `echo`.
+                    #
+                    err_msg = f"invalid memory access: {str(err)}"
+                else:
+                    err_msg = "invalid memory access while handling object "
+                    err_msg += "at address {hex(obj.address_of_().value_())}"
+                cmd_err = CommandError(self.name, err_msg)
+                print(cmd_err.text)
+            if result is not None:
+                yield from result
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        # pylint: disable=missing-docstring
-        result = self._call(objs)
-        if result is not None:
-            yield from result
+        """
+        Attempts to call the _call() method of the Command class first
+        and if that's not implemented calls _call_one(). All objects
+        returned by this method are guaranteed to be backed by valid
+        memory.
+        """
+        #
+        # We are trying to check if the current command implements
+        # its own _call() or _call_one() method, by comparing their
+        # method pointers to that of the super class (e.g. Command).
+        # We know what we are doing and thus disable the pylint error
+        # below that guards the general pitfall of comparing the
+        # method pointer when you actually want to check value
+        # returned from calling the method. As for the type annotations
+        # being ignored, this is a known issue for method/function
+        # pointers (ref: https://github.com/python/mypy/issues/2087).
+        #
+        # pylint: disable=comparison-with-callable
+        if self._call.__func__ != Command._call:  #type: ignore[attr-defined]
+            #
+            # Even though we have __invalid_memory_objects_check() to
+            # ensure that the objects returned are valid, we still
+            # need to account for invalid accesses happening while
+            # the command is running.
+            #
+            try:
+                result = self._call(objs)
+                if result is not None:
+                    yield from self.__invalid_memory_objects_check(result, True)
+            except drgn.FaultError as err:
+                raise CommandError(self.name,
+                                   f"invalid memory access: {str(err)}")
+
+        elif self._call_one.__func__ != Command._call_one:  #type: ignore[attr-defined]
+            yield from self.__invalid_memory_objects_check(
+                self.__call_for_each(objs), False)
+        else:
+            raise CommandNotImplementedError(self.name)
 
 
 class Cast(Command):
@@ -307,24 +450,9 @@ class Dereference(Command):
             if obj_type.type.type_name() == 'void':
                 raise CommandError(self.name,
                                    "cannot dereference a void pointer")
-            try:
-                #
-                # Note that under normal circumstances where there pointer
-                # is valid we wouldn't need the call to read_(), and we
-                # could leave that assignment as is. Unfortunately that
-                # wouldn't catch the cases where the pointer points to
-                # invalid memory (like NULL). Thus, calling read_() is
-                # required, so such cases throw a drgn.FaultError here
-                # within this command were it is ok to catch it.
-                #
-                dobj = drgn.Object(get_prog(),
-                                   type=obj.type_.type,
-                                   address=obj.value_()).read_()
-            except drgn.FaultError as err:
-                raise CommandError(
-                    self.name,
-                    f"invalid memory access at address {hex(obj.value_())}")
-            yield dobj
+            yield drgn.Object(get_prog(),
+                              type=obj.type_.type,
+                              address=obj.value_())
 
 
 class Address(Command):
