@@ -32,7 +32,7 @@ class MemberExprSep(Enum):
     ARRAY = "[]"
 
 
-class Member(sdb.Command):
+class Member(sdb.SingleInputCommand):
     """
     Dereference members of the given structure
 
@@ -279,7 +279,7 @@ class Member(sdb.Command):
 
     def _eval_member_terms(
             self, initial_obj: drgn.Object,
-            terms: List[Tuple[MemberExprSep, str]]) -> Tuple[drgn.Object, str]:
+            terms: List[Tuple[MemberExprSep, str]]) -> drgn.Object:
         """
         Evaluates member terms passed to us by _parse_member_tokens()
         """
@@ -287,19 +287,6 @@ class Member(sdb.Command):
         for term in terms:
             sep, token = term
             self._validate_type_dereference(obj, sep)
-
-            #
-            # Ensure we are not trying to dereference NULL.
-            #
-            if obj.value_() == 0x0:
-                warning = f"cannot dereference NULL member of type '{obj.type_}'"
-                if not obj.address_ is None:
-                    #
-                    # This is possible when the object was piped to
-                    # us through `echo`.
-                    #
-                    warning += f" at address {hex(obj.address_of_().value_())}"
-                return initial_obj, warning
 
             if sep == MemberExprSep.ARRAY:
                 idx = int(token)
@@ -315,26 +302,10 @@ class Member(sdb.Command):
                     # as-is.
                     #
                     raise sdb.CommandError(self.name, str(err))
-        return obj, ""
+        return obj
 
-    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        for obj in objs:
-            for member in self.args.members:
-                tokens = Member._lex_member_tokens(member)
-                terms = self._parse_member_tokens(tokens)
-                resulting_obj, skip_entry_warning = self._eval_member_terms(
-                    obj, terms)
-
-                #
-                # In some cases it would be annoying to stop a pipeline
-                # mid-way just because a member is NULL. At the same time
-                # it could be misleading in cases where a NULL is not
-                # expected but it exists (e.g. let's say due to a bug).
-                # As a trade-off between the two above cases, we allow
-                # pipelines to proceed but we always print a warning
-                # that a NULL was encountered.
-                #
-                if skip_entry_warning:
-                    print(f"warning: {self.name}: {skip_entry_warning}")
-                    continue
-                yield resulting_obj
+    def _call_one(self, obj: drgn.Object) -> Iterable[drgn.Object]:
+        for member in self.args.members:
+            tokens = Member._lex_member_tokens(member)
+            terms = self._parse_member_tokens(tokens)
+            yield self._eval_member_terms(obj, terms)

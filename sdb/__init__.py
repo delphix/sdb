@@ -36,7 +36,8 @@ from sdb.target import (create_object, get_object, get_prog, get_typed_null,
                         get_symbol, type_canonical_name, type_canonicalize,
                         type_canonicalize_name, type_equals)
 from sdb.command import (Address, Cast, Command, InputHandler, Locator,
-                         PrettyPrinter, Walk, Walker, get_registered_commands)
+                         PrettyPrinter, Walk, Walker, SingleInputCommand,
+                         get_registered_commands)
 from sdb.pipeline import execute_pipeline, get_first_type, invoke
 
 #

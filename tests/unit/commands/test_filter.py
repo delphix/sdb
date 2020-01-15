@@ -55,67 +55,12 @@ def test_no_operator():
         invoke(MOCK_PROGRAM, objs, line)
 
 
-def test_no_input():
-    line = 'filter obj == obj'
-    objs = []
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert not ret
-
-
 def test_single_void_ptr_input_lhs_not_object():
     line = 'filter 0 == obj'
     objs = [drgn.Object(MOCK_PROGRAM, 'void *', value=0)]
 
     with pytest.raises(sdb.CommandInvalidInputError):
         invoke(MOCK_PROGRAM, objs, line)
-
-
-def test_single_void_ptr_input_object_match():
-    line = 'filter obj == obj'
-    objs = [drgn.Object(MOCK_PROGRAM, 'void *', value=0)]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert len(ret) == 1
-    assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
-
-
-def test_single_void_ptr_input_value_match():
-    line = 'filter obj == 0'
-    objs = [drgn.Object(MOCK_PROGRAM, 'void *', value=0)]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert len(ret) == 1
-    assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
-
-
-def test_single_void_ptr_input_value_no_match():
-    line = 'filter obj == 1'
-    objs = [drgn.Object(MOCK_PROGRAM, 'void *', value=0)]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert not ret
-
-
-def test_multi_void_ptr_input_value_match_eq():
-    line = 'filter obj == 1'
-    objs = [
-        drgn.Object(MOCK_PROGRAM, 'void *', value=0),
-        drgn.Object(MOCK_PROGRAM, 'void *', value=1),
-        drgn.Object(MOCK_PROGRAM, 'void *', value=2),
-    ]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert len(ret) == 1
-    assert ret[0].value_() == 1
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
 
 
 def test_multi_void_ptr_input_value_match_ne():
@@ -143,139 +88,12 @@ def test_multi_void_ptr_input_value_match_ne():
         invoke(MOCK_PROGRAM, objs, line)
 
 
-def test_multi_void_ptr_input_value_match_gt():
-    line = 'filter obj > 1'
-    objs = [
-        drgn.Object(MOCK_PROGRAM, 'void *', value=0),
-        drgn.Object(MOCK_PROGRAM, 'void *', value=1),
-        drgn.Object(MOCK_PROGRAM, 'void *', value=2),
-    ]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert len(ret) == 1
-    assert ret[0].value_() == 2
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
-
-
-def test_multi_void_ptr_input_value_match_ge():
-    line = 'filter obj >= 1'
-    objs = [
-        drgn.Object(MOCK_PROGRAM, 'void *', value=0),
-        drgn.Object(MOCK_PROGRAM, 'void *', value=1),
-        drgn.Object(MOCK_PROGRAM, 'void *', value=2),
-    ]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert len(ret) == 2
-    assert ret[0].value_() == 1
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
-    assert ret[1].value_() == 2
-    assert ret[1].type_ == MOCK_PROGRAM.type('void *')
-
-
-def test_multi_void_ptr_input_value_match_lt():
-    line = 'filter obj < 1'
-    objs = [
-        drgn.Object(MOCK_PROGRAM, 'void *', value=0),
-        drgn.Object(MOCK_PROGRAM, 'void *', value=1),
-        drgn.Object(MOCK_PROGRAM, 'void *', value=2),
-    ]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert len(ret) == 1
-    assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
-
-
-def test_multi_void_ptr_input_value_match_le():
-    line = 'filter obj <= 1'
-    objs = [
-        drgn.Object(MOCK_PROGRAM, 'void *', value=0),
-        drgn.Object(MOCK_PROGRAM, 'void *', value=1),
-        drgn.Object(MOCK_PROGRAM, 'void *', value=2),
-    ]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert len(ret) == 2
-    assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
-    assert ret[1].value_() == 1
-    assert ret[1].type_ == MOCK_PROGRAM.type('void *')
-
-
 def test_char_array_input_object_match():
     line = 'filter obj == obj'
     objs = [drgn.Object(MOCK_PROGRAM, 'char [4]', value=b"foo")]
 
     with pytest.raises(sdb.CommandError):
         invoke(MOCK_PROGRAM, objs, line)
-
-
-def test_char_array_input_string_match():
-    line = 'filter obj == "foo"'
-    objs = [drgn.Object(MOCK_PROGRAM, 'char [4]', value=b"foo")]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert len(ret) == 1
-    assert ret[0].value_() == [102, 111, 111, 0]
-    assert ret[0].string_() == b'foo'
-    assert ret[0].type_ == MOCK_PROGRAM.type('char [4]')
-
-
-def test_struct_input_int_member_match_eq():
-    line = 'filter obj.ts_int == 1'
-    objs = [MOCK_PROGRAM["global_struct"]]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert len(ret) == 1
-    assert ret[0].type_ == MOCK_PROGRAM.type('struct test_struct')
-    assert ret[0].address_of_().value_() == 0xffffffffc0a8aee0
-
-
-def test_struct_input_int_member_match_gt():
-    line = 'filter obj.ts_int > 1'
-    objs = [MOCK_PROGRAM["global_struct"]]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert not ret
-
-
-def test_struct_input_int_member_match_ge():
-    line = 'filter obj.ts_int >= 1'
-    objs = [MOCK_PROGRAM["global_struct"]]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert len(ret) == 1
-    assert ret[0].type_ == MOCK_PROGRAM.type('struct test_struct')
-    assert ret[0].address_of_().value_() == 0xffffffffc0a8aee0
-
-
-def test_struct_input_int_member_match_lt():
-    line = 'filter obj.ts_int < 1'
-    objs = [MOCK_PROGRAM["global_struct"]]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert not ret
-
-
-def test_struct_input_int_member_match_le():
-    line = 'filter obj.ts_int <= 1'
-    objs = [MOCK_PROGRAM["global_struct"]]
-
-    ret = invoke(MOCK_PROGRAM, objs, line)
-
-    assert len(ret) == 1
-    assert ret[0].type_ == MOCK_PROGRAM.type('struct test_struct')
-    assert ret[0].address_of_().value_() == 0xffffffffc0a8aee0
 
 
 def test_struct_input_invalid_syntax():

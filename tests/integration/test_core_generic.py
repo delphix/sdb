@@ -22,7 +22,59 @@ import pytest
 from tests.integration.infra import repl_invoke, dump_exists, slurp_output_file
 
 POS_CMDS = [
+    # deref
     "addr jiffies | deref",
+
+    # filter - no input
+    "filter obj == 1",
+    # filter - match
+    "echo 0x0 | filter obj == 0",
+    # filter - no match
+    "echo 0x0 | filter obj == 1",
+    # filter - identity
+    "echo 0x1 | filter obj == obj",
+    # filter - multiple entries match one (eq)
+    "echo 0x0 0x1 0x2 | filter obj == 1",
+    # filter - multiple entries match one (gt)
+    "echo 0x0 0x1 0x2 | filter obj > 1",
+    # filter - multiple entries match one (ge)
+    "echo 0x0 0x1 0x2 | filter obj >= 1",
+    # filter - multiple entries match one (lt)
+    "echo 0x0 0x1 0x2 | filter obj < 1",
+    # filter - multiple entries match one (le)
+    "echo 0x0 0x1 0x2 | filter obj <= 1",
+    # filter - deref member
+    "spa rpool | filter obj.spa_syncing_txg == 1624 | member spa_name",
+    "spa rpool | filter obj.spa_syncing_txg >= 1624 | member spa_name",
+    "spa rpool | filter obj.spa_syncing_txg <= 1624 | member spa_name",
+    "spa rpool | filter obj.spa_syncing_txg < 1624 | member spa_name",
+    "spa rpool | filter obj.spa_syncing_txg > 1624 | member spa_name",
+
+    # member - generic
+    "member no_object",
+    "addr spa_namespace_avl | member avl_root->avl_child[0]->avl_child",
+    "addr spa_namespace_avl | member avl_root.avl_child[0].avl_child",
+    "spa | member spa_ubsync.ub_rootbp.blk_dva[0].dva_word",
+    "addr spa_namespace_avl | member avl_root.avl_pcb avl_size",
+    "spa | head 1 | member spa_zio_taskq[0][0].stqs_taskq",
+    "spa | head 1 | member spa_zio_taskq[0][0].stqs_taskq[0]",
+    # member - forcing printing beyond the bounds of the array (pointer)
+    "addr spa_namespace_avl | member avl_root->avl_child[3]",
+    "zfs_dbgmsg | head 1 | member zdm_msg[2]",
+    #
+    # bad dereferences with member:
+    # The following test cases for member semantically belong
+    # to NEG_CMDS. That said, we add them here because their
+    # exit code is actually 0. The reason for this is explained
+    # on the comment within the _call() method of the command,
+    # where we prefer just throwing warning (as opposed to errors
+    # and then halting) when dereferencing bad addresses to make
+    # pipelines that use member more usable.
+    #
+    "echo 0x0 | cast spa_t * | member spa_name",
+    "echo 0x1234 | cast dmu_recv_cookie_t * | member drc_os",
+    # member - bad and good pointer combination (e.g. doesn't blow up)
+    "echo 0x0 | addr spa_namespace_avl | echo 0x1 | cast avl_tree_t * | member avl_root",
 ]
 
 NEG_CMDS = [
@@ -34,6 +86,30 @@ NEG_CMDS = [
     "echo 0x10 | cast int * | deref",
     # dereference non-pointer type
     "addr jiffies | deref | deref",
+
+    # filter - no right-hand side
+    "zfs_dbgmsg | filter obj ==",
+    # filter - no left-hand side
+    "zfs_dbgmsg | filter  == obj",
+    # filter - no operator
+    "zfs_dbgmsg | filter obj"
+    # filter - bogus member
+    "spa rpool | filter obj.bogus == 1624",
+    # filter - bogus op
+    "spa rpool | filter obj.spa_syncing_txg bogus_op 1624",
+
+    # member user arrow notation in embedded struct member
+    "spa | member spa_ubsync->ub_rootbp",
+    # member - bogus member
+    "spa | member spa_ubsync.bogus",
+    # member - incomplete array expression
+    "addr spa_namespace_avl | member avl_root->avl_child[1",
+    # member - bogus array index
+    "addr spa_namespace_avl | member avl_root->avl_child[a]",
+    # member - incomplete expression
+    "spa | member spa_zio_taskq[0][0].stqs_taskq->",
+    # member - incomplete expression
+    "spa | member spa_zio_taskq[0][0].stqs_taskq.",
 ]
 
 CMD_TABLE = POS_CMDS + NEG_CMDS
