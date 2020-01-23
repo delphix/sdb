@@ -92,6 +92,21 @@ POS_CMDS = [
     "echo 0x1234 | cast dmu_recv_cookie_t * | member drc_os",
     # member - bad and good pointer combination (e.g. doesn't blow up)
     "echo 0x0 | addr spa_namespace_avl | echo 0x1 | cast avl_tree_t * | member avl_root",
+
+    # print
+    "addr spa_namespace_avl | print",
+    "addr spa_namespace_avl | print -n",
+    "addr spa_namespace_avl | print -r",
+    "addr spa_namespace_avl | print -nr",
+    "addr spa_namespace_avl | print -R",
+    "addr spa_namespace_avl | deref | print",
+    "addr spa_namespace_avl | print -d",
+    "addr spa_namespace_avl zfs_dbgmsgs | print -d",
+    "spa | head 1 | member spa_name[1] | print",
+    "spa | head 1 | member spa_name[1] | print -c",
+    "spa | head 1 | member spa_name[1] | print -cr",
+    "spa | head 1 | deref | print -rs",
+    "spa | head 1 | deref | print -Rs",
 ]
 
 NEG_CMDS = [
