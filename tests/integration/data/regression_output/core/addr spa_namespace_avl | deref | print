@@ -1,0 +1,7 @@
+(avl_tree_t){
+	.avl_root = (struct avl_node *)0xffffa089413b8108,
+	.avl_compar = (int (*)(const void *, const void *))spa_name_compare+0x0 = 0xffffffffc0593520,
+	.avl_offset = (size_t)264,
+	.avl_numnodes = (ulong_t)3,
+	.avl_size = (size_t)9176,
+}
