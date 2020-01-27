@@ -17,24 +17,44 @@
 # pylint: disable=missing-docstring
 
 import argparse
-from typing import Iterable
+from typing import Iterable, Dict, Type
 
 import drgn
 import sdb
 
 
 class Help(sdb.Command):
+    """ Displays help for the specified command for ex: help addr """
 
     names = ["help", "man"]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
         parser = super()._init_parser(name)
-        parser.add_argument("cmd", type=str)
+        parser.add_argument("cmd", nargs="?", type=str)
         return parser
 
     def _call(self, objs: Iterable[drgn.Object]) -> None:
-        try:
-            sdb.get_registered_commands()[self.args.cmd].help(self.args.cmd)
-        except KeyError:
-            raise sdb.error.CommandNotFoundError(self.args.cmd)
+        all_cmds = sdb.get_registered_commands()
+        if self.args.cmd is not None:
+            try:
+                all_cmds[self.args.cmd].help(self.args.cmd)
+            except KeyError:
+                raise sdb.error.CommandNotFoundError(self.args.cmd)
+        else:
+            cmds: Dict[str, Type[sdb.Command]] = {}
+            for k, v in all_cmds.items():
+                if v not in cmds.values():
+                    cmds[k] = v
+            for k in sorted(cmds):
+                names = cmds[k].names
+                hs = cmds[k].__doc__
+                if hs is not None:
+                    h = hs.split('\n', 2)
+                    hlp = h[0] if h[0] else h[1]
+                    if h:
+                        print(f"{','.join(names) :32} - {hlp.lstrip()}")
+                    else:
+                        print(f"{','.join(names) :32}")
+                else:
+                    print(f"{','.join(names) :32}")
