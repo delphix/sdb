@@ -1,0 +1,3 @@
+sdb: member: invalid memory access: addresss 0x0
+(struct avl_node *)0xffffa089413b8108
+sdb: member: invalid memory access: addresss 0x1

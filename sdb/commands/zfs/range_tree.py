@@ -30,31 +30,29 @@ class RangeTree(sdb.PrettyPrinter):
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
 
-        # RangeTreeSeg is a Command, and it's like a pretty-printer for
-        # range_seg*_t's, but since it has no `names`, it can't be invoked from
-        # the command line. The reason is that range_seg*_t's specify their
+        # RangeTreeSeg is a SingleInputCommand, and it's like a pretty-printer
+        # for range_seg*_t's, but since it has no `names`, it can't be invoked
+        # from the command line. The reason is that range_seg*_t's specify their
         # ranges relative to rt_start/rt_shift, which are not accessible from
         # the range_seg*_t. Therefore, they can only be pretty-printed as part
         # of a range_tree_t*, from the range_tree pretty-printer.
-        class RangeTreeSeg(sdb.Command):
+        class RangeTreeSeg(sdb.SingleInputCommand):
 
             def __init__(self, rt: drgn.Object):
                 super().__init__()
                 self.rt = rt
 
-            def _call(self, objs: Iterable[drgn.Object]) -> None:
-                for seg in objs:
-                    start = (
-                        seg.rs_start << self.rt.rt_shift) + self.rt.rt_start
-                    end = (seg.rs_end << self.rt.rt_shift) + self.rt.rt_start
-                    if hasattr(self.rt, 'rs_fill'):
-                        fill = seg.rs_fill << self.rt.rt_shift
-                        print(f"    [{hex(start)} {hex(end)}) "
-                              f"(length {hex(end - start)}) "
-                              f"(fill {hex(fill)})")
-                    else:
-                        print(f"    [{hex(start)} {hex(end)}) "
-                              f"(length {hex(end - start)})")
+            def _call_one(self, obj: drgn.Object) -> None:
+                start = (obj.rs_start << self.rt.rt_shift) + self.rt.rt_start
+                end = (obj.rs_end << self.rt.rt_shift) + self.rt.rt_start
+                if hasattr(self.rt, 'rs_fill'):
+                    fill = obj.rs_fill << self.rt.rt_shift
+                    print(f"    [{hex(start)} {hex(end)}) "
+                          f"(length {hex(end - start)}) "
+                          f"(fill {hex(fill)})")
+                else:
+                    print(f"    [{hex(start)} {hex(end)}) "
+                          f"(length {hex(end - start)})")
 
         for rt in objs:
             print(f"{hex(rt)}: range tree of {int(rt.rt_root.bt_num_elems)} "

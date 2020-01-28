@@ -23,7 +23,7 @@ import drgn
 import sdb
 
 
-class Filter(sdb.Command):
+class Filter(sdb.SingleInputCommand):
     """
     Return objects matching expression
 
@@ -100,37 +100,35 @@ class Filter(sdb.Command):
 
         self.compare = self.args.expr[index]
 
-    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def _call_one(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         try:
-            for obj in objs:
-                lhs = eval(self.lhs_code, {'__builtins__': None}, {'obj': obj})
-                rhs = eval(self.rhs_code, {'__builtins__': None}, {'obj': obj})
+            lhs = eval(self.lhs_code, {'__builtins__': None}, {'obj': obj})
+            rhs = eval(self.rhs_code, {'__builtins__': None}, {'obj': obj})
 
-                if not isinstance(lhs, drgn.Object):
-                    raise sdb.CommandInvalidInputError(
-                        self.name,
-                        "left hand side has unsupported type ({})".format(
-                            type(lhs).__name__))
+            if not isinstance(lhs, drgn.Object):
+                raise sdb.CommandInvalidInputError(
+                    self.name,
+                    "left hand side has unsupported type ({})".format(
+                        type(lhs).__name__))
 
-                if isinstance(rhs, str):
-                    lhs = lhs.string_().decode("utf-8")
-                elif isinstance(rhs, int):
-                    rhs = sdb.create_object(lhs.type_, rhs)
-                elif isinstance(rhs, bool):
-                    pass
-                elif isinstance(rhs, drgn.Object):
-                    pass
-                else:
-                    raise sdb.CommandInvalidInputError(
-                        self.name,
-                        "right hand side has unsupported type ({})".format(
-                            type(rhs).__name__))
+            if isinstance(rhs, str):
+                lhs = lhs.string_().decode("utf-8")
+            elif isinstance(rhs, int):
+                rhs = sdb.create_object(lhs.type_, rhs)
+            elif isinstance(rhs, bool):
+                pass
+            elif isinstance(rhs, drgn.Object):
+                pass
+            else:
+                raise sdb.CommandInvalidInputError(
+                    self.name,
+                    "right hand side has unsupported type ({})".format(
+                        type(rhs).__name__))
 
-                if eval("lhs {} rhs".format(self.compare),
-                        {'__builtins__': None}, {
-                            'lhs': lhs,
-                            'rhs': rhs
-                        }):
-                    yield obj
+            if eval("lhs {} rhs".format(self.compare), {'__builtins__': None}, {
+                    'lhs': lhs,
+                    'rhs': rhs
+            }):
+                yield obj
         except (AttributeError, TypeError, ValueError) as err:
             raise sdb.CommandError(self.name, str(err))

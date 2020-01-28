@@ -16,13 +16,11 @@
 
 # pylint: disable=missing-docstring
 
-from typing import Iterable
-
 import drgn
 import sdb
 
 
-class Type(sdb.Command):
+class Type(sdb.SingleInputCommand):
     """
     Print the type of the objects passed in the pipeline
 
@@ -35,6 +33,5 @@ class Type(sdb.Command):
 
     names = ["type"]
 
-    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        for obj in objs:
-            yield obj.type_
+    def _call_one(self, obj: drgn.Object) -> None:
+        print(obj.type_)

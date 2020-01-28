@@ -136,6 +136,15 @@ class Command:
             print()
 
         if cls.input_type is not None:
+            #
+            # The pylint error below is a new false-positive because
+            # we initialize cls.input type as None by default. A
+            # future change could be that everything would work if
+            # we initialized it to the empty string instead of None
+            # as they have the same semantics as predicates in
+            # conditional control flow.
+            #
+            # pylint: disable=unsubscriptable-object
             it_text = f"This command accepts inputs of type 'void *',"
             if cls.input_type[-1] == '*':
                 it_text += f" and '{cls.input_type[:-1].strip()}',"
@@ -225,14 +234,105 @@ class Command:
 
     def _call(self,
               objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
-        # pylint: disable=missing-docstring
-        raise NotImplementedError
+        """
+        Implemented by the subclass.
+        """
+        raise NotImplementedError()
+
+    def __invalid_memory_objects_check(self, objs: Iterable[drgn.Object],
+                                       fatal: bool) -> Iterable[drgn.Object]:
+        """
+        A filter method for objects passed through the pipeline that
+        are backed by invalid memory. When `fatal` is set to True
+        we raise an error which will stop this control flow when
+        such objects are encountered. If `fatal` is False we just
+        print the error and go on.
+        """
+        for obj in objs:
+            try:
+                obj.read_()
+            except drgn.FaultError as err:
+                if obj.address_ is None:
+                    #
+                    # This is possible when the object was created `echo`.
+                    #
+                    err_msg = str(err)
+                else:
+                    err_msg = f"addresss {hex(obj.address_of_().value_())}"
+                err = CommandError(self.name,
+                                   f"invalid memory access: {err_msg}")
+                if fatal:
+                    raise err
+                print(err.text)
+                continue
+            yield obj
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         # pylint: disable=missing-docstring
-        result = self._call(objs)
-        if result is not None:
-            yield from result
+        #
+        # Even though we have __invalid_memory_objects_check() to
+        # ensure that the objects returned are valid, we still
+        # need to account for invalid accesses happening while
+        # the command is running.
+        #
+        try:
+            result = self._call(objs)
+            if result is not None:
+                #
+                # The whole point of the SingleInputCommands are that
+                # they don't stop executing in the first encounter of
+                # a bad dereference. That's why we check here whether
+                # the command that we are running is a subclass of
+                # SingleInputCommand and we set the `fatal` flag
+                # accordinly.
+                #
+                yield from self.__invalid_memory_objects_check(
+                    result, not issubclass(self.__class__, SingleInputCommand))
+        except drgn.FaultError as err:
+            raise CommandError(self.name, f"invalid memory access: {str(err)}")
+
+
+class SingleInputCommand(Command):
+    """
+    Commands that would like to process each input object independently
+    (without saving state between objects) can subclass from this class.
+    If a FaultError exception is thrown while processing one object,
+    processing will continue with the next object.
+
+    Note: A SingleInputCommand cannot also be a Locator, nor a
+          PrettyPrinter, nor a Walker currently.
+    """
+
+    def _call_one(self, obj: drgn.Object) -> Optional[Iterable[drgn.Object]]:
+        """
+        Implemented by the subclass.
+        """
+        raise NotImplementedError()
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        for obj in objs:
+            #
+            # Even though we have __invalid_memory_objects_check() to
+            # ensure that the objects returned are valid, we still
+            # need to account for invalid accesses happening while
+            # the command is running.
+            #
+            result = None
+            try:
+                result = self._call_one(obj)
+            except drgn.FaultError as err:
+                if obj.address_ is None:
+                    #
+                    # This is possible when the object was created `echo`.
+                    #
+                    err_msg = f"invalid memory access: {str(err)}"
+                else:
+                    err_msg = "invalid memory access while handling object "
+                    err_msg += "at address {hex(obj.address_of_().value_())}"
+                cmd_err = CommandError(self.name, err_msg)
+                print(cmd_err.text)
+            if result is not None:
+                yield from result
 
 
 class Cast(Command):
@@ -307,24 +407,9 @@ class Dereference(Command):
             if obj_type.type.type_name() == 'void':
                 raise CommandError(self.name,
                                    "cannot dereference a void pointer")
-            try:
-                #
-                # Note that under normal circumstances where there pointer
-                # is valid we wouldn't need the call to read_(), and we
-                # could leave that assignment as is. Unfortunately that
-                # wouldn't catch the cases where the pointer points to
-                # invalid memory (like NULL). Thus, calling read_() is
-                # required, so such cases throw a drgn.FaultError here
-                # within this command were it is ok to catch it.
-                #
-                dobj = drgn.Object(get_prog(),
-                                   type=obj.type_.type,
-                                   address=obj.value_()).read_()
-            except drgn.FaultError as err:
-                raise CommandError(
-                    self.name,
-                    f"invalid memory access at address {hex(obj.value_())}")
-            yield dobj
+            yield drgn.Object(get_prog(),
+                              type=obj.type_.type,
+                              address=obj.value_())
 
 
 class Address(Command):
