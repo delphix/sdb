@@ -67,7 +67,7 @@ class SymbolNotFoundError(CommandError):
 
     def __init__(self, command: str, symbol: str) -> None:
         self.symbol = symbol
-        super().__init__(command, "symbol not found: {symbol}")
+        super().__init__(command, f"symbol not found: {symbol}")
 
 
 class CommandArgumentsError(CommandError):
