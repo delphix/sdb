@@ -35,7 +35,7 @@ class CommandNotFoundError(Error):
 
     def __init__(self, command: str) -> None:
         self.command = command
-        super().__init__("cannot recognize command: {command}")
+        super().__init__(f"cannot recognize command: {command}")
 
 
 class CommandError(Error):
