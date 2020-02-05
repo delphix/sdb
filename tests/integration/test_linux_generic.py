@@ -22,9 +22,29 @@ import pytest
 from tests.integration.infra import repl_invoke, dump_exists, slurp_output_file
 
 POS_CMDS = [
+    # container_of
     "addr init_task | member comm | addr | container_of task_struct comm | cast void *",
+
+    # fget
+    "find_task 1 | fget 1 4",
+    "find_task 1 | fget 1 4 123123",
+
+    # find_task
+    "find_task 1",
+    "find_task 1 2",
+    "find_task 1 2 | member comm",
+
+    # lxhlist
     "addr init_task | member thread_pid.tasks[3] | lxhlist task_struct pid_links[3] | member comm",
+
+    # lxlist
     "addr modules | lxlist module list | member name",
+
+    # pid
+    "pid 1",
+    "pid 1 10 12437",
+
+    # slabs
     "slabs",
     "slabs -v",
     "slabs -s util",
@@ -32,6 +52,8 @@ POS_CMDS = [
     "slabs | pp",
     "slabs -s util | slabs",
     "slabs | head 2 | slabs",
+
+    # stacks
     "stacks",
     "stacks -a",
     "stacks -m zfs",
@@ -40,12 +62,14 @@ POS_CMDS = [
 ]
 
 STRIPPED_POS_CMDS = [
+    # dmesg
     "dmesg",
     "dmesg | pp",
     "dmesg | filter obj.level == 3 | dmesg",
 ]
 
 NEG_CMDS = [
+    # container_of
     "addr init_task | member comm | addr | container_of task_struct bogus_member | cast void *",
     "addr init_task | member comm | addr | container_of bogus_type comm | cast void *",
     # not passing pointer - skips addr command in pipe
@@ -54,13 +78,21 @@ NEG_CMDS = [
     "addr init_task | member comm | addr | container_of int comm | cast void *",
     # using an incorrect structure
     "addr init_task | member comm | addr | container_of pid comm | cast void *",
+
+    # lxhlist
     "addr init_task | member thread_pid.tasks[3] | lxhlist bogus_type pid_links[3] | member comm",
     "addr init_task | member thread_pid.tasks[3] | lxhlist task_struct bogus_member | member comm",
+
+    # lxlist
     "addr modules | lxlist bogus_type list | member name",
     "addr modules | lxlist module bogus_member | member name",
+
+    # slabs
     "slabs -s bogus",
     "slabs -o bogus",
     "slabs -s active_objs -o util",
+
+    # stacks
     "stacks -m bogus",
     "stacks -c bogus",
     "stacks -t bogus",
