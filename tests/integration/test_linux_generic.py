@@ -73,6 +73,12 @@ POS_CMDS = [
     "stacks -m zfs",
     "stacks -c spa_sync",
     "stacks -m zfs -c spa_sync",
+
+    # threads
+    "threads",
+    "threads | count",
+    'threads | filter obj.comm == "java" | threads',
+    "thread",
 ]
 
 STRIPPED_POS_CMDS = [
