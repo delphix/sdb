@@ -1,0 +1,13 @@
+enum zfs_case {
+	ZFS_CASE_SENSITIVE = 0,
+	ZFS_CASE_INSENSITIVE = 1,
+	ZFS_CASE_MIXED = 2,
+}
+typedef union {
+	iv_t e;
+	uint8_t b[8];
+} v_t
+union thread_union {
+	struct task_struct task;
+	unsigned long stack[2048];
+}

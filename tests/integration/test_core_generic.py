@@ -107,6 +107,11 @@ POS_CMDS = [
     "spa | head 1 | member spa_name[1] | print -cr",
     "spa | head 1 | deref | print -rs",
     "spa | head 1 | deref | print -Rs",
+
+    # ptype
+    "ptype spa_t",
+    "ptype spa vdev",
+    "ptype zfs_case v_t thread_union",
 ]
 
 NEG_CMDS = [
@@ -149,6 +154,9 @@ NEG_CMDS = [
     "spa | member spa_zio_taskq[0][0].stqs_taskq->",
     # member - incomplete expression
     "spa | member spa_zio_taskq[0][0].stqs_taskq.",
+
+    # ptype - bogus type
+    "ptype bogus_t",
 ]
 
 CMD_TABLE = POS_CMDS + NEG_CMDS
