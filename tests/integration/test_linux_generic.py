@@ -55,6 +55,9 @@ POS_CMDS = [
     "pid 1",
     "pid 1 10 12437",
 
+    # rbtree
+    "addr vmap_area_root | rbtree vmap_area rb_node",
+
     # slabs
     "slabs",
     "slabs -v",
@@ -107,6 +110,10 @@ NEG_CMDS = [
     'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 3',
     'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 100',
     'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 0 2 1',
+
+    # rbtree
+    "addr vmap_area_root | rbtree bogus_type rb_node",
+    "addr vmap_area_root | rbtree vmap_area bogus_member",
 
     # slabs
     "slabs -s bogus",
