@@ -22,6 +22,11 @@ import pytest
 from tests.integration.infra import repl_invoke, dump_exists, slurp_output_file
 
 POS_CMDS = [
+    # addr
+    "addr spa_namespace_avl",
+    "addr spa_namespace_avl | deref",
+    "addr spa_namespace_avl | deref | addr",
+
     # array
     "spa | member spa_zio_taskq[0][0].stqs_taskq | array 2",
     "zfs_dbgmsg | head 1 | member zdm_msg | array",
@@ -115,6 +120,9 @@ POS_CMDS = [
 ]
 
 NEG_CMDS = [
+    # addr
+    "addr bogus",
+
     # array needs number of elements for pointer arrays
     "spa | member spa_zio_taskq[0][0].stqs_taskq | array",
     # array passed non-pointer type
