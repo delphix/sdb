@@ -25,6 +25,17 @@ POS_CMDS = [
     # container_of
     "addr init_task | member comm | addr | container_of task_struct comm | cast void *",
 
+    # cpu_counter_sum
+    "addr vm_committed_as | cpu_counter_sum",
+    "addr tcp_orphan_count | cpu_counter_sum",
+    "addr tcp_sockets_allocated | cpu_counter_sum",
+
+    # percpu
+    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu',
+    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 0',
+    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 1',
+    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 0 1',
+
     # fget
     "find_task 1 | fget 1 4",
     "find_task 1 | fget 1 4 123123",
@@ -44,6 +55,9 @@ POS_CMDS = [
     "pid 1",
     "pid 1 10 12437",
 
+    # rbtree
+    "addr vmap_area_root | rbtree vmap_area rb_node",
+
     # slabs
     "slabs",
     "slabs -v",
@@ -59,6 +73,12 @@ POS_CMDS = [
     "stacks -m zfs",
     "stacks -c spa_sync",
     "stacks -m zfs -c spa_sync",
+
+    # threads
+    "threads",
+    "threads | count",
+    'threads | filter obj.comm == "java" | threads',
+    "thread",
 ]
 
 STRIPPED_POS_CMDS = [
@@ -79,6 +99,10 @@ NEG_CMDS = [
     # using an incorrect structure
     "addr init_task | member comm | addr | container_of pid comm | cast void *",
 
+    # cpu_counter_sum
+    "echo 0x0 | cpu_counter_sum",
+    "addr spa_namespace_avl | cpu_counter_sum",
+
     # lxhlist
     "addr init_task | member thread_pid.tasks[3] | lxhlist bogus_type pid_links[3] | member comm",
     "addr init_task | member thread_pid.tasks[3] | lxhlist task_struct bogus_member | member comm",
@@ -86,6 +110,16 @@ NEG_CMDS = [
     # lxlist
     "addr modules | lxlist bogus_type list | member name",
     "addr modules | lxlist module bogus_member | member name",
+
+    # percpu - not valid CPU number
+    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 2',
+    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 3',
+    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 100',
+    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 0 2 1',
+
+    # rbtree
+    "addr vmap_area_root | rbtree bogus_type rb_node",
+    "addr vmap_area_root | rbtree vmap_area bogus_member",
 
     # slabs
     "slabs -s bogus",
