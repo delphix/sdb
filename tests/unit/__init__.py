@@ -44,8 +44,8 @@ def create_struct_type(name: str, member_names: List[str],
     struct_size, bit_offset = 0, 0
     member_list = []
     for member_name, type_ in zip(member_names, member_types):
-        member_tuple = (type_, member_name, bit_offset, 0)
-        member_list.append(member_tuple)
+        member_type = drgn.TypeMember(type_, member_name, bit_offset, 0)
+        member_list.append(member_type)
         if type_.kind == drgn.TypeKind.ARRAY:
             bit_offset += 8 * type_.length * type_.type.size
             struct_size += type_.length * type_.type.size
