@@ -107,3 +107,6 @@ venv.bak/
 tests/integration/data/dump.*
 tests/integration/data/vmlinux-*
 tests/integration/data/mods/
+
+# vim
+*.swp
