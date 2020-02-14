@@ -10,7 +10,7 @@ git clone https://github.com/ptesarik/libkdumpfile.git
 
 cd libkdumpfile
 autoreconf -fi
-./configure --with-python=$(which python3)
+./configure --with-python=no
 make
 sudo make install
 cd -
