@@ -217,6 +217,7 @@ class Command:
 
     def __init__(self, args: str = "", name: str = "_") -> None:
         self.name = name
+        self.isfirst = False
         self.islast = False
 
         self.parser = type(self)._init_parser(name)
@@ -681,9 +682,12 @@ class Locator(Command):
             baked[type_canonicalize_name(
                 method.input_typename_handled)] = method
 
-        has_input = False
+        if self.isfirst:
+            assert not objs
+            yield from self.no_input()
+            return
+
         for i in objs:
-            has_input = True
             obj_type_name = type_canonical_name(i.type_)
 
             # try subclass-specified input types first, so that they can
@@ -711,8 +715,6 @@ class Locator(Command):
             # error
             raise CommandError(
                 self.name, 'no handler for input of type {}'.format(i.type_))
-        if not has_input:
-            yield from self.no_input()
 
     def _call(self,
               objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
