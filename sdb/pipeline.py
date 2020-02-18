@@ -143,6 +143,7 @@ def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
             # a CommandArgumentsError.
             raise CommandArgumentsError(name)
 
+    pipeline[0].isfirst = True
     pipeline[-1].islast = True
 
     # If we have a !, redirect stdout to a shell process. This avoids

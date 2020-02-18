@@ -70,6 +70,8 @@ POS_CMDS = [
     "spa rpool | filter obj.spa_syncing_txg <= 1624 | member spa_name",
     "spa rpool | filter obj.spa_syncing_txg < 1624 | member spa_name",
     "spa rpool | filter obj.spa_syncing_txg > 1624 | member spa_name",
+    # locator that receives no input from a filter
+    'thread | filter obj.comm == \"bogus\" | thread',
 
     # member - generic
     "member no_object",
