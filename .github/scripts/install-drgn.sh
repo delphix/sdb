@@ -4,7 +4,7 @@
 # These are build requirements of "drgn"; if we don't install these, the
 # build/install of "drgn" will fail below.
 #
-sudo apt-get install bison flex libelf-dev libdw-dev libomp-dev
+sudo apt-get install bison flex libelf-dev libdw-dev libomp5 libomp-dev
 
 git clone https://github.com/osandov/drgn.git
 
