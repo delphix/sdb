@@ -82,6 +82,10 @@ POS_CMDS = [
     "stacks -m zfs",
     "stacks -c spa_sync",
     "stacks -m zfs -c spa_sync",
+    "stacks -m zfs -c zthr_procedure",
+    'threads | filter obj.comm == "java" | stack',
+    "stacks -m zfs | count",
+    "echo 0xffffa089669edc00 | stack",
 
     # threads
     "threads",
@@ -139,6 +143,7 @@ NEG_CMDS = [
     "stacks -m bogus",
     "stacks -c bogus",
     "stacks -t bogus",
+    "stacks -m bogus | count",
 ]
 
 CMD_TABLE = POS_CMDS + STRIPPED_POS_CMDS + NEG_CMDS
