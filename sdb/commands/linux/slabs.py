@@ -14,6 +14,11 @@
 # limitations under the License.
 #
 
+#
+# line-too-long is disabled because of the examples
+# added in slub_cache command.
+#
+# pylint: disable=line-too-long
 # pylint: disable=missing-docstring
 
 import argparse
@@ -197,3 +202,44 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
             table.add_row(row_dict[sort_field], row_dict)
         table.print_(print_headers=self.args.H,
                      reverse_sort=(sort_field not in ["name", "address"]))
+
+
+class SlubCacheWalker(sdb.Walker):
+    """
+    Walk though all allocated entries in a slub cache.
+
+    EXAMPLES
+        Walk through all the objects in the TCP cache:
+
+            sdb> slabs | filter obj.name == "TCP" | walk
+            (void *)0xffffa08888af0000
+            (void *)0xffffa08888af0880
+            (void *)0xffffa08888af1100
+            (void *)0xffffa08888af1980
+            (void *)0xffffa08888af2200
+
+        Walk though all the ZIOs in the system and print the pool
+        that each ZIO belongs to:
+
+            sdb> slabs | filter obj.name == "zio_cache" | slub_cache | cast zio_t * | member io_spa.spa_name
+            (char [256])"data"
+            (char [256])"rpool"
+            (char [256])"rpool"
+            (char [256])"rpool"
+            (char [256])"rpool"
+            (char [256])"rpool"
+
+    NOTES
+        This command is not expected to work well for hot caches
+        in live systems. The command is implemented using the
+        lowest-common denominator functionality provided by the
+        default Linux kernel config file that most distros use
+        and thus is very inefficient on traversing the entries
+        and slabs of each cache.
+    """
+
+    names = ["slub_cache"]
+    input_type = "struct kmem_cache *"
+
+    def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
+        yield from slub.for_each_object_in_cache(obj)
