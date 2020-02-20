@@ -17,7 +17,7 @@
 # pylint: disable=missing-docstring
 
 import argparse
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, List, Tuple
 from collections import defaultdict
 
 import drgn
@@ -27,34 +27,11 @@ from drgn.helpers.linux.pid import for_each_task
 import sdb
 
 
-#
-# Note: This is a rudimentary version of what the command could/should be.
-#
-# On the high-level, it could be a `Locator`, or something similar, where
-# objects could be passed as input from the pipeline dispatching different
-# methods depending on the type of object. E.g. input could be a namespace
-# object and we print all the task structs within it, or it could be just
-# a list of task structs passed from a previous command for filtering.
-# Another option would be to decouple the stack listing, filtering, and
-# pretty-printing functionality to independent SDB commands.
-#
-# There are also other lower-level usability improvements like supporting
-# filtering by `function+offset` with the `-c` option, or by namespace ID
-# using `-n <ID>`.
-#
-# Finally, the command lacks any support for userland targets.
-#
-# SDB is still in its early stages and hasn't been used enough for us to
-# be clear which use cases really matter. In the meantime if we don't have
-# anything that provides this functionality it won't be easy to do this
-# exploration. The version below is a good enough for the time being
-# providing some basic functionality and being our tracer bullet for
-# future iterations.
-#
-class Stacks(sdb.Command):
+class Stacks(sdb.Locator, sdb.PrettyPrinter):
     """
-    Print the stack traces for the active tasks / threads
+    Print the stack traces for active threads (task_struct)
 
+    DESCRIPTION
         By default, the command will aggregate similar call stacks
         printing them in descending order of frequency. The output
         includes the `struct task_struct` address, thread state, and
@@ -64,8 +41,11 @@ class Stacks(sdb.Command):
         those that match a given thread state, containing a given
         function, or belonging to a given kernel module.
 
-        EXAMPLES
-            Print the call stacks for all tasks
+        The command returns all task_stuct structs that matched the
+        filter.
+
+    EXAMPLES
+        Print the call stacks for all tasks
 
             sdb> stacks
             TASK_STRUCT        STATE             COUNT
@@ -85,47 +65,89 @@ class Stacks(sdb.Command):
                               ret_from_fork+0x35
             ...
 
-            Print stacks containing functions from the zfs module
+        Print stacks containing functions from the zfs module
 
-                sdb> stacks -m zfs
-                TASK_STRUCT        STATE             COUNT
-                ==========================================
-                0xffff952130515940 INTERRUPTIBLE         1
-                                  __schedule+0x24e
-                                  schedule+0x2c
-                                  cv_wait_common+0x11f
-                                  __cv_wait_sig+0x15
-                                  zthr_procedure+0x51
-                                  thread_generic_wrapper+0x74
-                                  kthread+0x121
-                                  ret_from_fork+0x35
-                ...
+            sdb> stacks -m zfs
+            TASK_STRUCT        STATE             COUNT
+            ==========================================
+            0xffff952130515940 INTERRUPTIBLE         1
+                              __schedule+0x24e
+                              schedule+0x2c
+                              cv_wait_common+0x11f
+                              __cv_wait_sig+0x15
+                              zthr_procedure+0x51
+                              thread_generic_wrapper+0x74
+                              kthread+0x121
+                              ret_from_fork+0x35
+            ...
 
-            Print stacks containing the l2arc_feed_thread function
+        Print stacks containing the l2arc_feed_thread function
 
-                sdb> stacks -c l2arc_feed_thread
-                TASK_STRUCT        STATE             COUNT
-                ==========================================
-                0xffff9521b3f43b80 INTERRUPTIBLE         1
-                                  __schedule+0x24e
-                                  schedule+0x2c
-                                  schedule_timeout+0x15d
-                                  __cv_timedwait_common+0xdf
-                                  __cv_timedwait_sig+0x16
-                                  l2arc_feed_thread+0x66
-                                  thread_generic_wrapper+0x74
-                                  kthread+0x121
-                                  ret_from_fork+0x35
+            sdb> stacks -c l2arc_feed_thread
+            TASK_STRUCT        STATE             COUNT
+            ==========================================
+            0xffff9521b3f43b80 INTERRUPTIBLE         1
+                              __schedule+0x24e
+                              schedule+0x2c
+                              schedule_timeout+0x15d
+                              __cv_timedwait_common+0xdf
+                              __cv_timedwait_sig+0x16
+                              l2arc_feed_thread+0x66
+                              thread_generic_wrapper+0x74
+                              kthread+0x121
+                              ret_from_fork+0x35
 
-            Print stacks of threads in the RUNNING state
+        Print stacks of threads in the RUNNING state
 
-                sdb> stacks -t RUNNING
-                TASK_STRUCT        STATE             COUNT
-                ==========================================
-                0xffff95214ff31dc0 RUNNING               1
+            sdb> stacks -t RUNNING
+            TASK_STRUCT        STATE             COUNT
+            ==========================================
+            0xffff95214ff31dc0 RUNNING               1
+
+        Count the number of stacks in the zfs module
+
+           sdb> stacks -m zfs | count
+           (unsigned long long)12
+
+        Print stacks of the threads started by the zthr command
+
+            sdb> threads | filter obj.comm == "zthr_procedure" | stack
+            TASK_STRUCT        STATE             COUNT
+            ==========================================
+            0xffff9c7e6c268000 INTERRUPTIBLE         5
+                              __schedule+0x24e
+                              schedule+0x2c
+                              cv_wait_common+0x118
+                              __cv_wait_sig+0x15
+                              zthr_procedure+0x45
+                              thread_generic_wrapper+0x74
+                              kthread+0x121
+                              ret_from_fork+0x1f
+
+            0xffff9c7e6c1f8000 INTERRUPTIBLE         1
+                              __schedule+0x24e
+                              schedule+0x2c
+                              schedule_hrtimeout_range_clock+0xb9
+                              schedule_hrtimeout_range+0x13
+                              __cv_timedwait_hires+0x117
+                              cv_timedwait_hires_common+0x4b
+                              cv_timedwait_sig_hires+0x14
+                              zthr_procedure+0x96
+                              thread_generic_wrapper+0x74
+                              kthread+0x121
+                              ret_from_fork+0x1f
+
     """
 
-    names = ["stacks"]
+    names = ["stacks", "stack"]
+    input_type = "struct task_struct *"
+    output_type = "struct task_struct *"
+
+    def __init__(self, args: str = "", name: str = "_") -> None:
+        super().__init__(args, name)
+        self.mod_start, self.mod_end = 0, 0
+        self.func_start, self.func_end = 0, 0
+        self.match_state = ""
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
@@ -190,6 +212,40 @@ class Stacks(sdb.Command):
         exit_state = task.exit_state.value_()
         return Stacks.TASK_STATES[(state | exit_state) & 0x7f]
 
+    @staticmethod
+    def resolve_state(tstate: str) -> str:
+        tstate = tstate.upper()
+        if tstate in Stacks.TASK_STATE_SHORTCUTS:
+            return Stacks.TASK_STATES[Stacks.TASK_STATE_SHORTCUTS[tstate]]
+        return tstate
+
+    @staticmethod
+    def get_frame_pcs(task: drgn.Object) -> List[int]:
+        frame_pcs = []
+        try:
+            for frame in sdb.get_prog().stack_trace(task):
+                frame_pcs.append(frame.pc)
+        except ValueError:
+            #
+            # Unwinding the stack of a running/runnable task will
+            # result in an exception. Since we expect some tasks to
+            # be running, we silently ignore this case, and move on.
+            #
+            # Unfortunately, the exception thrown in this case is a
+            # generic "ValueError" exception, so we may wind up
+            # masking other "ValueError" exceptions that are not due
+            # to unwinding the stack of a running task.
+            #
+            # We can't check the state of the task here, and verify
+            # it's in the "R" state, since that state can change in
+            # between the point where the "ValueError" exception was
+            # originally raised, and here where we'd verify the
+            # state of the task; i.e. it could have concurrently
+            # transitioned from running to some other state.
+            #
+            pass
+        return frame_pcs
+
     #
     # Unfortunately the drgn Symbol API does not specify the namelist
     # that a symbol came from. As a result, we created the following
@@ -216,120 +272,107 @@ class Stacks(sdb.Command):
                         mod.core_layout.size.value_())
         return (-1, 0)
 
-    def validate_args(self, args: argparse.Namespace) -> None:
-        if args.function:
-            try:
-                func = sdb.get_object(args.function)
-            except KeyError:
-                raise sdb.CommandError(
-                    self.name,
-                    "symbol '{:s}' does not exist".format(args.function))
-            if func.type_.kind != drgn.TypeKind.FUNCTION:
-                raise sdb.CommandError(
-                    self.name, "'{:s}' is not a function".format(args.function))
-
-        task_states = Stacks.TASK_STATES.values()
-        task_states_lowercase = list(map(lambda x: x.lower(), task_states))
-        state_shortcuts = Stacks.TASK_STATE_SHORTCUTS
-        if args.tstate and not args.tstate.lower(
-        ) in task_states_lowercase and not args.tstate in state_shortcuts:
-            raise sdb.CommandError(
-                self.name,
-                "'{:s}' is not a valid task state (acceptable states: {:s})".
-                format(args.tstate, ", ".join(task_states)))
-
-        if args.module and Stacks.find_module_memory_segment(
-                args.module)[0] == -1:
-            raise sdb.CommandError(
-                self.name,
-                "module '{:s}' doesn't exist or isn't currently loaded".format(
-                    args.module))
-
-    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        # pylint: disable=too-many-locals
-        # pylint: disable=too-many-branches
-        # pylint: disable=too-many-statements
-
+    def validate_context(self) -> None:
         #
-        # As the exception explains the code that follows this statement
-        # only works for linux kernel targets (crash dumps or live systems).
-        # When support for userland is added we can factor the kernel code
-        # that follows into its own function and switch to the correct
+        # This implementation only works for linux kernel targets
+        # (crash dumps or live systems). When support for userland is added we can
+        # refactor the kernel code into its own function and switch to the correct
         # codepath depending on the target.
         #
         if not sdb.get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL:
             raise sdb.CommandError(self.name,
                                    "userland targets are not supported yet")
-        self.validate_args(self.args)
+        self.validate_args()
 
-        #
-        # Resolve TSTATE shortcut and/or sanitize it to standard uppercase
-        # notation if it exists.
-        #
+    def validate_args(self) -> None:
+        if self.args.function:
+            try:
+                #
+                # It would be simpler to resolve the symbol from the function
+                # name directly but we use the address due to osandov/drgn#47.
+                #
+                func = sdb.get_object(self.args.function)
+                sym = sdb.get_symbol(func.address_of_())
+            except KeyError:
+                raise sdb.CommandError(
+                    self.name, f"symbol '{self.args.function}' does not exist")
+            if func.type_.kind != drgn.TypeKind.FUNCTION:
+                raise sdb.CommandError(
+                    self.name, f"'{self.args.function}' is not a function")
+            self.func_start = sym.address
+            self.func_end = self.func_start + sym.size
+
         if self.args.tstate:
-            if self.args.tstate in Stacks.TASK_STATE_SHORTCUTS:
-                self.args.tstate = Stacks.TASK_STATES[
-                    Stacks.TASK_STATE_SHORTCUTS[self.args.tstate]]
-            else:
-                self.args.tstate = self.args.tstate.upper()
+            self.match_state = Stacks.resolve_state(self.args.tstate)
+            task_states = Stacks.TASK_STATES.values()
+            if self.match_state not in task_states:
+                valid_states = ", ".join(task_states)
+                raise sdb.CommandError(
+                    self.name, f"'{self.args.tstate}' is not a valid task state"
+                    f" (acceptable states: {valid_states})")
 
-        mod_start, mod_end = -1, -1
         if self.args.module:
-            mod_start, mod_size = Stacks.find_module_memory_segment(
+            if Stacks.find_module_memory_segment(self.args.module)[0] == -1:
+                raise sdb.CommandError(
+                    self.name,
+                    f"module '{self.args.module}' doesn't exist or isn't currently loaded"
+                )
+            self.mod_start, mod_size = Stacks.find_module_memory_segment(
                 self.args.module)
-            assert mod_start != -1
-            mod_end = mod_start + mod_size
+            assert self.mod_start != -1
+            self.mod_end = self.mod_start + mod_size
 
+    def match_stack(self, task: drgn.Object) -> bool:
+        if self.args.tstate and self.match_state != Stacks.task_struct_get_state(
+                task):
+            return False
+
+        if not (self.args.module or self.args.function):
+            return True
+
+        mod_match, func_match = not self.args.module, not self.args.function
+        for frame_pc in Stacks.get_frame_pcs(task):
+            if not mod_match and self.mod_start <= frame_pc < self.mod_end:
+                mod_match = True
+
+            if not func_match and self.func_start <= frame_pc < self.func_end:
+                func_match = True
+
+            if mod_match and func_match:
+                return True
+        return False
+
+    def print_header(self):
         header = "{:<18} {:<16s}".format("TASK_STRUCT", "STATE")
         if not self.args.all:
             header += " {:>6s}".format("COUNT")
         print(header)
         print("=" * 42)
 
-        #
-        # We inspect and group the tasks by recording their state and
-        # stack frames once in the following loop. We do this because
-        # on live systems state can change under us, thus running
-        # something like sdb.get_prog().stack_trace(task) twice (once for
-        # grouping and once for printing) could yield different stack
-        # traces resulting into misleading output.
-        #
-        stack_aggr: Dict[Any, List[drgn.Object]] = defaultdict(list)
-        for task in for_each_task(sdb.get_prog()):
-            stack_key = [Stacks.task_struct_get_state(task)]
-            try:
-                for frame in sdb.get_prog().stack_trace(task):
-                    stack_key.append(frame.pc)
-            except ValueError:
-                #
-                # Unwinding the stack of a running/runnable task will
-                # result in an exception. Since we expect some tasks to
-                # be running, we silently ignore this case, and move on.
-                #
-                # Unfortunately, the exception thrown in this case is a
-                # generic "ValueError" exception, so we may wind up
-                # masking other "ValueError" exceptions that are not due
-                # to unwinding the stack of a running task.
-                #
-                # We can't check the state of the task here, and verify
-                # it's in the "R" state, since that state can change in
-                # between the point where the "ValueError" exception was
-                # originally raised, and here where we'd verify the
-                # state of the task; i.e. it could have concurrently
-                # transitioned from running to some other state.
-                #
-                pass
+    #
+    # De-duplicate the objs (task_structs) using a dictionary indexed by
+    # task state and program counters. Return a collection sorted by number
+    # of tasks per stack.
+    #
+    # Note: we disabled pyline C0330 due to https://github.com/PyCQA/pylint/issues/289
+    @staticmethod
+    def aggregate_stacks(
+        objs: Iterable[drgn.Object]  # pylint: disable=C0330
+    ) -> List[Tuple[Tuple[str, Tuple[int, ...]], List[drgn.Object]]]:
+        stack_aggr: Dict[Tuple[str, Tuple[int, ...]],
+                         List[drgn.Object]] = defaultdict(list)
+        for task in objs:
+            stack_key = (Stacks.task_struct_get_state(task),
+                         tuple(Stacks.get_frame_pcs(task)))
+            stack_aggr[stack_key].append(task)
+        return sorted(stack_aggr.items(), key=lambda x: len(x[1]), reverse=True)
 
-            stack_aggr[tuple(stack_key)].append(task)
-
-        for stack_key, tasks in sorted(stack_aggr.items(),
-                                       key=lambda x: len(x[1]),
-                                       reverse=True):
-            task_state = stack_key[0]
-            if self.args.tstate and self.args.tstate != task_state:
-                continue
-
+    def print_stacks(self, objs: Iterable[drgn.Object]) -> None:
+        self.print_header()
+        for stack_key, tasks in Stacks.aggregate_stacks(objs):
             stacktrace_info = ""
+            task_state = stack_key[0]
+
             if self.args.all:
                 for task in tasks:
                     stacktrace_info += "{:<18s} {:<16s}\n".format(
@@ -338,39 +381,22 @@ class Stacks(sdb.Command):
                 stacktrace_info += "{:<18s} {:<16s} {:6d}\n".format(
                     hex(tasks[0].value_()), task_state, len(tasks))
 
-            mod_match, func_match = False, False
-
-            #
-            # Note on the type-check being ignored:
-            # The original `stack_key` type is a list where the first
-            # element is a string and the rest of them are integers
-            # but this is not easily expressed in mypy, thus we ignore
-            # the assignment error below.
-            #
-            frame_pcs: List[int] = stack_key[1:]  #type: ignore[assignment]
+            frame_pcs: Tuple[int, ...] = stack_key[1]
             for frame_pc in frame_pcs:
-                if mod_start != -1 and mod_start <= frame_pc < mod_end:
-                    mod_match = True
-
                 try:
                     sym = sdb.get_symbol(frame_pc)
-                    func, offset = sym.name, frame_pc - sym.address
-                    if self.args.function and self.args.function == func:
-                        func_match = True
+                    func = sym.name
+                    offset = frame_pc - sym.address
                 except LookupError:
-                    func, offset = hex(frame_pc), 0x0
-
-                #
-                # As a potential future item, we may want to print
-                # the frame with the module where the pc/function
-                # belongs to. For example:
-                #     txg_sync_thread+0x15e [zfs]
-                #
+                    func = hex(frame_pc)
+                    offset = 0x0
                 stacktrace_info += "{:18s}{}+{}\n".format("", func, hex(offset))
-
-            if mod_start != -1 and not mod_match:
-                continue
-            if self.args.function and not func_match:
-                continue
             print(stacktrace_info)
-        return []
+
+    def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
+        self.validate_context()
+        self.print_stacks(filter(self.match_stack, objs))
+
+    def no_input(self) -> Iterable[drgn.Object]:
+        self.validate_context()
+        yield from filter(self.match_stack, for_each_task(sdb.get_prog()))
