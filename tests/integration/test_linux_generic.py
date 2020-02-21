@@ -67,6 +67,15 @@ POS_CMDS = [
     "slabs -s util | slabs",
     "slabs | head 2 | slabs",
 
+    # slub
+    'slabs | filter obj.name == "zio_cache" | slub_cache',
+    'slabs | filter obj.name == "zio_cache" | walk',
+    'slabs | filter obj.name == "zio_cache" | slub_cache | count',
+    'slabs | filter obj.name == "zio_cache" | slub_cache | cast zio_t * | member io_spa.spa_name',
+    # slub - expected inconsistent freelist test
+    # (still a positive tests because we want to keep going besides inconsistencies)
+    'slabs | filter obj.name == "UNIX" | slub_cache | count',
+
     # stacks
     "stacks",
     "stacks -a",
