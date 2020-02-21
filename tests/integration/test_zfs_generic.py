@@ -37,7 +37,10 @@ CMD_TABLE = [
     "spa | vdev | metaslab | member ms_allocatable.rt_root | zfs_btree",
     "zfs_dbgmsg",
     "zfs_dbgmsg | tail 5 | zfs_dbgmsg",
-]
+    "dbuf -l 1",
+    "dbuf | dbuf -l 1",
+    'dbuf | dbuf -l 1 | head | dbuf'
+] # yapf: disable
 
 
 @pytest.mark.skipif(not dump_exists(),

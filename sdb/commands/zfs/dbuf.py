@@ -83,7 +83,7 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
     def pretty_print(self, dbufs):
         print("{:>20} {:>8} {:>4} {:>8} {:>5} {}".format(
             "addr", "object", "lvl", "blkid", "holds", "os"))
-        for dbuf in dbufs:
+        for dbuf in filter(self.argfilter, dbufs):
             print("{:>20} {:>8d} {:>4d} {:>8d} {:>5d} {}".format(
                 hex(dbuf), int(dbuf.db.db_object), int(dbuf.db_level),
                 int(dbuf.db_blkid), int(dbuf.db_holds.rc_count),
@@ -114,6 +114,10 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
     @sdb.InputHandler('dnode_t*')
     def from_dnode(self, dn: drgn.Object) -> Iterable[drgn.Object]:
         yield from filter(self.argfilter, self.all_dnode_dbufs(dn))
+
+    @sdb.InputHandler(input_type)
+    def from_dbuf(self, dbuf: drgn.Object) -> Iterable[drgn.Object]:
+        yield from filter(self.argfilter, [dbuf])
 
     @staticmethod
     def all_dbufs() -> Iterable[drgn.Object]:
