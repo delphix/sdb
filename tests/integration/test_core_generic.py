@@ -105,7 +105,7 @@ POS_CMDS = [
     "addr spa_namespace_avl | print -n",
     "addr spa_namespace_avl | print -r",
     "addr spa_namespace_avl | print -nr",
-    "addr spa_namespace_avl | print -R",
+    "addr spa_namespace_avl | print --RAW",
     "addr spa_namespace_avl | deref | print",
     "addr spa_namespace_avl | print -d",
     "addr spa_namespace_avl zfs_dbgmsgs | print -d",
@@ -113,7 +113,7 @@ POS_CMDS = [
     "spa | head 1 | member spa_name[1] | print -c",
     "spa | head 1 | member spa_name[1] | print -cr",
     "spa | head 1 | deref | print -rs",
-    "spa | head 1 | deref | print -Rs",
+    "spa | head 1 | deref | print --RAW -s",
 
     # ptype
     "ptype spa_t",
