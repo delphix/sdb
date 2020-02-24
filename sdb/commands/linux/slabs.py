@@ -236,6 +236,13 @@ class SlubCacheWalker(sdb.Walker):
         default Linux kernel config file that most distros use
         and thus is very inefficient on traversing the entries
         and slabs of each cache.
+
+        Another thing to keep in mind is Linux SLUB allocator's
+        merging behavior. Some systems are tuned to merge together
+        caches whose entries are of the same size where it makes
+        sense. As a result, when using this walker the user may
+        run into entries that don't make sense given the cache's
+        name.
     """
 
     names = ["slub_cache"]
