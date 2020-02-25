@@ -117,7 +117,7 @@ def type_canonical_name(t: drgn.Type) -> str:
     """
     Return the "canonical name" of this type.  See type_canonicalize().
     """
-    return type_canonicalize(t).type_name()
+    return str(type_canonicalize(t).type_name())
 
 
 def type_canonicalize_name(type_name: str) -> str:
@@ -137,7 +137,7 @@ def type_canonicalize_size(t: Union[drgn.Type, str]) -> int:
     else:
         assert isinstance(t, drgn.Type)
         type_ = t
-    return type_canonicalize(type_).size
+    return int(type_canonicalize(type_).size)
 
 
 def type_equals(a: drgn.Type, b: drgn.Type) -> bool:

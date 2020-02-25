@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Delphix
+# Copyright 2020 Delphix
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,19 +14,12 @@
 # limitations under the License.
 #
 """
-Common String and Number formatting functions.
+Common C macros for bit-manipulation and alignment.
 """
 
-from typing import Union
 
-
-def size_nicenum(num: Union[int, float]) -> str:
+def p2roundup(val: int, align: int) -> int:
     """
-    Return `num` bytes as a human-readable string.
+    Round up `val` to the next `align` boundary.
     """
-    num = float(num)
-    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
-        if num < 1024.0:
-            return f"{num:.1f}{unit}"
-        num /= 1024.0
-    return f"{num:.1f}YB"
+    return ((val - 1) | (align - 1)) + 1

@@ -25,6 +25,7 @@ import drgn
 import sdb
 from sdb.commands.internal.fmt import size_nicenum
 from sdb.commands.internal.table import Table
+from sdb.commands.linux.internal import slub_helpers as slub
 from sdb.commands.spl.internal import kmem_helpers as kmem
 
 
@@ -97,12 +98,12 @@ class SplKmemCaches(sdb.Locator, sdb.PrettyPrinter):
                 raise sdb.CommandInvalidInputError(
                     self.name, f"'{self.args.s}' is not a valid field")
             yield from sorted(
-                kmem.list_for_each_spl_kmem_cache(),
+                kmem.for_each_spl_kmem_cache(),
                 key=SplKmemCaches.FIELDS[self.args.s],
                 reverse=(self.args.s not in
                          SplKmemCaches.DEFAULT_INCREASING_ORDER_FIELDS))
         else:
-            yield from kmem.list_for_each_spl_kmem_cache()
+            yield from kmem.for_each_spl_kmem_cache()
 
     FIELDS = {
         "address": lambda obj: hex(obj.value_()),
@@ -203,3 +204,35 @@ class SplKmemCaches(sdb.Locator, sdb.PrettyPrinter):
             table.add_row(row_dict[sort_field], row_dict)
         table.print_(print_headers=self.args.H,
                      reverse_sort=(sort_field not in ["name", "address"]))
+
+
+class SplKmemCacheWalker(sdb.Walker):
+    """
+    Walk through all allocated entries of an spl_kmem_cache.
+
+    DESCRIPTION
+        Walk through all allocated entries of an spl_kmem_cache. If
+        the cache is backed by a SLUB cache then iteration will be
+        delegated to the appropriate walker (keep in mind that in
+        this case not all objects may be part of the actual SPL
+        cache due to the SLUB allocator in Linux merging objects).
+
+    EXAMPLES
+        Print all the objects in the ddt_cache:
+
+            sdb> spl_kmem_caches | filter obj.skc_name == "ddt_cache" | spl_cache
+            (void *)0xffffa08937e80040
+            (void *)0xffffa08937e86180
+            (void *)0xffffa08937e8c2c0
+            (void *)0xffffa08937e92400
+            ...
+    """
+
+    names = ["spl_cache"]
+    input_type = "spl_kmem_cache_t *"
+
+    def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
+        if kmem.backed_by_linux_cache(obj):
+            yield from slub.for_each_object_in_cache(obj.skc_linux_cache)
+        else:
+            yield from kmem.for_each_object_in_spl_cache(obj)
