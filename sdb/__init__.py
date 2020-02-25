@@ -73,6 +73,7 @@ __all__ = [
     'type_canonical_name',
     'type_canonicalize',
     'type_canonicalize_name',
+    'type_canonicalize_size',
     'type_equals',
 ]
 

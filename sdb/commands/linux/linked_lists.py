@@ -124,3 +124,11 @@ class LxHList(sdb.Command):
                 yield from hlist_for_each_entry(sname, obj, self.args.member)
             except LookupError as err:
                 raise sdb.CommandError(self.name, str(err))
+
+
+def is_list_empty(l: drgn.Object) -> bool:
+    """
+    True if list is empty, False otherwise.
+    """
+    assert sdb.type_canonical_name(l.type_) == 'struct list_head'
+    return int(l.address_of_().value_()) == int(l.next.value_())

@@ -16,6 +16,7 @@
 
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
+# pylint: disable=line-too-long
 
 from typing import Any
 
@@ -23,11 +24,24 @@ import pytest
 from tests.integration.infra import repl_invoke, dump_exists, slurp_output_file
 
 CMD_TABLE = [
+    # avl walker
     "addr spa_namespace_avl | avl",
     "addr spa_namespace_avl | walk",
     "addr arc_mru | member [0].arcs_list[1] | walk | head",
+
+    # multilist walker
     "addr arc_mru | member [0].arcs_list[1] | multilist | head",
+
+    # spl_cache walker
+    'spl_kmem_caches | filter obj.skc_name == "ddt_cache" | walk',
+    "spl_kmem_caches | filter obj.skc_linux_cache == 0 | spl_cache",
+    "spl_kmem_caches | filter obj.skc_linux_cache == 0 | spl_cache | cnt",
+    # spl_cache - ensure we can walk caches backed by SLUB
+    "spl_kmem_caches | filter obj.skc_linux_cache > 0 | filter obj.skc_obj_alloc > 0 | head 1 | spl_cache",
+
+    # spl_kmem_caches
     "spl_kmem_caches",
+    "spl_kmem_caches -v",
     "spl_kmem_caches -s entry_size",
     "spl_kmem_caches -s entry_size | head 4 | spl_kmem_caches",
     "spl_kmem_caches | pp",
