@@ -26,7 +26,7 @@ import sdb
 
 
 def is_root_cache(cache: drgn.Object) -> bool:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     return int(cache.memcg_params.root_cache.value_()) == 0x0
 
 
@@ -38,14 +38,14 @@ def for_each_root_cache() -> Iterable[drgn.Object]:
 
 
 def for_each_child_cache(root_cache: drgn.Object) -> Iterable[drgn.Object]:
-    assert root_cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(root_cache.type_) == 'struct kmem_cache *'
     yield from list_for_each_entry(
         "struct kmem_cache", root_cache.memcg_params.children.address_of_(),
         "memcg_params.children_node")
 
 
 def nr_slabs(cache: drgn.Object) -> int:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     nslabs: int = cache.node[0].nr_slabs.counter.value_()
     if is_root_cache(cache):
         for child in for_each_child_cache(cache):
@@ -54,22 +54,22 @@ def nr_slabs(cache: drgn.Object) -> int:
 
 
 def entries_per_slab(cache: drgn.Object) -> int:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     return int(cache.oo.x.value_()) & 0xffff
 
 
 def entry_size(cache: drgn.Object) -> int:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     return int(cache.size.value_())
 
 
 def object_size(cache: drgn.Object) -> int:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     return int(cache.object_size.value_())
 
 
 def total_memory(cache: drgn.Object) -> int:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     nslabs = nr_slabs(cache)
     epslab = entries_per_slab(cache)
     esize = entry_size(cache)
@@ -77,7 +77,7 @@ def total_memory(cache: drgn.Object) -> int:
 
 
 def objs(cache: drgn.Object) -> int:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     count: int = cache.node[0].total_objects.counter.value_()
     if is_root_cache(cache):
         for child in for_each_child_cache(cache):
@@ -86,7 +86,7 @@ def objs(cache: drgn.Object) -> int:
 
 
 def inactive_objs(cache: drgn.Object) -> int:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     node = cache.node[0].partial  # assumption nr_node_ids == 0
     free = 0
     for page in list_for_each_entry("struct page", node.address_of_(), "lru"):
@@ -98,17 +98,17 @@ def inactive_objs(cache: drgn.Object) -> int:
 
 
 def active_objs(cache: drgn.Object) -> int:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     return objs(cache) - inactive_objs(cache)
 
 
 def active_memory(cache: drgn.Object) -> int:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     return active_objs(cache) * entry_size(cache)
 
 
 def util(cache: drgn.Object) -> int:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     total_mem = total_memory(cache)
     if total_mem == 0:
         return 0
@@ -129,8 +129,8 @@ def cache_get_free_pointer(cache: drgn.Object, p: drgn.Object) -> drgn.Object:
     function assumes that CONFIG_SLAB_FREELIST_HARDENED
     is set in the target
     """
-    assert cache.type_.type_name() == 'struct kmem_cache *'
-    assert p.type_.type_name() == 'void *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(p.type_) == 'void *'
     hardened_ptr = p + cache.offset.value_()
 
     #
@@ -177,7 +177,7 @@ def for_each_freeobj_in_slab(cache: drgn.Object,
 
 
 def for_each_partial_slab_in_cache(cache: drgn.Object) -> Iterable[drgn.Object]:
-    assert cache.type_.type_name() == 'struct kmem_cache *'
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
 
     node = cache.node[0].partial  # assumption nr_node_ids == 0
     yield from list_for_each_entry("struct page", node.address_of_(), "lru")
@@ -192,6 +192,7 @@ def for_each_object_in_cache(cache: drgn.Object) -> Iterable[drgn.Object]:
     Goes through each object in the SLUB cache supplied
     yielding them to the consumer.
     """
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
     pg_slab_flag = 1 << sdb.get_prog().constant('PG_slab').value_()
 
     cache_children = {child.value_() for child in for_each_child_cache(cache)}
