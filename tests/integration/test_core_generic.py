@@ -74,6 +74,9 @@ POS_CMDS = [
     # locator that receives no input from a filter
     'thread | filter obj.comm == \"bogus\" | thread',
 
+    # input type checking - locators can use walkers
+    'addr spa_namespace_avl | spa',
+
     # member - generic
     "member no_object",
     "addr spa_namespace_avl | member avl_root->avl_child[0]->avl_child",

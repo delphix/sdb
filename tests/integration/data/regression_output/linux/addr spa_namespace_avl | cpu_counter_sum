@@ -1,1 +1,1 @@
-sdb: cpu_counter_sum: input is not a percpu_counter
+sdb: cpu_counter_sum: expected input of type struct percpu_counter *, but received type avl_tree_t *
