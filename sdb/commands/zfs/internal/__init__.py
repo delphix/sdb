@@ -23,12 +23,13 @@ import drgn
 import sdb
 
 
-def enum_lookup(enum_type_name: str, value: int):
+def enum_lookup(enum_type_name: str, value: int) -> str:
     """return a string which is the short name of the enum value
     (truncating off the common prefix) """
     fields = sdb.get_type(enum_type_name).type.enumerators
+    enum_string: str = fields[value].name
     prefix = os.path.commonprefix([f[0] for f in fields])
-    return fields[value][0][prefix.rfind("_") + 1:]
+    return enum_string[prefix.rfind("_") + 1:]
 
 
 def print_histogram(histogram: List[int], size: int, offset: int) -> None:

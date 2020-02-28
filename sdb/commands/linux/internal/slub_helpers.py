@@ -27,7 +27,7 @@ import sdb
 
 def is_root_cache(cache: drgn.Object) -> bool:
     assert cache.type_.type_name() == 'struct kmem_cache *'
-    return cache.memcg_params.root_cache.value_() == 0x0
+    return int(cache.memcg_params.root_cache.value_()) == 0x0
 
 
 def for_each_root_cache() -> Iterable[drgn.Object]:
@@ -46,7 +46,7 @@ def for_each_child_cache(root_cache: drgn.Object) -> Iterable[drgn.Object]:
 
 def nr_slabs(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'struct kmem_cache *'
-    nslabs = cache.node[0].nr_slabs.counter.value_()
+    nslabs: int = cache.node[0].nr_slabs.counter.value_()
     if is_root_cache(cache):
         for child in for_each_child_cache(cache):
             nslabs += nr_slabs(child)
@@ -55,17 +55,17 @@ def nr_slabs(cache: drgn.Object) -> int:
 
 def entries_per_slab(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'struct kmem_cache *'
-    return cache.oo.x.value_() & 0xffff
+    return int(cache.oo.x.value_()) & 0xffff
 
 
 def entry_size(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'struct kmem_cache *'
-    return cache.size.value_()
+    return int(cache.size.value_())
 
 
 def object_size(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'struct kmem_cache *'
-    return cache.object_size.value_()
+    return int(cache.object_size.value_())
 
 
 def total_memory(cache: drgn.Object) -> int:
@@ -78,7 +78,7 @@ def total_memory(cache: drgn.Object) -> int:
 
 def objs(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'struct kmem_cache *'
-    count = cache.node[0].total_objects.counter.value_()
+    count: int = cache.node[0].total_objects.counter.value_()
     if is_root_cache(cache):
         for child in for_each_child_cache(cache):
             count += objs(child)

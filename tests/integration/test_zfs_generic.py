@@ -17,9 +17,11 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
 
-import pytest
+from typing import Any
 
+import pytest
 from tests.integration.infra import repl_invoke, dump_exists, slurp_output_file
+
 
 CMD_TABLE = [
     "arc",
@@ -43,10 +45,11 @@ CMD_TABLE = [
 ] # yapf: disable
 
 
-@pytest.mark.skipif(not dump_exists(),
-                    reason="couldn't find crash dump to run tests against")
-@pytest.mark.parametrize('cmd', CMD_TABLE)
-def test_cmd_output_and_error_code(capsys, cmd):
+@pytest.mark.skipif(  # type: ignore[misc]
+    not dump_exists(),
+    reason="couldn't find crash dump to run tests against")
+@pytest.mark.parametrize('cmd', CMD_TABLE)  # type: ignore[misc]
+def test_cmd_output_and_error_code(capsys: Any, cmd: str) -> None:
     assert repl_invoke(cmd) == 0
     captured = capsys.readouterr()
     assert captured.out == slurp_output_file("zfs", cmd)

@@ -23,39 +23,35 @@ import sdb
 from tests.unit import invoke, MOCK_PROGRAM
 
 
-def test_no_arg():
+def test_no_arg() -> None:
     line = 'filter'
-    objs = []
 
     with pytest.raises(sdb.CommandArgumentsError):
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
 
-def test_no_rhs():
+def test_no_rhs() -> None:
     line = 'filter obj =='
-    objs = []
 
     with pytest.raises(sdb.CommandInvalidInputError):
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
 
-def test_no_lhs():
+def test_no_lhs() -> None:
     line = 'filter == obj'
-    objs = []
 
     with pytest.raises(sdb.CommandInvalidInputError):
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
 
-def test_no_operator():
+def test_no_operator() -> None:
     line = 'filter obj'
-    objs = []
 
     with pytest.raises(sdb.CommandInvalidInputError):
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
 
-def test_single_void_ptr_input_lhs_not_object():
+def test_single_void_ptr_input_lhs_not_object() -> None:
     line = 'filter 0 == obj'
     objs = [drgn.Object(MOCK_PROGRAM, 'void *', value=0)]
 
@@ -63,7 +59,7 @@ def test_single_void_ptr_input_lhs_not_object():
         invoke(MOCK_PROGRAM, objs, line)
 
 
-def test_multi_void_ptr_input_value_match_ne():
+def test_multi_void_ptr_input_value_match_ne() -> None:
     line = 'filter obj != 1'
     objs = [
         drgn.Object(MOCK_PROGRAM, 'void *', value=0),
@@ -88,7 +84,7 @@ def test_multi_void_ptr_input_value_match_ne():
         invoke(MOCK_PROGRAM, objs, line)
 
 
-def test_char_array_input_object_match():
+def test_char_array_input_object_match() -> None:
     line = 'filter obj == obj'
     objs = [drgn.Object(MOCK_PROGRAM, 'char [4]', value=b"foo")]
 
@@ -96,7 +92,7 @@ def test_char_array_input_object_match():
         invoke(MOCK_PROGRAM, objs, line)
 
 
-def test_struct_input_invalid_syntax():
+def test_struct_input_invalid_syntax() -> None:
     line = 'filter obj->ts_int == 1'
     objs = [MOCK_PROGRAM["global_struct"]]
 
@@ -104,7 +100,7 @@ def test_struct_input_invalid_syntax():
         invoke(MOCK_PROGRAM, objs, line)
 
 
-def test_struct_input_bogus_member():
+def test_struct_input_bogus_member() -> None:
     line = 'filter obj.ts_bogus == 1'
     objs = [MOCK_PROGRAM["global_struct"]]
 

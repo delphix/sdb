@@ -17,8 +17,9 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
 
-import pytest
+from typing import Any
 
+import pytest
 from tests.integration.infra import repl_invoke, dump_exists, slurp_output_file
 
 POS_CMDS = [
@@ -172,19 +173,21 @@ NEG_CMDS = [
 CMD_TABLE = POS_CMDS + NEG_CMDS
 
 
-@pytest.mark.skipif(not dump_exists(),
-                    reason="couldn't find crash dump to run tests against")
-@pytest.mark.parametrize('cmd', POS_CMDS)
-def test_cmd_output_and_error_code_0(capsys, cmd):
+@pytest.mark.skipif(  # type: ignore[misc]
+    not dump_exists(),
+    reason="couldn't find crash dump to run tests against")
+@pytest.mark.parametrize('cmd', POS_CMDS)  # type: ignore[misc]
+def test_cmd_output_and_error_code_0(capsys: Any, cmd: str) -> None:
     assert repl_invoke(cmd) == 0
     captured = capsys.readouterr()
     assert captured.out == slurp_output_file("core", cmd)
 
 
-@pytest.mark.skipif(not dump_exists(),
-                    reason="couldn't find crash dump to run tests against")
-@pytest.mark.parametrize('cmd', NEG_CMDS)
-def test_cmd_output_and_error_code_1(capsys, cmd):
+@pytest.mark.skipif(  # type: ignore[misc]
+    not dump_exists(),
+    reason="couldn't find crash dump to run tests against")
+@pytest.mark.parametrize('cmd', NEG_CMDS)  # type: ignore[misc]
+def test_cmd_output_and_error_code_1(capsys: Any, cmd: str) -> None:
     assert repl_invoke(cmd) == 1
     captured = capsys.readouterr()
     assert captured.out == slurp_output_file("core", cmd)

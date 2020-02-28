@@ -19,41 +19,41 @@
 from typing import Iterable
 
 import drgn
-from drgn.helpers.linux.list import list_for_each_entry
+import drgn.helpers.linux.list as drgn_list
 
 import sdb
 from sdb.commands.linux.internal import slub_helpers as slub
 
 
 def list_for_each_spl_kmem_cache() -> Iterable[drgn.Object]:
-    yield from list_for_each_entry(
+    yield from drgn_list.list_for_each_entry(
         "spl_kmem_cache_t",
         sdb.get_object("spl_kmem_cache_list").address_of_(), "skc_list")
 
 
 def backed_by_linux_cache(cache: drgn.Object) -> bool:
     assert cache.type_.type_name() == 'spl_kmem_cache_t *'
-    return cache.skc_linux_cache.value_() != 0x0
+    return int(cache.skc_linux_cache.value_()) != 0x0
 
 
 def slab_name(cache: drgn.Object) -> str:
     assert cache.type_.type_name() == 'spl_kmem_cache_t *'
-    return cache.skc_name.string_().decode('utf-8')
+    return str(cache.skc_name.string_().decode('utf-8'))
 
 
 def nr_slabs(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'spl_kmem_cache_t *'
-    return cache.skc_slab_total.value_()
+    return int(cache.skc_slab_total.value_())
 
 
 def slab_alloc(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'spl_kmem_cache_t *'
-    return cache.skc_slab_alloc.value_()
+    return int(cache.skc_slab_alloc.value_())
 
 
 def slab_size(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'spl_kmem_cache_t *'
-    return cache.skc_slab_size.value_()
+    return int(cache.skc_slab_size.value_())
 
 
 def slab_linux_cache_source(cache: drgn.Object) -> str:
@@ -80,19 +80,19 @@ def slab_flags(cache: drgn.Object) -> str:
 
 def object_size(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'spl_kmem_cache_t *'
-    return cache.skc_obj_size.value_()
+    return int(cache.skc_obj_size.value_())
 
 
 def nr_objects(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'spl_kmem_cache_t *'
     if backed_by_linux_cache(cache):
-        return cache.skc_obj_alloc.value_()
-    return cache.skc_obj_total.value_()
+        return int(cache.skc_obj_alloc.value_())
+    return int(cache.skc_obj_total.value_())
 
 
 def obj_alloc(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'spl_kmem_cache_t *'
-    return cache.skc_obj_alloc.value_()
+    return int(cache.skc_obj_alloc.value_())
 
 
 def obj_inactive(cache: drgn.Object) -> int:
@@ -102,7 +102,7 @@ def obj_inactive(cache: drgn.Object) -> int:
 
 def objs_per_slab(cache: drgn.Object) -> int:
     assert cache.type_.type_name() == 'spl_kmem_cache_t *'
-    return cache.skc_slab_objs.value_()
+    return int(cache.skc_slab_objs.value_())
 
 
 def entry_size(cache: drgn.Object) -> int:

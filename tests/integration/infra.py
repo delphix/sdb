@@ -63,7 +63,7 @@ def setup_target() -> Optional[drgn.Program]:
 
 
 TEST_PROGRAM = setup_target()
-TEST_REPL = REPL(TEST_PROGRAM, sdb.get_registered_commands())
+TEST_REPL = REPL(TEST_PROGRAM, list(sdb.get_registered_commands().keys()))
 
 
 def repl_invoke(cmd: str) -> int:
@@ -148,7 +148,7 @@ def get_all_generic_test_modules() -> List[str]:
     return modnames
 
 
-def generate_known_regression_output():
+def generate_known_regression_output() -> None:
     """
     Auto-generate the baseline regression output for all
     the detected test modules in this directory.

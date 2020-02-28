@@ -20,6 +20,8 @@ import argparse
 from typing import Iterable
 
 import drgn
+import drgn.helpers.linux.cpumask as drgn_cpumask
+import drgn.helpers.linux.percpu as drgn_percpu
 import sdb
 
 
@@ -52,9 +54,7 @@ class LxPerCpuPtr(sdb.SingleInputCommand):
     def __init__(self, args: str = "", name: str = "_") -> None:
         super().__init__(args, name)
         self.ncpus = len(
-            list(
-                drgn.helpers.linux.cpumask.for_each_possible_cpu(
-                    sdb.get_prog())))
+            list(drgn_cpumask.for_each_possible_cpu(sdb.get_prog())))
 
     def _call_one(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         cpus = self.args.cpus
@@ -65,7 +65,7 @@ class LxPerCpuPtr(sdb.SingleInputCommand):
                 raise sdb.CommandError(
                     self.name,
                     f"available CPUs [0-{self.ncpus -1}] - requested CPU {cpu}")
-            yield drgn.helpers.linux.percpu.per_cpu_ptr(obj, cpu)
+            yield drgn_percpu.per_cpu_ptr(obj, cpu)
 
 
 class LxPerCpuCounterSum(sdb.SingleInputCommand):
@@ -95,7 +95,7 @@ class LxPerCpuCounterSum(sdb.SingleInputCommand):
 
     def _call_one(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         try:
-            sum_ = drgn.helpers.linux.percpu.percpu_counter_sum(obj)
+            sum_ = drgn_percpu.percpu_counter_sum(obj)
         except AttributeError as err:
             raise sdb.CommandError(self.name, "input is not a percpu_counter")
         yield drgn.Object(sdb.get_prog(), type="s64", value=sum_)

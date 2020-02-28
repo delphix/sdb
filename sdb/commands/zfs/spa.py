@@ -17,7 +17,9 @@
 # pylint: disable=missing-docstring
 
 import argparse
+from typing import Iterable
 
+import drgn
 import sdb
 from sdb.commands.spl.avl import Avl
 from sdb.commands.zfs.vdev import Vdev
@@ -60,7 +62,7 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
         if self.args.weight:
             self.arg_string += "-w "
 
-    def pretty_print(self, spas):
+    def pretty_print(self, spas: Iterable[drgn.Object]) -> None:
         print("{:18} {}".format("ADDR", "NAME"))
         print("%s" % ("-" * 60))
         for spa in spas:
@@ -70,7 +72,7 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
                 vdevs = sdb.execute_pipeline([spa], [Vdev()])
                 Vdev(self.arg_string).pretty_print(vdevs, 5)
 
-    def no_input(self):
+    def no_input(self) -> drgn.Object:
         spas = sdb.execute_pipeline(
             [sdb.get_object("spa_namespace_avl").address_of_()],
             [Avl(), sdb.Cast("spa_t *")],

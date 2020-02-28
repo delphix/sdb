@@ -211,7 +211,7 @@ def main() -> None:
         print("sdb: " + str(err))
         return
 
-    repl = REPL(prog, sdb.get_registered_commands())
+    repl = REPL(prog, list(sdb.get_registered_commands().keys()))
     repl.enable_history()
     if args.eval:
         exit_code = repl.eval_cmd(args.eval)

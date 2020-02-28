@@ -54,7 +54,8 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
         return parser
 
     @staticmethod
-    def metaslab_weight_print(msp, print_header, indent):
+    def metaslab_weight_print(msp: drgn.Object, print_header: bool,
+                              indent: int) -> None:
         if print_header:
             print(
                 "".ljust(indent),
@@ -115,7 +116,8 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
             print("", (count + " x " + size).rjust(12))
 
     @staticmethod
-    def print_metaslab(msp, print_header, indent):
+    def print_metaslab(msp: drgn.Object, print_header: bool,
+                       indent: int) -> None:
         spacemap = msp.ms_sm
 
         if print_header:
@@ -158,7 +160,9 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
             print((str(int(msp.ms_fragmentation)) + "%").rjust(6), end="")
         print(nicenum(uchanges_mem).rjust(9))
 
-    def pretty_print(self, metaslabs, indent=0):
+    def pretty_print(self,
+                     metaslabs: Iterable[drgn.Object],
+                     indent: int = 0) -> None:
         first_time = True
         for msp in metaslabs:
             if not self.args.histogram and not self.args.weight:
