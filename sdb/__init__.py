@@ -40,6 +40,41 @@ from sdb.command import (Address, Cast, Command, InputHandler, Locator,
                          get_registered_commands)
 from sdb.pipeline import execute_pipeline, get_first_type, invoke
 
+__all__ = [
+    'Address',
+    'Cast',
+    'Command',
+    'CommandArgumentsError',
+    'CommandError',
+    'CommandEvalSyntaxError',
+    'CommandInvalidInputError',
+    'CommandNotFoundError',
+    'Error',
+    'InputHandler',
+    'Locator',
+    'PrettyPrinter',
+    'SingleInputCommand',
+    'SymbolNotFoundError',
+    'Walk',
+    'Walker',
+    'create_object',
+    'execute_pipeline',
+    'invoke',
+    'get_first_type',
+    'get_object',
+    'get_pointer_type',
+    'get_prog',
+    'get_registered_commands',
+    'get_symbol',
+    'get_target_flags',
+    'get_type',
+    'get_typed_null',
+    'type_canonical_name',
+    'type_canonicalize',
+    'type_canonicalize_name',
+    'type_equals',
+]
+
 #
 # The SDB commands build on top of all the SDB "infrastructure" imported
 # above, so we must be sure to import all of the commands last.

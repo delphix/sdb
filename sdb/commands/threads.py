@@ -16,7 +16,7 @@
 
 # pylint: disable=missing-docstring
 
-from typing import Iterable
+from typing import Callable, Dict, Iterable, Union
 
 import drgn
 from drgn.helpers.linux.pid import for_each_task
@@ -52,7 +52,7 @@ class Threads(sdb.Locator, sdb.PrettyPrinter):
     input_type = "struct task_struct *"
     output_type = "struct task_struct *"
 
-    FIELDS = {
+    FIELDS: Dict[str, Callable[[drgn.Object], Union[str, int]]] = {
         "task": lambda obj: hex(obj.value_()),
         "state": lambda obj: str(Stacks.task_struct_get_state(obj)),
         "pid": lambda obj: int(obj.pid),

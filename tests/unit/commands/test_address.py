@@ -22,42 +22,38 @@ import sdb
 from tests.unit import invoke, MOCK_PROGRAM
 
 
-def test_empty():
+def test_empty() -> None:
     line = 'address'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert not ret
 
 
-def test_single_object():
+def test_single_object() -> None:
     line = 'addr global_int'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
     assert ret[0].value_() == 0xffffffffc0000000
     assert ret[0].type_ == MOCK_PROGRAM.type('int *')
 
 
-def test_plain_address():
+def test_plain_address() -> None:
     line = 'addr 0xffffffffc084eee0'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
     assert ret[0].value_() == 0xffffffffc084eee0
     assert ret[0].type_ == MOCK_PROGRAM.type('void *')
 
 
-def test_multiple_object():
+def test_multiple_object() -> None:
     line = 'addr global_int 0xffffffffc084eee0 global_void_ptr'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 3
     assert ret[0].value_() == 0xffffffffc0000000
@@ -68,11 +64,10 @@ def test_multiple_object():
     assert ret[2].type_ == MOCK_PROGRAM.type('void **')
 
 
-def test_piped_invocations():
+def test_piped_invocations() -> None:
     line = 'addr global_int | addr 0xffffffffc084eee0 global_void_ptr'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 3
     assert ret[0].value_() == 0xffffffffc0000000
@@ -83,11 +78,10 @@ def test_piped_invocations():
     assert ret[2].type_ == MOCK_PROGRAM.type('void **')
 
 
-def test_echo_pipe():
+def test_echo_pipe() -> None:
     line = 'addr 0xffffffffc084eee0 | addr global_void_ptr'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 2
     assert ret[0].value_() == 0xffffffffc084eee0
@@ -96,11 +90,10 @@ def test_echo_pipe():
     assert ret[1].type_ == MOCK_PROGRAM.type('void **')
 
 
-def test_global_not_found():
+def test_global_not_found() -> None:
     line = 'addr bogus'
-    objs = []
 
     with pytest.raises(sdb.SymbolNotFoundError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert err.value.symbol == 'bogus'

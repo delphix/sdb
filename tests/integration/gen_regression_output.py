@@ -20,7 +20,7 @@
 from tests.integration.infra import generate_known_regression_output
 
 
-def main():
+def main() -> None:
     generate_known_regression_output()
 
 

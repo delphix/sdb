@@ -24,7 +24,7 @@ registered commands during a session.
 import argparse
 import inspect
 import textwrap
-from typing import Callable, Dict, Iterable, List, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, Iterable, List, Optional, Type, TypeVar
 
 import drgn
 
@@ -90,7 +90,7 @@ class Command:
         return argparse.ArgumentParser(prog=name, description=summary)
 
     @classmethod
-    def help(cls, name: str):
+    def help(cls, name: str) -> None:
         """
         This method will print a "help message" for the particular
         command class that it's called on. The docstring and parser for
@@ -223,13 +223,17 @@ class Command:
         self.parser = type(self)._init_parser(name)
         self.args = self.parser.parse_args(args.split())
 
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, **kwargs: Any) -> None:
         """
         This method will automatically register the subclass command,
         such that the command will be automatically integrated with the
         SDB REPL.
         """
-        super().__init_subclass__(**kwargs)
+        #
+        # We ignore the type failure below because of the following issue:
+        # https://github.com/python/mypy/issues/4660
+        #
+        super().__init_subclass__(**kwargs)  # type: ignore[call-arg]
         for name in cls.names:
             register_command(name, cls)
 
@@ -584,7 +588,7 @@ class Walker(Command):
     allWalkers: Dict[str, Type["Walker"]] = {}
 
     # When a subclass is created, register it
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         assert cls.input_type is not None
         Walker.allWalkers[cls.input_type] = cls
@@ -621,7 +625,7 @@ class PrettyPrinter(Command):
     all_printers: Dict[str, Type["PrettyPrinter"]] = {}
 
     # When a subclass is created, register it
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         assert cls.input_type is not None
         PrettyPrinter.all_printers[cls.input_type] = cls

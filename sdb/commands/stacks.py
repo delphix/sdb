@@ -342,7 +342,7 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
                 return True
         return False
 
-    def print_header(self):
+    def print_header(self) -> None:
         header = "{:<18} {:<16s}".format("TASK_STRUCT", "STATE")
         if not self.args.all:
             header += " {:>6s}".format("COUNT")

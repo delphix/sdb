@@ -20,7 +20,9 @@ import atexit
 import os
 import readline
 import traceback
+from typing import Callable, List, Optional
 
+import drgn
 from sdb.error import Error, CommandArgumentsError
 from sdb.pipeline import invoke
 
@@ -34,25 +36,36 @@ class REPL:
     """
 
     @staticmethod
-    def __make_completer(vocabulary):
+    def __make_completer(
+            vocabulary: List[str]) -> Callable[[str, int], Optional[str]]:
         """
         Attribution:
         The following completer code came from Eli Berdensky's blog
         released under the public domain.
         """
 
-        def custom_complete(text, state):
+        def custom_complete(text: str, state: int) -> str:
+            #
             # None is returned for the end of the completion session.
-            results = [x for x in vocabulary if x.startswith(text)] + [None]
+            #
+            results = [x for x in vocabulary if x.startswith(text)
+                      ] + [None]  # type: ignore[list-item]
+
+            #
             # A space is added to the completion since the Python readline
             # doesn't do this on its own. When a word is fully completed we
             # want to mimic the default readline library behavior of adding
             # a space after it.
+            #
             return results[state] + " "
 
         return custom_complete
 
-    def __init__(self, target, vocabulary, prompt="sdb> ", closing=""):
+    def __init__(self,
+                 target: drgn.Program,
+                 vocabulary: List[str],
+                 prompt: str = "sdb> ",
+                 closing: str = ""):
         self.prompt = prompt
         self.closing = closing
         self.vocabulary = vocabulary
@@ -60,7 +73,7 @@ class REPL:
         self.histfile = ""
         readline.set_completer(REPL.__make_completer(vocabulary))
 
-    def enable_history(self, history_file='~/.sdb_history'):
+    def enable_history(self, history_file: str = '~/.sdb_history') -> None:
         self.histfile = os.path.expanduser(history_file)
         try:
             readline.read_history_file(self.histfile)

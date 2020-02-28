@@ -21,37 +21,34 @@ import drgn
 from tests.unit import invoke, MOCK_PROGRAM
 
 
-def test_empty():
+def test_empty() -> None:
     line = 'count'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
     assert ret[0].value_() == 0
 
 
-def test_single_piped_input():
+def test_single_piped_input() -> None:
     line = 'echo 0x0 | count'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
     assert ret[0].value_() == 1
 
 
-def test_multiple_piped_inputs():
+def test_multiple_piped_inputs() -> None:
     line = 'echo 0x0 0xfffff 0xdeadbeef 0x101010 | count'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
     assert ret[0].value_() == 4
 
 
-def test_single_input():
+def test_single_input() -> None:
     line = 'count'
     objs = [drgn.Object(MOCK_PROGRAM, 'void *', value=0)]
 
@@ -61,7 +58,7 @@ def test_single_input():
     assert ret[0].value_() == 1
 
 
-def test_multiple_inputs():
+def test_multiple_inputs() -> None:
     line = 'count'
     objs = [
         drgn.Object(MOCK_PROGRAM, 'void *', value=0),

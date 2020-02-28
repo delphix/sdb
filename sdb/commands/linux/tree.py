@@ -20,6 +20,8 @@ import argparse
 from typing import Iterable
 
 import drgn
+import drgn.helpers.linux.rbtree as drgn_rbtree
+
 import sdb
 from sdb.commands.internal.util import get_valid_struct_name
 
@@ -60,7 +62,7 @@ class RBTree(sdb.Command):
         sname = get_valid_struct_name(self, self.args.struct_name)
         for obj in objs:
             try:
-                yield from drgn.helpers.linux.rbtree.rbtree_inorder_for_each_entry(
+                yield from drgn_rbtree.rbtree_inorder_for_each_entry(
                     sname, obj, self.args.member)
             except LookupError as err:
                 raise sdb.CommandError(self.name, str(err))
