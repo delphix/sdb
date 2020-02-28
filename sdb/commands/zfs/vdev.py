@@ -66,7 +66,9 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
         if self.args.weight:
             self.arg_string += "-w "
 
-    def pretty_print(self, vdevs, indent=0):
+    def pretty_print(self,
+                     vdevs: Iterable[drgn.Object],
+                     indent: int = 0) -> None:
         print(
             "".ljust(indent),
             "ADDR".ljust(18),

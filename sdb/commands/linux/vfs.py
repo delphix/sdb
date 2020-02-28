@@ -20,6 +20,7 @@ import argparse
 from typing import Iterable
 
 import drgn
+import drgn.helpers.linux.fs as drgn_fs
 import sdb
 
 
@@ -49,4 +50,4 @@ class FGet(sdb.SingleInputCommand):
 
     def _call_one(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         for fd in self.args.fd:
-            yield drgn.helpers.linux.fs.fget(obj, fd)
+            yield drgn_fs.fget(obj, fd)

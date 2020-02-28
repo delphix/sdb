@@ -57,14 +57,15 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
         return parser
 
     @staticmethod
-    def DslDirName(dd: drgn.Object):
-        pname = ''
+    def DslDirName(dd: drgn.Object) -> str:
+        name = ""
         if dd.dd_parent:
-            pname = Dbuf.DslDirName(dd.dd_parent) + '/'
-        return pname + dd.dd_myname.string_().decode("utf-8")
+            name = Dbuf.DslDirName(dd.dd_parent) + "/"
+        name += dd.dd_myname.string_().decode("utf-8")
+        return name
 
     @staticmethod
-    def DatasetName(ds: drgn.Object):
+    def DatasetName(ds: drgn.Object) -> str:
         name = Dbuf.DslDirName(ds.ds_dir)
         if not ds.ds_prev:
             sn = ds.ds_snapname.string_().decode("utf-8")
@@ -74,13 +75,13 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
         return name
 
     @staticmethod
-    def ObjsetName(os: drgn.Object):
+    def ObjsetName(os: drgn.Object) -> str:
         if not os.os_dsl_dataset:
             return '{}/_MOS'.format(
                 os.os_spa.spa_name.string_().decode("utf-8"))
         return Dbuf.DatasetName(os.os_dsl_dataset)
 
-    def pretty_print(self, dbufs):
+    def pretty_print(self, dbufs: drgn.Object) -> None:
         print("{:>20} {:>8} {:>4} {:>8} {:>5} {}".format(
             "addr", "object", "lvl", "blkid", "holds", "os"))
         for dbuf in filter(self.argfilter, dbufs):

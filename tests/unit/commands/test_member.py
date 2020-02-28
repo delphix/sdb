@@ -22,79 +22,71 @@ import sdb
 from tests.unit import invoke, MOCK_PROGRAM
 
 
-def test_no_arg():
+def test_no_arg() -> None:
     line = 'member'
-    objs = []
 
     with pytest.raises(sdb.CommandArgumentsError):
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
 
-def test_scalar_input():
+def test_scalar_input() -> None:
     line = 'addr global_int | member int_member'
-    objs = []
 
     with pytest.raises(sdb.CommandError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert "'int' is not a structure, union, or class" in str(err.value)
 
 
-def test_member_not_found():
+def test_member_not_found() -> None:
     line = 'addr global_struct | member bogus'
-    objs = []
 
     with pytest.raises(sdb.CommandError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert "'struct test_struct' has no member 'bogus'" in str(err.value)
 
 
-def test_array_member_incomplete_expression():
+def test_array_member_incomplete_expression() -> None:
     line = 'addr global_struct | member ts_array[2'
-    objs = []
 
     with pytest.raises(sdb.CommandError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert "incomplete array expression" in str(err.value)
 
 
-def test_array_member_bogus_index():
+def test_array_member_bogus_index() -> None:
     line = 'addr global_struct | member ts_array[a]'
-    objs = []
 
     with pytest.raises(sdb.CommandError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert "incorrect index: 'a' is not a number" in str(err.value)
 
 
-def test_embedded_struct_member_deref_notation_error():
+def test_embedded_struct_member_deref_notation_error() -> None:
     line = 'addr global_cstruct | member cs_struct->ts_int'
-    objs = []
 
     with pytest.raises(sdb.CommandError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert "use the dot(.) notation for member access" in str(err.value)
 
 
-def test_arrow_with_no_identifier():
+def test_arrow_with_no_identifier() -> None:
     line = 'addr global_cstruct | member cs_struct->'
-    objs = []
 
     with pytest.raises(sdb.CommandError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert "no identifier specified after ->" in str(err.value)
 
 
-def test_dot_with_no_identifier():
+def test_dot_with_no_identifier() -> None:
     line = 'addr global_cstruct | member cs_struct.'
-    objs = []
 
     with pytest.raises(sdb.CommandError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert "no identifier specified after ." in str(err.value)

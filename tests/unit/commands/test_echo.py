@@ -23,16 +23,15 @@ import sdb
 from tests.unit import invoke, MOCK_PROGRAM
 
 
-def test_empty():
+def test_empty() -> None:
     line = 'echo'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert not ret
 
 
-def test_piped_input():
+def test_piped_input() -> None:
     line = 'echo'
     objs = [drgn.Object(MOCK_PROGRAM, 'void *', value=0)]
 
@@ -43,39 +42,36 @@ def test_piped_input():
     assert ret[0].type_ == MOCK_PROGRAM.type('void *')
 
 
-def test_single_arg_hex():
+def test_single_arg_hex() -> None:
     line = 'echo 0x0'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
     assert ret[0].value_() == 0
     assert ret[0].type_ == MOCK_PROGRAM.type('void *')
 
 
-def test_single_arg_decimal():
+def test_single_arg_decimal() -> None:
     line = 'echo 0'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
     assert ret[0].value_() == 0
     assert ret[0].type_ == MOCK_PROGRAM.type('void *')
 
 
-def test_bogus_arg():
+def test_bogus_arg() -> None:
     line = 'echo bogus'
-    objs = []
 
     with pytest.raises(sdb.CommandInvalidInputError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert err.value.argument == 'bogus'
 
 
-def test_test_piped_int():
+def test_test_piped_int() -> None:
     line = 'echo'
     objs = [drgn.Object(MOCK_PROGRAM, 'int', value=1)]
 
@@ -86,18 +82,17 @@ def test_test_piped_int():
     assert ret[0].type_ == MOCK_PROGRAM.type('int')
 
 
-def test_single_arg():
+def test_single_arg() -> None:
     line = 'echo 1'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
     assert ret[0].value_() == 1
     assert ret[0].type_ == MOCK_PROGRAM.type('void *')
 
 
-def test_multiple_piped():
+def test_multiple_piped() -> None:
     line = 'echo'
     objs = [
         drgn.Object(MOCK_PROGRAM, 'void *', value=0),
@@ -113,11 +108,10 @@ def test_multiple_piped():
     assert ret[1].type_ == MOCK_PROGRAM.type('int')
 
 
-def test_multiple_args():
+def test_multiple_args() -> None:
     line = 'echo 0 1'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 2
     assert ret[0].value_() == 0
@@ -126,7 +120,7 @@ def test_multiple_args():
     assert ret[1].type_ == MOCK_PROGRAM.type('void *')
 
 
-def test_piped_and_args_combo():
+def test_piped_and_args_combo() -> None:
     line = 'echo 0 1'
     objs = [
         drgn.Object(MOCK_PROGRAM, 'void *', value=0),
@@ -146,7 +140,7 @@ def test_piped_and_args_combo():
     assert ret[3].type_ == MOCK_PROGRAM.type('void *')
 
 
-def test_multi_echo_combo():
+def test_multi_echo_combo() -> None:
     line = 'echo 2 3 | echo 4'
     objs = [
         drgn.Object(MOCK_PROGRAM, 'void *', value=0),

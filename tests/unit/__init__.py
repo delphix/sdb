@@ -206,7 +206,7 @@ MOCK_PROGRAM = setup_basic_mock_program()
 
 
 def invoke(prog: drgn.Program, objs: Iterable[drgn.Object],
-           line: str) -> Iterable[drgn.Object]:
+           line: str) -> List[drgn.Object]:
     """
     Dispatch to sdb.invoke, but also drain the generator it returns, so
     the tests can more easily access the returned objects.

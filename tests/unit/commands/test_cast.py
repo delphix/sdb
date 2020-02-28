@@ -22,34 +22,31 @@ import sdb
 from tests.unit import invoke, MOCK_PROGRAM
 
 
-def test_no_arg():
+def test_no_arg() -> None:
     line = 'cast'
-    objs = []
 
     with pytest.raises(sdb.CommandArgumentsError):
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
 
-def test_arg_no_pipe_input():
+def test_arg_no_pipe_input() -> None:
     line = 'cast int'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert not ret
 
 
-def test_arg_no_pipe_input_invalid_type():
+def test_arg_no_pipe_input_invalid_type() -> None:
     line = 'cast bogus'
-    objs = []
 
     with pytest.raises(sdb.CommandError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert "could not find type 'bogus'" in str(err.value)
 
 
-def test_invoke_pipe_input():
+def test_invoke_pipe_input() -> None:
     line = 'cast void *'
     objs = [MOCK_PROGRAM['global_int']]
 
@@ -60,54 +57,49 @@ def test_invoke_pipe_input():
     assert ret[0].value_() == 0x01020304
 
 
-def test_str_pipe_input():
+def test_str_pipe_input() -> None:
     line = 'addr global_int | cast void *'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
     assert ret[0].type_ == MOCK_PROGRAM.type('void *')
     assert ret[0].value_() == 0xffffffffc0000000
 
 
-def test_pipe_input_pointer_to_int():
+def test_pipe_input_pointer_to_int() -> None:
     line = 'addr global_int | cast unsigned int'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
     assert ret[0].type_ == MOCK_PROGRAM.type('unsigned int')
     assert ret[0].value_() == 0xc0000000
 
 
-def test_str_pipe_input_pointer_to_invalid_type():
+def test_str_pipe_input_pointer_to_invalid_type() -> None:
     line = 'addr global_int | cast bogus'
-    objs = []
 
     with pytest.raises(sdb.CommandError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert "could not find type 'bogus'" in str(err.value)
 
 
-def test_double_cast():
+def test_double_cast() -> None:
     line = 'addr global_int | cast unsigned int | cast char *'
-    objs = []
 
-    ret = invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
     assert ret[0].type_ == MOCK_PROGRAM.type('char *')
     assert ret[0].value_() == 0xc0000000
 
 
-def test_pointer_to_struct():
+def test_pointer_to_struct() -> None:
     line = 'addr global_int | cast struct test_struct'
-    objs = []
 
     with pytest.raises(sdb.CommandError) as err:
-        invoke(MOCK_PROGRAM, objs, line)
+        invoke(MOCK_PROGRAM, [], line)
 
     assert "cannot convert 'int *' to 'struct test_struct'" in str(err.value)
