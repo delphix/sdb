@@ -168,6 +168,9 @@ NEG_CMDS = [
 
     # ptype - bogus type
     "ptype bogus_t",
+
+    # pretty printer passed incorrect type
+    "spa | range_tree"
 ]
 
 CMD_TABLE = POS_CMDS + NEG_CMDS

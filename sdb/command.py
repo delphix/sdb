@@ -634,6 +634,22 @@ class PrettyPrinter(Command):
         # pylint: disable=missing-docstring
         raise NotImplementedError
 
+    def check_input_type(self,
+                         objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        """
+        This function acts as a generator, checking that each passed object
+        matches the input type for the command
+        """
+        assert self.input_type is not None
+        type_name = type_canonicalize_name(self.input_type)
+        for obj in objs:
+            if type_canonical_name(obj.type_) != type_name:
+                raise CommandError(
+                    self.name,
+                    f'expected input of type {self.input_type}, but received '
+                    f'type {obj.type_}')
+            yield obj
+
     def _call(  # type: ignore[return]
             self,
             objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
@@ -641,17 +657,8 @@ class PrettyPrinter(Command):
         This function will call pretty_print() on each input object,
         verifying the types as we go.
         """
-
         assert self.input_type is not None
-        type_name = type_canonicalize_name(self.input_type)
-        for obj in objs:
-            if type_canonical_name(obj.type_) != type_name:
-                raise CommandError(
-                    self.name,
-                    f'exepected input of type {self.input_type}, but received '
-                    f'type {obj.type_}')
-
-            self.pretty_print([obj])
+        self.pretty_print(self.check_input_type(objs))
 
 
 class Locator(Command):
