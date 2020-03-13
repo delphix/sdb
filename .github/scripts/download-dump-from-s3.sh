@@ -25,16 +25,16 @@ fi
 
 echo "initiating download of $1 from S3 ..."
 /usr/local/bin/aws s3 cp --no-sign-request s3://sdb-regression-dumps/$1 .
-[ $? -eq 0 ]  || exit 1
+[ $? -eq 0 ] || exit 1
 
 echo "decompressing dump ..."
 tar -x --lzma -f $1
 
 echo "moving contents to tests/integration/data ..."
 mv dump-data/* $DATA_DIR
-[ $? -eq 0 ]  || exit 1
+[ $? -eq 0 ] || exit 1
 
 rmdir dump-data
-[ $? -eq 0 ]  || exit 1
+[ $? -eq 0 ] || exit 1
 
 echo "Done"
