@@ -120,6 +120,11 @@ POS_CMDS = [
     "ptype spa_t",
     "ptype spa vdev",
     "ptype zfs_case v_t thread_union",
+
+    # sizeof
+    "sizeof size_t",
+    "sizeof task_struct",
+    "sizeof spa vdev",
 ]
 
 NEG_CMDS = [
@@ -170,7 +175,11 @@ NEG_CMDS = [
     "ptype bogus_t",
 
     # pretty printer passed incorrect type
-    "spa | range_tree"
+    "spa | range_tree",
+
+    # sizeof - bogus types
+    "sizeof struct spa",
+    "sizeof bogus"
 ]
 
 CMD_TABLE = POS_CMDS + NEG_CMDS
