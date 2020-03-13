@@ -21,6 +21,7 @@ from typing import Iterable
 
 import drgn
 import sdb
+from sdb.commands.internal import util
 
 
 class PType(sdb.Command):
@@ -74,46 +75,5 @@ class PType(sdb.Command):
         return parser
 
     def _call(self, objs: Iterable[drgn.Object]) -> None:
-        for tp_name in self.args.type:
-            found = False
-
-            #
-            # There is a reason we have "" at the end below after we
-            # check all the C keywords below. There are cases that
-            # we've seen in C codebases that do things like this:
-            #
-            #   typedef union GCObject GCObject; // taken from LUA repo
-            #
-            # If we checked for typedefs first (e.g. "" below), then
-            # we'd get the description that is useless:
-            #
-            #   sdb> ptype GCObject
-            #   typedef union GCObject GCObject
-            #
-            # Putting the typedef at the end allows to first check for
-            # the real type info which is more useful:
-            #
-            #   sdb> ptype GCObject
-            #   union GCObject {
-            #   	GCheader gch;
-            #   	union TString ts;
-            #           ...
-            #   }
-            #
-            # In the future we probably want to also support queries
-            # like `ptype union GCObject` so the code doesn't have
-            # to be mindful of this issue.
-            #
-            for prefix in ["struct ", "enum ", "union ", ""]:
-                try:
-                    print(sdb.get_prog().type(f"{prefix}{tp_name}"))
-                    found = True
-                except LookupError:
-                    pass
-                if found:
-                    break
-            if not found:
-                raise sdb.CommandError(
-                    self.name,
-                    f"couldn't find typedef, struct, enum, nor union named '{tp_name}'"
-                )
+        for tname in self.args.type:
+            print(util.get_valid_type_by_name(self, tname))

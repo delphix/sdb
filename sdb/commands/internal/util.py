@@ -20,19 +20,20 @@ import drgn
 import sdb
 
 
-def get_valid_struct_name(cmd: sdb.Command, tname: str) -> str:
+def get_valid_type_by_name(cmd: sdb.Command, tname: str) -> drgn.Type:
     """
-    If tname is a name of a type that's a typedef to a
-    struct, this function return will it as is. If this
-    is a name of a struct, then it returns the canonical
-    name (e.g. adds "struct" prefix). Otherwise, raises
-    an error.
+    Given a type name in string form (`tname`) without any C keyword
+    prefixes (e.g. 'struct', 'enum', 'class', 'union'), return the
+    corresponding drgn.Type object.
 
-    Used for shorthands in providing names of structure
-    types to be consumed by drgn interfaces in string
-    form (linux_list, container_of, etc..).
+    This function is used primarily by commands that accept a type
+    name as an argument and exists mainly for 2 reasons:
+    [1] There is a limitation in the way the SDB lexer interacts with
+        argparse making it hard for us to parse type names more than
+        1 token wide (e.g. 'struct task_struct'). [bad reason]
+    [2] We save some typing for the user. [good reason]
     """
-    if tname in ['struct', 'union', 'class']:
+    if tname in ['struct', 'enum', 'union', 'class']:
         #
         # Note: We have to do this because currently in drgn
         # prog.type('struct') returns a different error than
@@ -46,21 +47,74 @@ def get_valid_struct_name(cmd: sdb.Command, tname: str) -> str:
                                f"skip keyword '{tname}' and try again")
 
     try:
-        type_ = sdb.get_prog().type(tname)
+        type_ = sdb.get_type(tname)
+        if type_.kind == drgn.TypeKind.TYPEDEF and type_.type_name(
+        ) == sdb.type_canonical_name(type_):
+            #
+            # In some C codebases there are typedefs like this:
+            #
+            #     typedef union GCObject GCObject; // taken from LUA repo
+            #
+            # The point of the above is to avoid typing the word
+            # 'union' every time we declare a variable of that type.
+            # For the purposes of SDB, passing around a drng.Type
+            # describing the typedef above isn't particularly
+            # useful. Using such an object with the `ptype` command
+            # (one of the consumers of this function) would yield
+            # the following:
+            #
+            #     sdb> ptype GCObject
+            #     typedef union GCObject GCObject
+            #
+            # Resolving the typedef's explicitly in those cases
+            # is more useful and this is why this if-clause exists.
+            #
+            #     sdb> ptype GCObject
+            #     union GCObject {
+            #             GCheader gch;
+            #             union TString ts;
+            #             ...
+            #     }
+            #
+            return sdb.type_canonicalize(type_)
+        return type_
     except LookupError:
-        # Check for struct
-        struct_name = f"struct {tname}"
+        #
+        # We couldn't find a type with that name. Check if
+        # it is a structure, an enum, or a union.
+        #
+        pass
+    for prefix in ["struct ", "enum ", "union "]:
         try:
-            type_ = sdb.get_prog().type(struct_name)
-        except LookupError as err:
-            raise sdb.CommandError(cmd.name, str(err))
-        return struct_name
+            return sdb.get_type(f"{prefix}{tname}")
+        except LookupError:
+            pass
+    raise sdb.CommandError(
+        cmd.name,
+        f"couldn't find typedef, struct, enum, nor union named '{tname}'")
 
-    # Check for typedef to struct
-    if type_.kind != drgn.TypeKind.TYPEDEF:
-        raise sdb.CommandError(
-            cmd.name, f"{tname} is not a struct nor a typedef to a struct")
-    if sdb.type_canonicalize(type_).kind != drgn.TypeKind.STRUCT:
-        raise sdb.CommandError(cmd.name,
-                               f"{tname} is not a typedef to a struct")
-    return tname
+
+def get_valid_struct_name(cmd: sdb.Command, tname: str) -> str:
+    """
+    If tname is a name of a type that's a typedef to a
+    struct, this function return will it as is. If this
+    is a name of a struct, then it returns the canonical
+    name (e.g. adds "struct" prefix). Otherwise, raises
+    an error.
+
+    Used for shorthands in providing names of structure
+    types to be consumed by drgn interfaces in string
+    form (linux_list, container_of, etc..).
+    """
+    type_ = get_valid_type_by_name(cmd, tname)
+
+    if type_.kind == drgn.TypeKind.STRUCT:
+        return str(type_.type_name())
+
+    # canonicalize in case this is a typedef to a struct
+    canonical_type_ = sdb.type_canonicalize(type_)
+    if canonical_type_.kind == drgn.TypeKind.STRUCT:
+        return str(canonical_type_.type_name())
+
+    raise sdb.CommandError(
+        cmd.name, f"{tname} is not a struct nor a typedef to a struct")
