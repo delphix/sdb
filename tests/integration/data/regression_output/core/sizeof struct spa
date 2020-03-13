@@ -1,0 +1,1 @@
+sdb: sizeof: skip keyword 'struct' and try again
