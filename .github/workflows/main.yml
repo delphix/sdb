@@ -101,3 +101,12 @@ jobs:
       - run: python3 -m pip install mypy==0.730
       - run: python3 -m mypy --strict --allow-untyped-calls --show-error-codes -p sdb
       - run: python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests
+  #
+  # Verify that "shfmt" ran successfully against our shell scripts.
+  #
+  shfmt:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - run: ./.github/scripts/install-shfmt.sh
+      - run: /usr/local/bin/shfmt -d .github/scripts/
