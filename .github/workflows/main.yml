@@ -109,4 +109,4 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - run: ./.github/scripts/install-shfmt.sh
-      - run: /usr/local/bin/shfmt -d .github/scripts/
+      - run: /usr/local/bin/shfmt -d .
