@@ -125,6 +125,13 @@ POS_CMDS = [
     "sizeof size_t",
     "sizeof task_struct",
     "sizeof spa vdev",
+
+    # sum
+    "sum",
+    "echo 1 | echo 2 | sum",
+    "spa | vdev | metaslab | deref | sizeof | sum",
+    "threads | sizeof | sum",
+    "threads | deref | sizeof | sum",
 ]
 
 NEG_CMDS = [
@@ -179,7 +186,10 @@ NEG_CMDS = [
 
     # sizeof - bogus types
     "sizeof struct spa",
-    "sizeof bogus"
+    "sizeof bogus",
+
+    # sum
+    "spa | deref | sum",
 ]
 
 CMD_TABLE = POS_CMDS + NEG_CMDS
