@@ -1,1 +1,1 @@
-sdb: rbtree: could not find 'struct bogus_type'
+sdb: rbtree: couldn't find typedef, struct, enum, nor union named 'bogus_type'
