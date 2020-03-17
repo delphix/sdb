@@ -154,7 +154,11 @@ def setup_target(args: argparse.Namespace) -> drgn.Program:
     """
     prog = drgn.Program()
     if args.core:
-        prog.set_core_dump(args.core)
+        try:
+            prog.set_core_dump(args.core)
+        except FileNotFoundError:
+            print(f"sdb: no such file: '{args.core}'")
+            sys.exit(2)
 
         #
         # This is currently a short-coming of drgn. Whenever we
