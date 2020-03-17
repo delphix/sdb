@@ -72,14 +72,23 @@ class REPL:
         self.target = target
         self.histfile = ""
         readline.set_completer(REPL.__make_completer(vocabulary))
+        readline.parse_and_bind("tab: complete")
 
-    def enable_history(self, history_file: str = '~/.sdb_history') -> None:
+    def enable_history(self, history_file: str) -> None:
         self.histfile = os.path.expanduser(history_file)
         try:
             readline.read_history_file(self.histfile)
         except FileNotFoundError:
             pass
-        readline.parse_and_bind("tab: complete")
+        except PermissionError:
+            self.histfile = ""
+            print(
+                f"Warning: You don't have permissions to read {history_file} and\n"
+                "         the command history of this session won't be saved.\n"
+                "         Either change this file's permissions, recreate it,\n"
+                "         or use an alternate path with the SDB_HISTORY_FILE\n"
+                "         environment variable.")
+            return
         readline.set_history_length(1000)
         atexit.register(readline.write_history_file, self.histfile)
 
