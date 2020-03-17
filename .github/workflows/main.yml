@@ -10,12 +10,19 @@ jobs:
   #
   install:
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
         with:
-          python-version: '3.6'
+          python-version: ${{ matrix.python-version }}
       - run: python3 setup.py install
+        #
+        # The statement below is used for debugging the Github job.
+        #
+      - run: python3 --version
   #
   # Verify "pylint" runs successfully.
   #
@@ -26,7 +33,7 @@ jobs:
   pylint:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
         with:
           python-version: '3.6'
@@ -46,11 +53,14 @@ jobs:
   #
   pytest:
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
         with:
-          python-version: '3.6'
+          python-version: ${{ matrix.python-version }}
       - run: python3 -m pip install aws python-config pytest pytest-cov
       - run: ./.github/scripts/install-libkdumpfile.sh
       - run: ./.github/scripts/install-drgn.sh
@@ -65,7 +75,7 @@ jobs:
   yapf:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
         with:
           python-version: '3.6'
@@ -93,7 +103,7 @@ jobs:
   mypy:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
         with:
           python-version: '3.6'
@@ -107,6 +117,6 @@ jobs:
   shfmt:
     runs-on: ubuntu-18.04
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - run: ./.github/scripts/install-shfmt.sh
       - run: /usr/local/bin/shfmt -d .
