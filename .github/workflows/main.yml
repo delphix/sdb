@@ -20,9 +20,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: python3 setup.py install
         #
-        # The statement below is used for debugging the Github job.
+        # The statements below are used for debugging the Github job:
+        # - Ensure that we are using the right python version from
+        #   the Github action matrix.
+        # - Ensure that drgn (the main dependency of sdb) is installed
+        #   as part of `setup.py install`.
         #
       - run: python3 --version
+      - run: drgn -h
   #
   # Verify "pylint" runs successfully.
   #
@@ -80,8 +85,7 @@ jobs:
         with:
           python-version: '3.6'
       - run: python3 -m pip install yapf
-      - run: yapf --diff --style google --recursive sdb
-      - run: yapf --diff --style google --recursive tests
+      - run: yapf --diff --style google --recursive sdb tests setup.py
   #
   # Verify "mypy" runs successfully.
   #
@@ -120,3 +124,16 @@ jobs:
       - uses: actions/checkout@v2
       - run: ./.github/scripts/install-shfmt.sh
       - run: /usr/local/bin/shfmt -d .
+  #
+  # Verify that we can generate a new distribution archive.
+  #
+  distribution-archives:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.6'
+      - run: python3 -m pip install --user --upgrade setuptools wheel
+      - run: python3 setup.py sdist bdist_wheel
+      - run: ls dist
