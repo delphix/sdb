@@ -163,8 +163,6 @@ TASK_STRUCT        STATE             COUNT
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
 
-0xffffa08966a01700 RUNNING               3
-
 0xffffa0895820dc00 INTERRUPTIBLE         3
                   __schedule+0x2c0
                   schedule+0x2c
@@ -241,6 +239,8 @@ TASK_STRUCT        STATE             COUNT
                   schedule+0x2c
                   kthreadd+0x2e8
                   ret_from_fork+0x1f
+
+0xffffa08966a01700 RUNNING               1
 
 0xffffa08966a6dc00 INTERRUPTIBLE         1
                   __schedule+0x2c0
@@ -445,6 +445,41 @@ TASK_STRUCT        STATE             COUNT
                   vfs_read+0x8e
                   ksys_read+0x5c
                   __x64_sys_read+0x1a
+                  do_syscall_64+0x5a
+                  entry_SYSCALL_64+0x7c
+
+0xffffa0888cc62e00 RUNNING               1
+                  new_slab+0x240
+                  ___slab_alloc+0x393
+                  __slab_alloc+0x20
+                  kmem_cache_alloc+0x182
+                  spl_kmem_cache_alloc+0x46
+                  zio_data_buf_alloc+0x55
+                  zil_itx_create+0x29
+                  zfs_log_write+0x124
+                  zfs_write+0x68c
+                  zpl_write_common_iovec+0xa5
+                  zpl_iter_write_common+0x81
+                  zpl_iter_write+0x4f
+                  new_sync_write+0x10c
+                  __vfs_write+0x29
+                  vfs_write+0xb1
+                  ksys_write+0x5c
+                  __x64_sys_write+0x1a
+                  do_syscall_64+0x5a
+                  entry_SYSCALL_64+0x7c
+
+0xffffa08884831700 RUNNING               1
+                  __crash_kexec+0x9d
+                  panic+0x10e
+                  0xffffffff8b849f25+0x0
+                  __handle_sysrq+0x9f
+                  write_sysrq_trigger+0x34
+                  proc_reg_write+0x3e
+                  __vfs_write+0x1b
+                  vfs_write+0xb1
+                  ksys_write+0x5c
+                  __x64_sys_write+0x1a
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
 

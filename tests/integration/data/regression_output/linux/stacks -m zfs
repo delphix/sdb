@@ -98,3 +98,24 @@ TASK_STRUCT        STATE             COUNT
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
 
+0xffffa0888cc62e00 RUNNING               1
+                  new_slab+0x240
+                  ___slab_alloc+0x393
+                  __slab_alloc+0x20
+                  kmem_cache_alloc+0x182
+                  spl_kmem_cache_alloc+0x46
+                  zio_data_buf_alloc+0x55
+                  zil_itx_create+0x29
+                  zfs_log_write+0x124
+                  zfs_write+0x68c
+                  zpl_write_common_iovec+0xa5
+                  zpl_iter_write_common+0x81
+                  zpl_iter_write+0x4f
+                  new_sync_write+0x10c
+                  __vfs_write+0x29
+                  vfs_write+0xb1
+                  ksys_write+0x5c
+                  __x64_sys_write+0x1a
+                  do_syscall_64+0x5a
+                  entry_SYSCALL_64+0x7c
+
