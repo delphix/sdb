@@ -24,8 +24,8 @@ import sdb
 from sdb.commands.zfs.internal import (
     METASLAB_ACTIVE_MASK, METASLAB_WEIGHT_CLAIM, METASLAB_WEIGHT_PRIMARY,
     METASLAB_WEIGHT_SECONDARY, METASLAB_WEIGHT_TYPE, WEIGHT_GET_COUNT,
-    WEIGHT_GET_INDEX, WEIGHT_IS_SPACEBASED, BTREE_LEAF_SIZE, nicenum,
-    print_histogram)
+    WEIGHT_GET_INDEX, WEIGHT_IS_SPACEBASED, BTREE_LEAF_SIZE, nicenum)
+from sdb.commands.zfs.histograms import ZFSHistogram
 
 
 class Metaslab(sdb.Locator, sdb.PrettyPrinter):
@@ -165,13 +165,17 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
                      indent: int = 0) -> None:
         first_time = True
         for msp in metaslabs:
-            if not self.args.histogram and not self.args.weight:
+            if not self.args.weight:
                 Metaslab.print_metaslab(msp, first_time, indent)
             if self.args.histogram:
                 spacemap = msp.ms_sm
                 if spacemap != sdb.get_typed_null(spacemap.type_):
                     histogram = spacemap.sm_phys.smp_histogram
-                    print_histogram(histogram, 32, spacemap.sm_shift)
+                    ZFSHistogram.print_histogram(histogram,
+                                                 int(spacemap.sm_shift), indent)
+                    ZFSHistogram.print_histogram_median(histogram,
+                                                        int(spacemap.sm_shift),
+                                                        indent)
             if self.args.weight:
                 Metaslab.metaslab_weight_print(msp, first_time, indent)
             first_time = False

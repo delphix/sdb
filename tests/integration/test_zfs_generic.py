@@ -16,6 +16,7 @@
 
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
+# pylint: disable=line-too-long
 
 from typing import Any
 
@@ -24,10 +25,22 @@ from tests.integration.infra import repl_invoke, dump_exists, slurp_output_file
 
 
 CMD_TABLE = [
+    # arc
     "arc",
+
+    # dbuf
     "dbuf",
+    "dbuf -l 1",
+    "dbuf | dbuf -l 1",
+    'dbuf | dbuf -l 1 | head | dbuf',
+
+    # spa + vdev + metaslab
     "spa",
+    "spa -H",
     "spa -v",
+    "spa -vH",
+    "spa -vm",
+    "spa -vmH",
     "spa rpool",
     "spa | pp",
     "spa | head 1 | spa",
@@ -37,11 +50,16 @@ CMD_TABLE = [
     "spa | vdev | metaslab -w",
     "spa | vdev | metaslab | member ms_allocatable | range_tree",
     "spa | vdev | metaslab | member ms_allocatable.rt_root | zfs_btree",
+
+    # zfs_dbgmsg
     "zfs_dbgmsg",
     "zfs_dbgmsg | tail 5 | zfs_dbgmsg",
-    "dbuf -l 1",
-    "dbuf | dbuf -l 1",
-    'dbuf | dbuf -l 1 | head | dbuf'
+
+    # zfs_histogram
+    "spa data | member spa_normal_class.mc_histogram | zfs_histogram",
+    "spa data | vdev | metaslab | filter obj.ms_loaded == 1 | head 1 | member ms_sm.sm_phys.smp_histogram | zhist",
+    "spa data | vdev | metaslab | filter obj.ms_loaded == 1 | head 1 | member ms_sm.sm_phys.smp_histogram | zhist 9",
+    "spa data | vdev | metaslab | filter obj.ms_loaded == 1 | head 1 | member ms_allocatable.rt_histogram | zhist",
 ] # yapf: disable
 
 

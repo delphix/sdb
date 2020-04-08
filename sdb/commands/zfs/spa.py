@@ -23,6 +23,7 @@ import drgn
 import sdb
 from sdb.commands.spl.avl import Avl
 from sdb.commands.zfs.vdev import Vdev
+from sdb.commands.zfs.histograms import ZFSHistogram
 
 
 class Spa(sdb.Locator, sdb.PrettyPrinter):
@@ -68,6 +69,12 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
         for spa in spas:
             print("{:18} {}".format(hex(spa),
                                     spa.spa_name.string_().decode("utf-8")))
+            if self.args.histogram:
+                ZFSHistogram.print_histogram(spa.spa_normal_class.mc_histogram,
+                                             0, 5)
+                ZFSHistogram.print_histogram_median(
+                    spa.spa_normal_class.mc_histogram, 0, 5)
+
             if self.args.vdevs:
                 vdevs = sdb.execute_pipeline([spa], [Vdev()])
                 Vdev(self.arg_string).pretty_print(vdevs, 5)

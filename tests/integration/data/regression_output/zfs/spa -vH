@@ -1,0 +1,64 @@
+ADDR               NAME
+------------------------------------------------------------
+0xffffa0894e720000 data
+       512.0B:     32 ********************************
+        1.0KB:     27 ***************************
+        2.0KB:     32 ********************************
+        4.0KB:      7 *******
+        8.0KB:      1 *
+       16.0KB:      1 *
+       32.0KB:      0 
+       64.0KB:      0 
+      128.0KB:      0 
+      256.0KB:      0 
+      512.0KB:      0 
+        1.0MB:      0 
+        2.0MB:      0 
+        4.0MB:      0 
+        8.0MB:      0 
+       16.0MB:      0 
+       32.0MB:      0 
+       64.0MB:      0 
+      128.0MB:      0 
+      256.0MB:     15 ***************
+     Approx. Median: 384.0MB
+      ADDR               STATE   AUX  DESCRIPTION
+      ------------------------------------------------------------
+      0xffffa089486fc000 HEALTHY NONE  root
+      0xffffa08949ff4000 HEALTHY NONE    mirror
+      0xffffa08948af8000 HEALTHY NONE      /dev/sdb1
+      0xffffa08949ff8000 HEALTHY NONE      /dev/sdc1
+      0xffffa08949e58000 HEALTHY NONE    /dev/sdd1
+0xffffa089413b8000 meta-domain
+        1.0KB:     18 ******************
+        2.0KB:     24 ************************
+        4.0KB:     17 *****************
+        8.0KB:     21 *********************
+       16.0KB:      0 
+       32.0KB:      0 
+       64.0KB:      0 
+      128.0KB:      0 
+      256.0KB:      0 
+      512.0KB:      0 
+        1.0MB:      0 
+        2.0MB:      0 
+        4.0MB:      0 
+        8.0MB:      0 
+       16.0MB:      0 
+       32.0MB:      0 
+       64.0MB:      1 *
+      128.0MB:      4 ****
+     Approx. Median: 184.0MB
+      ADDR               STATE   AUX  DESCRIPTION
+      ------------------------------------------------------------
+      0xffffa08953aa4000 HEALTHY NONE  root
+      0xffffa08953aa8000 HEALTHY NONE    raidz
+      0xffffa08953aac000 HEALTHY NONE      /tmp/dks0
+      0xffffa08953ab0000 HEALTHY NONE      /tmp/dks1
+      0xffffa08953ab4000 HEALTHY NONE      /tmp/dks2
+0xffffa08955c44000 rpool
+     Approx. Median: 0.0B
+      ADDR               STATE   AUX  DESCRIPTION
+      ------------------------------------------------------------
+      0xffffa08952efc000 HEALTHY NONE  root
+      0xffffa08953300000 HEALTHY NONE    /dev/sda1
