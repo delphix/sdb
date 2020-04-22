@@ -1,0 +1,21 @@
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron:  '0 0 * * *'
+
+jobs:
+  sync:
+    strategy:
+      matrix:
+        branch:
+          - 6.0/stage
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: ./.github/scripts/install-hub.sh
+      - run: ./.github/scripts/sync-with-master.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ matrix.branch }}
