@@ -33,16 +33,18 @@ CMD_TABLE = [
     "addr arc_mru | member [0].arcs_list[1] | multilist | head",
 
     # spl_cache walker
-    'spl_kmem_caches | filter obj.skc_name == "ddt_cache" | walk',
-    "spl_kmem_caches | filter obj.skc_linux_cache == 0 | spl_cache",
-    "spl_kmem_caches | filter obj.skc_linux_cache == 0 | spl_cache | cnt",
+    'spl_kmem_caches | filter \'obj.skc_name == "ddt_cache"\' | walk',
+    "spl_kmem_caches | filter 'obj.skc_linux_cache == 0' | spl_cache",
+    "spl_kmem_caches | filter 'obj.skc_linux_cache == 0' | spl_cache | cnt",
     # spl_cache - ensure we can walk caches backed by SLUB
-    "spl_kmem_caches | filter obj.skc_linux_cache > 0 | filter obj.skc_obj_alloc > 0 | head 1 | spl_cache",
+    "spl_kmem_caches | filter 'obj.skc_linux_cache > 0' | filter 'obj.skc_obj_alloc > 0' | head 1 | spl_cache",
 
     # spl_kmem_caches
     "spl_kmem_caches",
+    "spl_kmem_caches -o name,source",
     "spl_kmem_caches -v",
     "spl_kmem_caches -s entry_size",
+    "spl_kmem_caches -o name,entry_size -s entry_size",
     "spl_kmem_caches -s entry_size | head 4 | spl_kmem_caches",
     "spl_kmem_caches | pp",
 ]

@@ -48,31 +48,31 @@ POS_CMDS = [
     "addr jiffies | deref",
 
     # filter - no input
-    "filter obj == 1",
+    "filter 'obj == 1'",
     # filter - match
-    "echo 0x0 | filter obj == 0",
+    "echo 0x0 | filter 'obj == 0'",
     # filter - no match
-    "echo 0x0 | filter obj == 1",
+    "echo 0x0 | filter 'obj == 1'",
     # filter - identity
-    "echo 0x1 | filter obj == obj",
+    "echo 0x1 | filter 'obj == obj'",
     # filter - multiple entries match one (eq)
-    "echo 0x0 0x1 0x2 | filter obj == 1",
+    "echo 0x0 0x1 0x2 | filter 'obj == 1'",
     # filter - multiple entries match one (gt)
-    "echo 0x0 0x1 0x2 | filter obj > 1",
+    "echo 0x0 0x1 0x2 | filter 'obj > 1'",
     # filter - multiple entries match one (ge)
-    "echo 0x0 0x1 0x2 | filter obj >= 1",
+    "echo 0x0 0x1 0x2 | filter 'obj >= 1'",
     # filter - multiple entries match one (lt)
-    "echo 0x0 0x1 0x2 | filter obj < 1",
+    "echo 0x0 0x1 0x2 | filter 'obj < 1'",
     # filter - multiple entries match one (le)
-    "echo 0x0 0x1 0x2 | filter obj <= 1",
+    "echo 0x0 0x1 0x2 | filter 'obj <= 1'",
     # filter - deref member
-    "spa rpool | filter obj.spa_syncing_txg == 1624 | member spa_name",
-    "spa rpool | filter obj.spa_syncing_txg >= 1624 | member spa_name",
-    "spa rpool | filter obj.spa_syncing_txg <= 1624 | member spa_name",
-    "spa rpool | filter obj.spa_syncing_txg < 1624 | member spa_name",
-    "spa rpool | filter obj.spa_syncing_txg > 1624 | member spa_name",
+    "spa rpool | filter 'obj.spa_syncing_txg == 1624' | member spa_name",
+    "spa rpool | filter 'obj.spa_syncing_txg >= 1624' | member spa_name",
+    "spa rpool | filter 'obj.spa_syncing_txg <= 1624' | member spa_name",
+    "spa rpool | filter 'obj.spa_syncing_txg < 1624' | member spa_name",
+    "spa rpool | filter 'obj.spa_syncing_txg > 1624' | member spa_name",
     # locator that receives no input from a filter
-    'thread | filter obj.comm == \"bogus\" | thread',
+    'thread | filter "obj.comm == \\"bogus\\"" | thread',
 
     # member - generic
     "member no_object",
@@ -120,6 +120,7 @@ POS_CMDS = [
     "ptype spa_t",
     "ptype spa vdev",
     "ptype zfs_case v_t thread_union",
+    "ptype 'struct spa'",
 
     # sizeof
     "sizeof size_t",
@@ -155,15 +156,15 @@ NEG_CMDS = [
     "addr jiffies | deref | deref",
 
     # filter - no right-hand side
-    "zfs_dbgmsg | filter obj ==",
+    "zfs_dbgmsg | filter 'obj =='",
     # filter - no left-hand side
-    "zfs_dbgmsg | filter  == obj",
+    "zfs_dbgmsg | filter  '== obj'",
     # filter - no operator
-    "zfs_dbgmsg | filter obj"
+    "zfs_dbgmsg | filter 'obj'"
     # filter - bogus member
-    "spa rpool | filter obj.bogus == 1624",
+    "spa rpool | filter 'obj.bogus == 1624'",
     # filter - bogus op
-    "spa rpool | filter obj.spa_syncing_txg bogus_op 1624",
+    "spa rpool | filter 'obj.spa_syncing_txg bogus_op 1624'",
 
     # member user arrow notation in embedded struct member
     "spa | member spa_ubsync->ub_rootbp",
@@ -180,6 +181,8 @@ NEG_CMDS = [
 
     # ptype - bogus type
     "ptype bogus_t",
+    # ptype - freestanding C keyword
+    "ptype struct spa",
 
     # pretty printer passed incorrect type
     "spa | range_tree",

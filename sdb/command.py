@@ -215,13 +215,47 @@ class Command:
 
     input_type: Optional[str] = None
 
-    def __init__(self, args: str = "", name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         self.name = name
         self.isfirst = False
         self.islast = False
 
         self.parser = type(self)._init_parser(name)
-        self.args = self.parser.parse_args(args.split())
+
+        #
+        # The if-else clauses below may seem like it can be avoided by:
+        #
+        #     [1] Passing the `args` function argument to parse_args() even if
+        #         it is None - the call won't blow up.
+        #
+        #  or [2] Setting the default value of `args` to be [] instead of None.
+        #
+        # Solution [1] doesn't work because parse_args() actually distinguishes
+        # between None and [] as parameters. If [] is passed it returns an
+        # argparse.Namespace() with default values for all the fields that the
+        # command specified in _init_parser(), which is what we want. If None
+        # is passed then argparse's default logic is to attempt to parse
+        # `_sys.argv[1:]` (reference code: cpython/Lib/argparse.py) which is
+        # the arguments passed to the sdb from the shell. This is far from what
+        # we want.
+        #
+        # Solution 2 is dangerous as default arguments in Python are mutable(!)
+        # and thus invoking a Command with arguments that doesn't specify the
+        # __init__() method can pass its arguments to a similar Command later
+        # in the pipeline even if the latter Command didn't specify any args.
+        # [docs.python-guide.org/writing/gotchas/#mutable-default-arguments]
+        #
+        # We still want to set self.args to an argparse.Namespace() with the
+        # fields specific to our self.parser, thus we are forced to call
+        # parse_args([]) for it, even if `args` is None. This way commands
+        # using arguments can always do self.args.<expected field> without
+        # having to check whether this field exist every time.
+        #
+        if args is None:
+            args = []
+        self.args = self.parser.parse_args(args)
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """
@@ -365,7 +399,9 @@ class Cast(Command):
         parser.add_argument("type", nargs=argparse.REMAINDER)
         return parser
 
-    def __init__(self, args: str = "", name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         super().__init__(args, name)
         if not self.args.type:
             self.parser.error("the following arguments are required: <type>")

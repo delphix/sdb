@@ -24,7 +24,7 @@ class Error(Exception):
     text: str = ""
 
     def __init__(self, text: str) -> None:
-        self.text = 'sdb: {}'.format(text)
+        self.text = f"sdb: {text}"
         super().__init__(self.text)
 
 
@@ -90,3 +90,20 @@ class CommandEvalSyntaxError(CommandError):
             indicator = ''.join(spaces_str)
             msg += f"\n\t{indicator}"
         super().__init__(command, msg)
+
+
+class ParserError(Error):
+    """
+    Thrown when SDB fails to parse input from the user.
+    """
+
+    line: str = ""
+    message: str = ""
+    offset: int = 0
+
+    def __init__(self, line: str, message: str, offset: int = 0) -> None:
+        self.line, self.message, self.offset = line, message, offset
+        msg = (f"syntax error: {self.message}\n"
+               f"  {self.line}\n"
+               f"  {' ' * (self.offset)}^")
+        super().__init__(msg)

@@ -17,7 +17,7 @@
 # pylint: disable=missing-docstring
 
 import argparse
-from typing import Iterable
+from typing import Iterable, List, Optional
 
 import drgn
 import sdb
@@ -55,16 +55,31 @@ class Filter(sdb.SingleInputCommand):
         parser.add_argument("expr", nargs=argparse.REMAINDER)
         return parser
 
-    def __init__(self, args: str = "", name: str = "_") -> None:
+    @staticmethod
+    def _parse_expression(input_expr: str) -> List[str]:
+        pass
+
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         super().__init__(args, name)
         if not self.args.expr:
-            self.parser.error("the following arguments are required: expr")
+            self.parser.error("no expression specified")
+
+        #
+        # This is a stop-gap solution until we figure out
+        # exactly how we want the filter command to behave.
+        #
+        if len(self.args.expr) == 1:
+            self.expr = self.args.expr[0].split()
+        else:
+            self.expr = self.args.expr
 
         index = None
         operators = ["==", "!=", ">", "<", ">=", "<="]
         for operator in operators:
             try:
-                index = self.args.expr.index(operator)
+                index = self.expr.index(operator)
                 # Use the first comparison operator we find.
                 break
             except ValueError:
@@ -83,7 +98,7 @@ class Filter(sdb.SingleInputCommand):
             raise sdb.CommandInvalidInputError(
                 self.name, "left hand side of expression is missing")
 
-        if index == len(self.args.expr) - 1:
+        if index == len(self.expr) - 1:
             # If the index is found to be at the very end of the list,
             # this means there's no right hand side of the comparison to
             # compare the left hand side to. This is an error.
@@ -91,14 +106,14 @@ class Filter(sdb.SingleInputCommand):
                 self.name, "right hand side of expression is missing")
 
         try:
-            self.lhs_code = compile(" ".join(self.args.expr[:index]),
-                                    "<string>", "eval")
-            self.rhs_code = compile(" ".join(self.args.expr[index + 1:]),
-                                    "<string>", "eval")
+            self.lhs_code = compile(" ".join(self.expr[:index]), "<string>",
+                                    "eval")
+            self.rhs_code = compile(" ".join(self.expr[index + 1:]), "<string>",
+                                    "eval")
         except SyntaxError as err:
             raise sdb.CommandEvalSyntaxError(self.name, err)
 
-        self.compare = self.args.expr[index]
+        self.compare = self.expr[index]
 
     def _call_one(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         try:

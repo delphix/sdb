@@ -15,7 +15,6 @@
 #
 """This module enables integration with the SDB REPL."""
 
-import shlex
 import subprocess
 import sys
 import itertools
@@ -24,6 +23,7 @@ from typing import Iterable, List, Tuple
 
 import drgn
 
+import sdb.parser as parser
 import sdb.target as target
 from sdb.error import CommandArgumentsError, CommandNotFoundError
 from sdb.command import Address, Cast, Command, get_registered_commands
@@ -55,7 +55,7 @@ def massage_input_and_call(
         # If we are passed a void*, cast it to the expected type.
         if (first_obj_type.kind is drgn.TypeKind.POINTER and
                 first_obj_type.type.primitive is drgn.PrimitiveType.C_VOID):
-            yield from execute_pipeline(objs, [Cast(cmd.input_type), cmd])
+            yield from execute_pipeline(objs, [Cast([cmd.input_type]), cmd])
             return
 
         # If we are passed a foo_t when we expect a foo_t*, use its address.
@@ -91,65 +91,42 @@ def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
     function is responsible for converting that string into the
     appropriate pipeline of Command objects, and executing it.
     """
-
-    # pylint: disable=too-many-locals
-    # pylint: disable=too-many-branches
-    # pylint: disable=too-many-statements
-
     target.set_prog(myprog)
 
-    shell_cmd = None
-    # Parse the argument string. Each pipeline stage is delimited by
-    # a pipe character "|". If there is a "!" character detected, then
-    # pipe all the remaining outout into a subshell.
-    lexer = shlex.shlex(line, posix=False, punctuation_chars="|!")
-    lexer.wordchars += "();<>&[]"
-    all_tokens = list(lexer)
-    pipe_stages = []
-    tokens: List[str] = []
-    for num, token in enumerate(all_tokens):
-        if token == "|":
-            pipe_stages.append(" ".join(tokens))
-            tokens = []
-        elif token == "!":
-            pipe_stages.append(" ".join(tokens))
-            if any(t == "!" for t in all_tokens[num + 1:]):
-                print("Multiple ! not supported")
-                return
-            shell_cmd = " ".join(all_tokens[num + 1:])
-            break
-        else:
-            tokens.append(token)
-    else:
-        # We didn't find a !, so all remaining tokens are part of
-        # the last pipe
-        pipe_stages.append(" ".join(tokens))
-
+    #
     # Build the pipeline by constructing each of the commands we want to
-    # use and building a list of them.
+    # use and building a list of them. If a shell pipeline is constructed
+    # at the end save it shell_cmd.
+    #
+    shell_cmd = None
     pipeline = []
-    for stage in pipe_stages:
-        (name, _, args) = stage.strip().partition(" ")
-        if name not in get_registered_commands():
-            raise CommandNotFoundError(name)
-        try:
-            pipeline.append(get_registered_commands()[name](args, name))
-        except SystemExit:
-            # The passed in arguments to each command will be parsed in
-            # the command object's constructor. We use "argparse" to do
-            # the argument parsing, and when that detects an error, it
-            # will throw this exception. Rather than exiting the entire
-            # SDB session, we only abort this specific pipeline by raising
-            # a CommandArgumentsError.
-            raise CommandArgumentsError(name)
+    for cmd, cmd_type in parser.tokenize(line):
+        if cmd_type == parser.ExpressionType.CMD:
+            name, *args = cmd
+            if name not in get_registered_commands():
+                raise CommandNotFoundError(name)
+            try:
+                pipeline.append(get_registered_commands()[name](args, name))
+            except SystemExit:
+                #
+                # The passed in arguments to each command will be parsed in
+                # the command object's constructor. We use "argparse" to do
+                # the argument parsing, and when that detects an error, it
+                # will throw this exception. Rather than exiting the entire
+                # SDB session, we only abort this specific pipeline by raising
+                # a CommandArgumentsError.
+                #
+                raise CommandArgumentsError(name)
+        else:
+            assert cmd_type == parser.ExpressionType.SHELL_CMD
+            shell_cmd = cmd
 
-    pipeline[0].isfirst = True
-    pipeline[-1].islast = True
-
+    #
     # If we have a !, redirect stdout to a shell process. This avoids
     # having to have a custom printing function that we pass around and
     # use everywhere. We'll fix stdout to point back to the normal stdout
     # at the end.
+    #
     if shell_cmd is not None:
         shell_proc = subprocess.Popen(shell_cmd,
                                       shell=True,
@@ -163,7 +140,10 @@ def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
         sys.stdout = shell_proc.stdin  # type: ignore[assignment]
 
     try:
-        yield from execute_pipeline(first_input, pipeline)
+        if pipeline:
+            pipeline[0].isfirst = True
+            pipeline[-1].islast = True
+            yield from execute_pipeline(first_input, pipeline)
 
         if shell_cmd is not None:
             shell_proc.stdin.flush()
