@@ -100,8 +100,8 @@ class SplKmemCaches(sdb.Locator, sdb.PrettyPrinter):
             yield from sorted(
                 kmem.for_each_spl_kmem_cache(),
                 key=SplKmemCaches.FIELDS[self.args.s],
-                reverse=(self.args.s not in
-                         SplKmemCaches.DEFAULT_INCREASING_ORDER_FIELDS))
+                reverse=(self.args.s
+                         not in SplKmemCaches.DEFAULT_INCREASING_ORDER_FIELDS))
         else:
             yield from kmem.for_each_spl_kmem_cache()
 
