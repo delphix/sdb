@@ -35,11 +35,11 @@ class Table:
     #
     # pylint: disable=bad-continuation
     def __init__(
-        self,
-        fields: List[str],
-        rjustfields: Optional[Set[str]] = None,
-        formatters: Optional[Dict[str, Callable[[Any], str]]] = None
-    ) -> None:
+            self,
+            fields: List[str],
+            rjustfields: Optional[Set[str]] = None,
+            formatters: Optional[Dict[str, Callable[[Any],
+                                                    str]]] = None) -> None:
         self.fields = fields
 
         if rjustfields is None:
@@ -93,13 +93,11 @@ class Table:
                 continue
 
             line_fields = []
-            for fid in range(len(self.fields)):
-                if self.fields[fid] in self.rjustfields:
+            for fid, field in enumerate(self.fields):
+                if field in self.rjustfields:
                     line_fields.append(
-                        f"{row_values[fid]:>{self.maxfieldlen[self.fields[fid]]}}"
-                    )
+                        f"{row_values[fid]:>{self.maxfieldlen[field]}}")
                 else:
                     line_fields.append(
-                        f"{row_values[fid]:<{self.maxfieldlen[self.fields[fid]]}}"
-                    )
+                        f"{row_values[fid]:<{self.maxfieldlen[field]}}")
             print(delimeter.join(line_fields))

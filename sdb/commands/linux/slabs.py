@@ -110,8 +110,8 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
             yield from sorted(
                 self.__no_input_iterator(),
                 key=Slabs.FIELDS[self.args.s],
-                reverse=(
-                    self.args.s not in Slabs.DEFAULT_INCREASING_ORDER_FIELDS))
+                reverse=(self.args.s
+                         not in Slabs.DEFAULT_INCREASING_ORDER_FIELDS))
         else:
             yield from self.__no_input_iterator()
 

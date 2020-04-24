@@ -192,6 +192,6 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
                             i, int(vdev.vdev_ms_count), int(vdev.vdev_id)))
                 yield vdev.vdev_ms[i]
         else:
-            for i in range(0, int(vdev.vdev_ms_count)):
+            for i in range(int(vdev.vdev_ms_count)):
                 msp = vdev.vdev_ms[i]
                 yield msp

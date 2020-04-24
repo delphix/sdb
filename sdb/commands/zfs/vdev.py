@@ -130,6 +130,6 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
                 self.name, "when providing a vdev, "
                 "specific child vdevs can not be requested")
         yield vdev
-        for cid in range(0, int(vdev.vdev_children)):
+        for cid in range(int(vdev.vdev_children)):
             cvd = vdev.vdev_child[cid]
             yield from self.from_vdev(cvd)
