@@ -1,5 +1,5 @@
 # sdb
-The Slick/Simple Debugger
+The Slick Debugger
 
 ![](https://github.com/delphix/sdb/workflows/.github/workflows/main.yml/badge.svg)
 
