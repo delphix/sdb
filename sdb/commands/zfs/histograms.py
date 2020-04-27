@@ -143,7 +143,7 @@ class ZFSHistogram(sdb.Command):
 
     def _call(self, objs: Iterable[drgn.Object]) -> None:
         for obj in objs:
-            print(f'seg-size   count')
+            print('seg-size   count')
             print(f'{"-" * 8}   {"-" * 5}')
             ZFSHistogram.print_histogram(obj, self.args.offset)
             ZFSHistogram.print_histogram_median(obj, self.args.offset)

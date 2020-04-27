@@ -145,7 +145,7 @@ class Command:
             # conditional control flow.
             #
             # pylint: disable=unsubscriptable-object
-            it_text = f"This command accepts inputs of type 'void *',"
+            it_text = "This command accepts inputs of type 'void *',"
             if cls.input_type[-1] == '*':
                 it_text += f" and '{cls.input_type[:-1].strip()}',"
             it_text += f" which will be converted to '{cls.input_type}'."
