@@ -96,6 +96,6 @@ class LxPerCpuCounterSum(sdb.SingleInputCommand):
     def _call_one(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         try:
             sum_ = drgn_percpu.percpu_counter_sum(obj)
-        except AttributeError as err:
+        except AttributeError:
             raise sdb.CommandError(self.name, "input is not a percpu_counter")
         yield drgn.Object(sdb.get_prog(), type="s64", value=sum_)
