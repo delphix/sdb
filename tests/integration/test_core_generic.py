@@ -160,7 +160,7 @@ NEG_CMDS = [
     # filter - no left-hand side
     "zfs_dbgmsg | filter  '== obj'",
     # filter - no operator
-    "zfs_dbgmsg | filter 'obj'"
+    "zfs_dbgmsg | filter 'obj'",
     # filter - bogus member
     "spa rpool | filter 'obj.bogus == 1624'",
     # filter - bogus op

@@ -30,19 +30,19 @@ class Filter(sdb.SingleInputCommand):
     EXAMPLES
         Print addresses greater than or equal to 4
 
-            sdb> addr 0 1 2 3 4 5 6 | filter obj >= 4
+            sdb> addr 0 1 2 3 4 5 6 | filter "obj >= 4"
             (void *)0x4
             (void *)0x5
             (void *)0x6
 
         Find the SPA object of the ZFS pool named "jax" and print its 'spa_name'
 
-            sdb> spa | filter obj.spa_name == "jax" | member spa_name
+            sdb> spa | filter 'obj.spa_name == "jax"' | member spa_name
             (char [256])"jax"
 
         Print the number of level 3 log statements in the kernel log buffer
 
-            sdb> dmesg | filter obj.level == 3 | count
+            sdb> dmesg | filter 'obj.level == 3' | count
             (unsigned long long)24
     """
     # pylint: disable=eval-used
@@ -52,7 +52,7 @@ class Filter(sdb.SingleInputCommand):
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
         parser = super()._init_parser(name)
-        parser.add_argument("expr", nargs=argparse.REMAINDER)
+        parser.add_argument("expr", nargs=1)
         return parser
 
     @staticmethod
@@ -63,17 +63,7 @@ class Filter(sdb.SingleInputCommand):
                  args: Optional[List[str]] = None,
                  name: str = "_") -> None:
         super().__init__(args, name)
-        if not self.args.expr:
-            self.parser.error("no expression specified")
-
-        #
-        # This is a stop-gap solution until we figure out
-        # exactly how we want the filter command to behave.
-        #
-        if len(self.args.expr) == 1:
-            self.expr = self.args.expr[0].split()
-        else:
-            self.expr = self.args.expr
+        self.expr = self.args.expr[0].split()
 
         index = None
         operators = ["==", "!=", ">", "<", ">=", "<="]
