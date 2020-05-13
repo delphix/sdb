@@ -148,14 +148,6 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
     def __pp_parse_args(self) -> Tuple[str, List[str], Dict[str, Any]]:
         fields = self.DEFAULT_FIELDS
         if self.args.o:
-            #
-            # HACK: Until we have a proper lexer for SDB we can
-            #       only pass the comma-separated list as a
-            #       string (e.g. quoted). Until this is fixed
-            #       we make sure to unquote such strings.
-            #
-            if self.args.o[0] == '"' and self.args.o[-1] == '"':
-                self.args.o = self.args.o[1:-1]
             fields = self.args.o.split(",")
         elif self.args.v:
             fields = list(Slabs.FIELDS.keys())

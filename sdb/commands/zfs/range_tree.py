@@ -81,5 +81,6 @@ class RangeSeg(sdb.Locator):
             enum_dict['RANGE_SEG_GAP']: 'range_seg_gap_t*',
         }
         seg_type_name = range_seg_type_to_type[int(rt.rt_type)]
-        yield from sdb.execute_pipeline([rt.rt_root.address_of_()],
-                                        [Btree(), Cast(seg_type_name)])
+        yield from sdb.execute_pipeline(
+            [rt.rt_root.address_of_()],
+            [Btree(), Cast([seg_type_name])])

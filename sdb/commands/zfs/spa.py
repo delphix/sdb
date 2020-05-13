@@ -17,7 +17,7 @@
 # pylint: disable=missing-docstring
 
 import argparse
-from typing import Iterable
+from typing import Iterable, List, Optional
 
 import drgn
 import sdb
@@ -53,15 +53,17 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
         parser.add_argument("poolnames", nargs="*")
         return parser
 
-    def __init__(self, args: str = "", name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         super().__init__(args, name)
-        self.arg_string = ""
+        self.arg_list: List[str] = []
         if self.args.metaslab:
-            self.arg_string += "-m "
+            self.arg_list.append("-m")
         if self.args.histogram:
-            self.arg_string += "-H "
+            self.arg_list.append("-H")
         if self.args.weight:
-            self.arg_string += "-w "
+            self.arg_list.append("-w")
 
     def pretty_print(self, spas: Iterable[drgn.Object]) -> None:
         print("{:18} {}".format("ADDR", "NAME"))
@@ -77,12 +79,12 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
 
             if self.args.vdevs:
                 vdevs = sdb.execute_pipeline([spa], [Vdev()])
-                Vdev(self.arg_string).pretty_print(vdevs, 5)
+                Vdev(self.arg_list).pretty_print(vdevs, 5)
 
     def no_input(self) -> drgn.Object:
         spas = sdb.execute_pipeline(
             [sdb.get_object("spa_namespace_avl").address_of_()],
-            [Avl(), sdb.Cast("spa_t *")],
+            [Avl(), sdb.Cast(["spa_t *"])],
         )
         for spa in spas:
             if (self.args.poolnames and spa.spa_name.string_().decode("utf-8")

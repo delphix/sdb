@@ -40,7 +40,7 @@ class ContainerOf(sdb.Command):
 
             sdb> addr init_task | cast void *
             (void *)0xffffffffa8217740
-            sdb> addr init_task | member comm | addr | container_of struct task_struct comm  | cast void *
+            sdb> addr init_task | member comm | addr | container_of task_struct comm  | cast void *
             (void *)0xffffffffa8217740
 
     """

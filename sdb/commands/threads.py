@@ -38,7 +38,7 @@ class Threads(sdb.Locator, sdb.PrettyPrinter):
         comm - the thread's command
 
     EXAMPLE
-        sdb> threads | filter obj.comm == "java" | threads
+        sdb> threads | filter 'obj.comm == "java"' | threads
         task               state         pid  prio comm
         ------------------ ------------- ---- ---- ----
         0xffff95d48b0e8000 INTERRUPTIBLE 4386 120  java

@@ -17,7 +17,7 @@
 # pylint: disable=missing-docstring
 
 import argparse
-from typing import Iterable
+from typing import Iterable, List, Optional
 
 import drgn
 import sdb
@@ -58,13 +58,15 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
         parser.add_argument("vdev_ids", nargs="*", type=int)
         return parser
 
-    def __init__(self, args: str = "", name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         super().__init__(args, name)
-        self.arg_string = ""
+        self.arg_list: List[str] = []
         if self.args.histogram:
-            self.arg_string += "-H "
+            self.arg_list.append("-H")
         if self.args.weight:
-            self.arg_string += "-w "
+            self.arg_list.append("-w")
 
     def pretty_print(self,
                      vdevs: Iterable[drgn.Object],
@@ -106,7 +108,7 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
                 )
             if self.args.metaslab:
                 metaslabs = sdb.execute_pipeline([vdev], [Metaslab()])
-                Metaslab(self.arg_string).pretty_print(metaslabs, indent + 5)
+                Metaslab(self.arg_list).pretty_print(metaslabs, indent + 5)
 
     @sdb.InputHandler("spa_t*")
     def from_spa(self, spa: drgn.Object) -> Iterable[drgn.Object]:

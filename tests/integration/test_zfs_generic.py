@@ -57,9 +57,9 @@ CMD_TABLE = [
 
     # zfs_histogram
     "spa data | member spa_normal_class.mc_histogram | zfs_histogram",
-    "spa data | vdev | metaslab | filter obj.ms_loaded == 1 | head 1 | member ms_sm.sm_phys.smp_histogram | zhist",
-    "spa data | vdev | metaslab | filter obj.ms_loaded == 1 | head 1 | member ms_sm.sm_phys.smp_histogram | zhist 9",
-    "spa data | vdev | metaslab | filter obj.ms_loaded == 1 | head 1 | member ms_allocatable.rt_histogram | zhist",
+    "spa data | vdev | metaslab | filter 'obj.ms_loaded == 1' | head 1 | member ms_sm.sm_phys.smp_histogram | zhist",
+    "spa data | vdev | metaslab | filter 'obj.ms_loaded == 1' | head 1 | member ms_sm.sm_phys.smp_histogram | zhist 9",
+    "spa data | vdev | metaslab | filter 'obj.ms_loaded == 1' | head 1 | member ms_allocatable.rt_histogram | zhist",
 ] # yapf: disable
 
 

@@ -17,7 +17,7 @@
 # pylint: disable=missing-docstring
 
 import argparse
-from typing import Iterable
+from typing import Iterable, List, Optional
 
 import drgn
 import drgn.helpers.linux.cpumask as drgn_cpumask
@@ -51,7 +51,9 @@ class LxPerCpuPtr(sdb.SingleInputCommand):
         parser.add_argument("cpus", nargs="*", type=int)
         return parser
 
-    def __init__(self, args: str = "", name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         super().__init__(args, name)
         self.ncpus = len(
             list(drgn_cpumask.for_each_possible_cpu(sdb.get_prog())))
