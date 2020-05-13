@@ -16,6 +16,7 @@
 
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
+# pylint: disable=line-too-long
 
 from typing import Any
 
@@ -32,10 +33,10 @@ POS_CMDS = [
     "addr tcp_sockets_allocated | cpu_counter_sum",
 
     # percpu
-    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu',
-    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 0',
-    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 1',
-    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 0 1',
+    'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu',
+    'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu 0',
+    'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu 1',
+    'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu 0 1',
 
     # fget
     "find_task 1 | fget 1 4",
@@ -63,19 +64,19 @@ POS_CMDS = [
     "slabs",
     "slabs -v",
     "slabs -s util",
-    'slabs -s active_objs -o "active_objs,util,name"',
+    'slabs -s active_objs -o active_objs,util,name',
     "slabs | pp",
     "slabs -s util | slabs",
     "slabs | head 2 | slabs",
 
     # slub
-    'slabs | filter obj.name == "zio_cache" | slub_cache',
-    'slabs | filter obj.name == "zio_cache" | walk',
-    'slabs | filter obj.name == "zio_cache" | slub_cache | count',
-    'slabs | filter obj.name == "zio_cache" | slub_cache | cast zio_t * | member io_spa.spa_name',
+    'slabs | filter \'obj.name == "zio_cache"\' | slub_cache',
+    'slabs | filter \'obj.name == "zio_cache"\' | walk',
+    'slabs | filter \'obj.name == "zio_cache"\' | slub_cache | count',
+    'slabs | filter \'obj.name == "zio_cache"\' | slub_cache | cast zio_t * | member io_spa.spa_name',
     # slub - expected inconsistent freelist test
     # (still a positive tests because we want to keep going besides inconsistencies)
-    'slabs | filter obj.name == "UNIX" | slub_cache | count',
+    'slabs | filter \'obj.name == "UNIX"\' | slub_cache | count',
 
     # stacks
     "stacks",
@@ -84,14 +85,14 @@ POS_CMDS = [
     "stacks -c spa_sync",
     "stacks -m zfs -c spa_sync",
     "stacks -m zfs -c zthr_procedure",
-    'threads | filter obj.comm == "java" | stack',
+    'threads | filter \'obj.comm == "java"\' | stack',
     "stacks -m zfs | count",
     "echo 0xffffa089669edc00 | stack",
 
     # threads
     "threads",
     "threads | count",
-    'threads | filter obj.comm == "java" | threads',
+    'threads | filter \'obj.comm == "java"\' | threads',
     "thread",
 ]
 
@@ -99,7 +100,7 @@ STRIPPED_POS_CMDS = [
     # dmesg
     "dmesg",
     "dmesg | pp",
-    "dmesg | filter obj.level == 3 | dmesg",
+    "dmesg | filter 'obj.level == 3' | dmesg",
 ]
 
 NEG_CMDS = [
@@ -126,10 +127,10 @@ NEG_CMDS = [
     "addr modules | lxlist module bogus_member | member name",
 
     # percpu - not valid CPU number
-    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 2',
-    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 3',
-    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 100',
-    'slabs | filter obj.name == "kmalloc-8" | member cpu_slab | percpu 0 2 1',
+    'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu 2',
+    'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu 3',
+    'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu 100',
+    'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu 0 2 1',
 
     # rbtree
     "addr vmap_area_root | rbtree bogus_type rb_node",

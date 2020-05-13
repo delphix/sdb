@@ -16,7 +16,7 @@
 
 # pylint: disable=missing-docstring
 
-from typing import Iterable
+from typing import Iterable, List, Optional
 
 import drgn
 import sdb
@@ -52,7 +52,9 @@ class Btree(sdb.Walker):
     names = ["zfs_btree"]
     input_type = "zfs_btree_t *"
 
-    def __init__(self, args: str = "", name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         super().__init__(args, name)
         self.elem_size: drgn.Object = None
 

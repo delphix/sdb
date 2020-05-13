@@ -110,7 +110,7 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
     def all_dnode_dbufs(self, dn: drgn.Object) -> Iterable[drgn.Object]:
         yield from sdb.execute_pipeline(
             [dn.dn_dbufs.address_of_()],
-            [sdb.Walk(), sdb.Cast(self.output_type)])
+            [sdb.Walk(), sdb.Cast([self.output_type])])
 
     @sdb.InputHandler('dnode_t*')
     def from_dnode(self, dn: drgn.Object) -> Iterable[drgn.Object]:

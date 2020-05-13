@@ -30,29 +30,43 @@ def test_no_arg() -> None:
         invoke(MOCK_PROGRAM, [], line)
 
 
-def test_no_rhs() -> None:
-    line = 'filter obj =='
-
-    with pytest.raises(sdb.CommandInvalidInputError):
-        invoke(MOCK_PROGRAM, [], line)
-
-
-def test_no_lhs() -> None:
-    line = 'filter == obj'
-
-    with pytest.raises(sdb.CommandInvalidInputError):
-        invoke(MOCK_PROGRAM, [], line)
-
-
-def test_no_operator() -> None:
+def test_no_quotes_0() -> None:
     line = 'filter obj'
 
     with pytest.raises(sdb.CommandInvalidInputError):
         invoke(MOCK_PROGRAM, [], line)
 
 
+def test_no_quotes_1() -> None:
+    line = 'filter obj == 1'
+
+    with pytest.raises(sdb.CommandArgumentsError):
+        invoke(MOCK_PROGRAM, [], line)
+
+
+def test_no_rhs() -> None:
+    line = 'filter "obj =="'
+
+    with pytest.raises(sdb.CommandInvalidInputError):
+        invoke(MOCK_PROGRAM, [], line)
+
+
+def test_no_lhs() -> None:
+    line = 'filter "== obj"'
+
+    with pytest.raises(sdb.CommandInvalidInputError):
+        invoke(MOCK_PROGRAM, [], line)
+
+
+def test_no_operator() -> None:
+    line = 'filter "obj"'
+
+    with pytest.raises(sdb.CommandInvalidInputError):
+        invoke(MOCK_PROGRAM, [], line)
+
+
 def test_single_void_ptr_input_lhs_not_object() -> None:
-    line = 'filter 0 == obj'
+    line = 'filter "0 == obj"'
     objs = [drgn.Object(MOCK_PROGRAM, 'void *', value=0)]
 
     with pytest.raises(sdb.CommandInvalidInputError):
@@ -60,32 +74,24 @@ def test_single_void_ptr_input_lhs_not_object() -> None:
 
 
 def test_multi_void_ptr_input_value_match_ne() -> None:
-    line = 'filter obj != 1'
+    line = 'filter "obj != 1"'
     objs = [
         drgn.Object(MOCK_PROGRAM, 'void *', value=0),
         drgn.Object(MOCK_PROGRAM, 'void *', value=1),
         drgn.Object(MOCK_PROGRAM, 'void *', value=2),
     ]
 
-    #
-    # This throws an error for all the wrong reasons. The operator this
-    # test is attempting to use is "!=", and due to a bug in the lexer
-    # used within "invoke", this operator does not reach the "filter"
-    # command. Instead, the lexer sees the "!" character and split the
-    # string into the following parts:
-    #
-    #     1. filter obj
-    #     2. = 1
-    #
-    # As a result, the "filter" command fails because it doesn't see a
-    # comparison operator as input to it.
-    #
-    with pytest.raises(sdb.CommandInvalidInputError):
-        invoke(MOCK_PROGRAM, objs, line)
+    ret = invoke(MOCK_PROGRAM, objs, line)
+
+    assert len(ret) == 2
+    assert ret[0].value_() == 0
+    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert ret[1].value_() == 2
+    assert ret[1].type_ == MOCK_PROGRAM.type('void *')
 
 
 def test_char_array_input_object_match() -> None:
-    line = 'filter obj == obj'
+    line = 'filter "obj == obj"'
     objs = [drgn.Object(MOCK_PROGRAM, 'char [4]', value=b"foo")]
 
     with pytest.raises(sdb.CommandError):
@@ -93,7 +99,7 @@ def test_char_array_input_object_match() -> None:
 
 
 def test_struct_input_invalid_syntax() -> None:
-    line = 'filter obj->ts_int == 1'
+    line = 'filter "obj->ts_int == 1"'
     objs = [MOCK_PROGRAM["global_struct"]]
 
     with pytest.raises(sdb.CommandEvalSyntaxError):
@@ -101,7 +107,7 @@ def test_struct_input_invalid_syntax() -> None:
 
 
 def test_struct_input_bogus_member() -> None:
-    line = 'filter obj.ts_bogus == 1'
+    line = 'filter "obj.ts_bogus == 1"'
     objs = [MOCK_PROGRAM["global_struct"]]
 
     with pytest.raises(sdb.CommandError):

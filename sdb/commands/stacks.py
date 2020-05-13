@@ -17,7 +17,7 @@
 # pylint: disable=missing-docstring
 
 import argparse
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 from collections import defaultdict
 
 import drgn
@@ -143,7 +143,9 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
     input_type = "struct task_struct *"
     output_type = "struct task_struct *"
 
-    def __init__(self, args: str = "", name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         super().__init__(args, name)
         self.mod_start, self.mod_end = 0, 0
         self.func_start, self.func_end = 0, 0

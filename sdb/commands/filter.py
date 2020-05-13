@@ -17,7 +17,7 @@
 # pylint: disable=missing-docstring
 
 import argparse
-from typing import Iterable
+from typing import Iterable, List, Optional
 
 import drgn
 import sdb
@@ -30,19 +30,19 @@ class Filter(sdb.SingleInputCommand):
     EXAMPLES
         Print addresses greater than or equal to 4
 
-            sdb> addr 0 1 2 3 4 5 6 | filter obj >= 4
+            sdb> addr 0 1 2 3 4 5 6 | filter "obj >= 4"
             (void *)0x4
             (void *)0x5
             (void *)0x6
 
         Find the SPA object of the ZFS pool named "jax" and print its 'spa_name'
 
-            sdb> spa | filter obj.spa_name == "jax" | member spa_name
+            sdb> spa | filter 'obj.spa_name == "jax"' | member spa_name
             (char [256])"jax"
 
         Print the number of level 3 log statements in the kernel log buffer
 
-            sdb> dmesg | filter obj.level == 3 | count
+            sdb> dmesg | filter 'obj.level == 3' | count
             (unsigned long long)24
     """
     # pylint: disable=eval-used
@@ -52,19 +52,24 @@ class Filter(sdb.SingleInputCommand):
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
         parser = super()._init_parser(name)
-        parser.add_argument("expr", nargs=argparse.REMAINDER)
+        parser.add_argument("expr", nargs=1)
         return parser
 
-    def __init__(self, args: str = "", name: str = "_") -> None:
+    @staticmethod
+    def _parse_expression(input_expr: str) -> List[str]:
+        pass
+
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         super().__init__(args, name)
-        if not self.args.expr:
-            self.parser.error("the following arguments are required: expr")
+        self.expr = self.args.expr[0].split()
 
         index = None
         operators = ["==", "!=", ">", "<", ">=", "<="]
         for operator in operators:
             try:
-                index = self.args.expr.index(operator)
+                index = self.expr.index(operator)
                 # Use the first comparison operator we find.
                 break
             except ValueError:
@@ -83,7 +88,7 @@ class Filter(sdb.SingleInputCommand):
             raise sdb.CommandInvalidInputError(
                 self.name, "left hand side of expression is missing")
 
-        if index == len(self.args.expr) - 1:
+        if index == len(self.expr) - 1:
             # If the index is found to be at the very end of the list,
             # this means there's no right hand side of the comparison to
             # compare the left hand side to. This is an error.
@@ -91,14 +96,14 @@ class Filter(sdb.SingleInputCommand):
                 self.name, "right hand side of expression is missing")
 
         try:
-            self.lhs_code = compile(" ".join(self.args.expr[:index]),
-                                    "<string>", "eval")
-            self.rhs_code = compile(" ".join(self.args.expr[index + 1:]),
-                                    "<string>", "eval")
+            self.lhs_code = compile(" ".join(self.expr[:index]), "<string>",
+                                    "eval")
+            self.rhs_code = compile(" ".join(self.expr[index + 1:]), "<string>",
+                                    "eval")
         except SyntaxError as err:
             raise sdb.CommandEvalSyntaxError(self.name, err)
 
-        self.compare = self.args.expr[index]
+        self.compare = self.expr[index]
 
     def _call_one(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         try:

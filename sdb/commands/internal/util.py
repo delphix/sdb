@@ -27,11 +27,8 @@ def get_valid_type_by_name(cmd: sdb.Command, tname: str) -> drgn.Type:
     corresponding drgn.Type object.
 
     This function is used primarily by commands that accept a type
-    name as an argument and exists mainly for 2 reasons:
-    [1] There is a limitation in the way the SDB lexer interacts with
-        argparse making it hard for us to parse type names more than
-        1 token wide (e.g. 'struct task_struct'). [bad reason]
-    [2] We save some typing for the user. [good reason]
+    name as an argument and exist only to save keystrokes for the
+    user.
     """
     if tname in ['struct', 'enum', 'union', 'class']:
         #
@@ -43,8 +40,9 @@ def get_valid_type_by_name(cmd: sdb.Command, tname: str) -> drgn.Type:
         # user-friendly and thus we just avoid that situation
         # by instructing the user to skip such keywords.
         #
-        raise sdb.CommandError(cmd.name,
-                               f"skip keyword '{tname}' and try again")
+        raise sdb.CommandError(
+            cmd.name,
+            f"skip keyword '{tname}' or quote your type \"{tname} <typename>\"")
 
     try:
         type_ = sdb.get_type(tname)

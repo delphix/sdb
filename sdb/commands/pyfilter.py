@@ -17,7 +17,7 @@
 # pylint: disable=missing-docstring
 
 import argparse
-from typing import Iterable
+from typing import Iterable, List, Optional
 
 import drgn
 import sdb
@@ -33,7 +33,9 @@ class PyFilter(sdb.Command):
         parser.add_argument("expr", nargs=argparse.REMAINDER)
         return parser
 
-    def __init__(self, args: str = "", name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         super().__init__(args, name)
         if not self.args.expr:
             self.parser.error("the following arguments are required: expr")

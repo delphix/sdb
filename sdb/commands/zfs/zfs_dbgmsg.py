@@ -60,4 +60,4 @@ class ZfsDbgmsg(sdb.Locator, sdb.PrettyPrinter):
         list_addr = proc_list.address_of_()
 
         yield from sdb.execute_pipeline(
-            [list_addr], [SPLList(), sdb.Cast("zfs_dbgmsg_t *")])
+            [list_addr], [SPLList(), sdb.Cast(["zfs_dbgmsg_t *"])])

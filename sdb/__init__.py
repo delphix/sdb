@@ -30,7 +30,8 @@ CLI/consumer implementations.
 #
 from sdb.error import (Error, CommandNotFoundError, CommandError,
                        CommandInvalidInputError, SymbolNotFoundError,
-                       CommandArgumentsError, CommandEvalSyntaxError)
+                       CommandArgumentsError, CommandEvalSyntaxError,
+                       ParserError)
 from sdb.target import (create_object, get_object, get_prog, get_typed_null,
                         get_type, get_pointer_type, get_target_flags,
                         get_symbol, type_canonical_name, type_canonicalize,
@@ -53,6 +54,7 @@ __all__ = [
     'Error',
     'InputHandler',
     'Locator',
+    'ParserError',
     'PrettyPrinter',
     'SingleInputCommand',
     'SymbolNotFoundError',
