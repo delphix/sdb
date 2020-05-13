@@ -118,5 +118,4 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
-      - run: ./.github/scripts/install-shfmt.sh
-      - run: /usr/local/bin/shfmt -d .
+      - uses: delphix/actions/shfmt@master
