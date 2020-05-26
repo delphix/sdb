@@ -765,6 +765,12 @@ TASK_STRUCT        STATE
                   ret_from_fork+0x1f
 
 0xffffa08966a01700 RUNNING         
+                  __schedule+0x2c0
+                  schedule+0x2c
+                  schedule_timeout+0x169
+                  rcu_gp_kthread+0x572
+                  kthread+0x121
+                  ret_from_fork+0x1f
 
 0xffffa08966a6dc00 INTERRUPTIBLE   
                   __schedule+0x2c0
