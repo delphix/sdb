@@ -24,7 +24,3 @@ for path in glob.glob("{}/*.py".format(os.path.dirname(__file__))):
     if path != __file__:
         module = os.path.splitext(os.path.basename(path))[0]
         importlib.import_module("sdb.commands.spl.internal.{}".format(module))
-
-for path in glob.glob("{}/*/__init__.py".format(os.path.dirname(__file__))):
-    module = os.path.basename(os.path.dirname(path))
-    importlib.import_module("sdb.commands.spl.internal.{}".format(module))
