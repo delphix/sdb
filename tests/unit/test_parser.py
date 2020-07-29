@@ -15,6 +15,7 @@
 #
 
 # pylint: disable=missing-docstring
+# pylint: disable=not-callable
 
 from typing import List, Tuple
 
