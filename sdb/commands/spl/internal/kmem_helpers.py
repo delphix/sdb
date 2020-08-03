@@ -20,6 +20,7 @@ from typing import Iterable
 
 import drgn
 import drgn.helpers.linux.list as drgn_list
+import drgn.helpers.linux.percpu as drgn_percpu
 
 import sdb
 from sdb.commands.internal import p2
@@ -91,12 +92,25 @@ def object_size(cache: drgn.Object) -> int:
 def nr_objects(cache: drgn.Object) -> int:
     assert sdb.type_canonical_name(cache.type_) == 'struct spl_kmem_cache *'
     if backed_by_linux_cache(cache):
-        return int(cache.skc_obj_alloc.value_())
+        return obj_alloc(cache)
     return int(cache.skc_obj_total.value_())
 
 
 def obj_alloc(cache: drgn.Object) -> int:
     assert sdb.type_canonical_name(cache.type_) == 'struct spl_kmem_cache *'
+    if backed_by_linux_cache(cache):
+        try:
+            return int(drgn_percpu.percpu_counter_sum(cache.skc_linux_alloc))
+        except AttributeError:
+            #
+            # The percpu_counter referenced above wasn't in ZoL until the
+            # following commit: ec1fea4516ac2f0c08d31d6308929298d1b281d0
+            #
+            # Fall back to the old-mechanism of using skc_obj_alloc if that
+            # percpu_counter member doesn't exist (an AttributeError will
+            # be thrown).
+            #
+            pass
     return int(cache.skc_obj_alloc.value_())
 
 
