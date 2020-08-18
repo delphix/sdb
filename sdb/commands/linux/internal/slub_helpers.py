@@ -44,9 +44,18 @@ def for_each_child_cache(root_cache: drgn.Object) -> Iterable[drgn.Object]:
         "memcg_params.children_node")
 
 
+def for_each_node(cache: drgn.Object) -> Iterable[drgn.Object]:
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
+    node_num = sdb.get_object('nr_node_ids')
+    for i in range(node_num):
+        yield cache.node[i]
+
+
 def nr_slabs(cache: drgn.Object) -> int:
     assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
-    nslabs: int = cache.node[0].nr_slabs.counter.value_()
+    nslabs = 0
+    for node in for_each_node(cache):
+        nslabs += node.nr_slabs.counter.value_()
     if is_root_cache(cache):
         for child in for_each_child_cache(cache):
             nslabs += nr_slabs(child)
@@ -78,7 +87,9 @@ def total_memory(cache: drgn.Object) -> int:
 
 def objs(cache: drgn.Object) -> int:
     assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
-    count: int = cache.node[0].total_objects.counter.value_()
+    count = 0
+    for node in for_each_node(cache):
+        count += node.total_objects.counter.value_()
     if is_root_cache(cache):
         for child in for_each_child_cache(cache):
             count += objs(child)
@@ -87,10 +98,12 @@ def objs(cache: drgn.Object) -> int:
 
 def inactive_objs(cache: drgn.Object) -> int:
     assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
-    node = cache.node[0].partial  # assumption nr_node_ids == 0
     free = 0
-    for page in list_for_each_entry("struct page", node.address_of_(), "lru"):
-        free += page.objects.value_() - page.inuse.value_()
+    for node in for_each_node(cache):
+        node_partial = node.partial
+        for page in list_for_each_entry("struct page",
+                                        node_partial.address_of_(), "lru"):
+            free += page.objects.value_() - page.inuse.value_()
     if is_root_cache(cache):
         for child in for_each_child_cache(cache):
             free += inactive_objs(child)
@@ -178,9 +191,10 @@ def for_each_freeobj_in_slab(cache: drgn.Object,
 
 def for_each_partial_slab_in_cache(cache: drgn.Object) -> Iterable[drgn.Object]:
     assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
-
-    node = cache.node[0].partial  # assumption nr_node_ids == 0
-    yield from list_for_each_entry("struct page", node.address_of_(), "lru")
+    for node in for_each_node(cache):
+        node_partial = node.partial
+        yield from list_for_each_entry("struct page",
+                                       node_partial.address_of_(), "lru")
 
     if is_root_cache(cache):
         for child in for_each_child_cache(cache):

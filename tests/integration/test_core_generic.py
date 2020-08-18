@@ -16,6 +16,7 @@
 
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
+# pylint: disable=not-callable
 
 from typing import Any
 
