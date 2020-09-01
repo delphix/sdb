@@ -22,13 +22,13 @@ import drgn
 import sdb
 
 
-def create_struct_type(name: str, member_names: List[str],
+def create_struct_type(prog: drgn.Program, name: str, member_names: List[str],
                        member_types: List[drgn.Type]) -> drgn.Type:
     """
     Creates a structure type given a list of member names and
     a list of types like this:
     ```
-    create_struct_type(<name>, [<name_a>, <name_b> ...],
+    create_struct_type(<prog>, <name>, [<name_a>, <name_b> ...],
                        [<type_a>, <type_b>, ...])
     ```
     returns a C structure:
@@ -52,7 +52,7 @@ def create_struct_type(name: str, member_names: List[str],
         else:
             bit_offset += 8 * type_.size
             struct_size += type_.size
-    return drgn.struct_type(name, struct_size, member_list)
+    return prog.struct_type(name, struct_size, member_list)
 
 
 def setup_basic_mock_program() -> drgn.Program:
@@ -97,13 +97,13 @@ def setup_basic_mock_program() -> drgn.Program:
     # More complex types are added to the mocked_types table in
     # an ad-hoc way here.
     #
-    struct_type = create_struct_type('test_struct',
+    struct_type = create_struct_type(prog, 'test_struct',
                                      ['ts_int', 'ts_voidp', 'ts_array'],
                                      [int_type, voidp_type, int_array_type])
     mocked_types['test_struct'] = struct_type
     structp_type = prog.type('struct test_struct *')
     complex_struct_type = create_struct_type(
-        'complex_struct', ['cs_structp', 'cs_struct', 'cs_structp_null'],
+        prog, 'complex_struct', ['cs_structp', 'cs_struct', 'cs_structp_null'],
         [structp_type, struct_type, structp_type])
     mocked_types['complex_struct'] = complex_struct_type
 
