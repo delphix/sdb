@@ -107,7 +107,7 @@ def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
                 raise CommandNotFoundError(name)
             try:
                 pipeline.append(get_registered_commands()[name](args, name))
-            except SystemExit:
+            except SystemExit as cmd_exit:
                 #
                 # The passed in arguments to each command will be parsed in
                 # the command object's constructor. We use "argparse" to do
@@ -116,7 +116,7 @@ def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
                 # SDB session, we only abort this specific pipeline by raising
                 # a CommandArgumentsError.
                 #
-                raise CommandArgumentsError(name)
+                raise CommandArgumentsError(name) from cmd_exit
         else:
             assert cmd_type == parser.ExpressionType.SHELL_CMD
             shell_cmd = cmd

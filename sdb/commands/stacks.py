@@ -295,9 +295,10 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
                 #
                 func = sdb.get_object(self.args.function)
                 sym = sdb.get_symbol(func.address_of_())
-            except KeyError:
+            except KeyError as err:
                 raise sdb.CommandError(
-                    self.name, f"symbol '{self.args.function}' does not exist")
+                    self.name,
+                    f"symbol '{self.args.function}' does not exist") from err
             if func.type_.kind != drgn.TypeKind.FUNCTION:
                 raise sdb.CommandError(
                     self.name, f"'{self.args.function}' is not a function")
@@ -356,10 +357,9 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
     # task state and program counters. Return a collection sorted by number
     # of tasks per stack.
     #
-    # Note: we disabled pyline C0330 due to https://github.com/PyCQA/pylint/issues/289
     @staticmethod
     def aggregate_stacks(
-        objs: Iterable[drgn.Object]  # pylint: disable=C0330
+        objs: Iterable[drgn.Object]
     ) -> List[Tuple[Tuple[str, Tuple[int, ...]], List[drgn.Object]]]:
         stack_aggr: Dict[Tuple[str, Tuple[int, ...]],
                          List[drgn.Object]] = defaultdict(list)
