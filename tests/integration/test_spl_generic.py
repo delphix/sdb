@@ -17,7 +17,6 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
 # pylint: disable=line-too-long
-# pylint: disable=not-callable
 
 from typing import Any
 

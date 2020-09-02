@@ -43,6 +43,6 @@ class Echo(sdb.Command):
         for addr in self.args.addrs:
             try:
                 value_ = int(addr, 0)
-            except ValueError:
-                raise sdb.CommandInvalidInputError(self.name, addr)
+            except ValueError as err:
+                raise sdb.CommandInvalidInputError(self.name, addr) from err
             yield sdb.create_object("void *", value_)

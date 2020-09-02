@@ -39,8 +39,8 @@ class Help(sdb.Command):
         if self.args.cmd is not None:
             try:
                 all_cmds[self.args.cmd].help(self.args.cmd)
-            except KeyError:
-                raise sdb.error.CommandNotFoundError(self.args.cmd)
+            except KeyError as err:
+                raise sdb.error.CommandNotFoundError(self.args.cmd) from err
         else:
             cmds: Dict[str, Type[sdb.Command]] = {}
             for k, v in all_cmds.items():

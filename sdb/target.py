@@ -104,12 +104,13 @@ def type_canonicalize(t: drgn.Type) -> drgn.Type:
 
     Note: function type's arguments and return types are not canonicalized.
     """
+    global prog
     if t.kind == drgn.TypeKind.TYPEDEF:
         return type_canonicalize(t.type)
     if t.kind == drgn.TypeKind.POINTER:
-        return drgn.pointer_type(t.size, type_canonicalize(t.type))
+        return prog.pointer_type(type_canonicalize(t.type), t.size)
     if t.kind == drgn.TypeKind.ARRAY:
-        return drgn.array_type(t.length, type_canonicalize(t.type))
+        return prog.array_type(type_canonicalize(t.type), t.length)
     return t.unqualified()
 
 
