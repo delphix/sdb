@@ -328,7 +328,8 @@ class Command:
                 yield from self.__invalid_memory_objects_check(
                     result, not issubclass(self.__class__, SingleInputCommand))
         except drgn.FaultError as err:
-            raise CommandError(self.name, f"invalid memory access: {str(err)}")
+            raise CommandError(self.name,
+                               f"invalid memory access: {str(err)}") from err
 
 
 class SingleInputCommand(Command):
@@ -409,15 +410,16 @@ class Cast(Command):
         tname = " ".join(self.args.type)
         try:
             self.type = target.get_type(tname)
-        except LookupError:
-            raise CommandError(self.name, f"could not find type '{tname}'")
+        except LookupError as err:
+            raise CommandError(self.name,
+                               f"could not find type '{tname}'") from err
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for obj in objs:
             try:
                 yield drgn.cast(self.type, obj)
             except TypeError as err:
-                raise CommandError(self.name, str(err))
+                raise CommandError(self.name, str(err)) from err
 
 
 class Dereference(Command):
@@ -546,8 +548,8 @@ class Address(Command):
         for symbol in self.args.symbols:
             try:
                 yield Address.resolve_for_address(symbol)
-            except KeyError:
-                raise SymbolNotFoundError(self.name, symbol)
+            except KeyError as err:
+                raise SymbolNotFoundError(self.name, symbol) from err
 
 
 class Walk(Command):
