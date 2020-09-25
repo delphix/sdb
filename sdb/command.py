@@ -643,13 +643,13 @@ class Walker(Command):
         the types as we go.
         """
         assert self.input_type is not None
-        type_ = target.get_type(self.input_type)
+        expected_type = type_canonicalize_name(self.input_type)
         for obj in objs:
-            if obj.type_ != type_:
+            if type_canonical_name(obj.type_) != expected_type:
                 raise CommandError(
                     self.name,
                     'expected input of type {}, but received {}'.format(
-                        type_, obj.type_))
+                        expected_type, type_canonical_name(obj.type_)))
 
             yield from self.walk(obj)
 
