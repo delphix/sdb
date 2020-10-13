@@ -50,16 +50,15 @@ class PType(sdb.Command):
 
         Print enums and unions:
 
-            sdb> ptype zfs_case v_t thread_union
+            sdb> ptype zfs_case 'struct v' thread_union
             enum zfs_case {
                     ZFS_CASE_SENSITIVE = 0,
                     ZFS_CASE_INSENSITIVE = 1,
                     ZFS_CASE_MIXED = 2,
             }
-            typedef union {
-                    iv_t e;
-                    uint8_t b[8];
-            } v_t
+            struct v {
+                    uint8_t b[16];
+            }
             union thread_union {
                     struct task_struct task;
                     unsigned long stack[2048];

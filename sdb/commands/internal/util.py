@@ -24,13 +24,46 @@ def get_valid_type_by_name(cmd: sdb.Command, tname: str) -> drgn.Type:
     """
     Given a type name in string form (`tname`) without any C keyword
     prefixes (e.g. 'struct', 'enum', 'class', 'union'), return the
-    corresponding drgn.Type object.
+    corresponding drgn.Type object. If `tname` starts with a C keyword
+    we just return the type as is.
 
     This function is used primarily by commands that accept a type
     name as an argument and exist only to save keystrokes for the
     user.
     """
-    if tname in ['struct', 'enum', 'union', 'class']:
+    TYPE_KEYWORDS = ['struct', 'enum', 'union', 'class']
+
+    tokens = tname.split()
+    if len(tokens) > 2:
+        #
+        # drgn fails in all kinds of ways when we pass it an
+        # invalid type that consists of more than 2 text tokens.
+        #
+        raise sdb.CommandError(cmd.name,
+                               f"input '{tname}' is not a valid type name")
+
+    if len(tokens) == 2:
+        if tokens[0] not in TYPE_KEYWORDS or tokens[1] in TYPE_KEYWORDS:
+            #
+            # For the same reason mentioned in the above comment
+            # we also ensure that someone may not invalid two-token
+            # input that has the following errors:
+            # 1] Doesn't start with a type keyword - e.g "bogus type"
+            # 2] Has a type keyword as its type name (also see
+            #    comment below) - e.g. struct struct
+            #
+            raise sdb.CommandError(cmd.name,
+                                   f"input '{tname}' is not a valid type name")
+        try:
+            return sdb.get_type(tname)
+        except LookupError as err:
+            raise sdb.CommandError(cmd.name,
+                                   f"couldn't find type '{tname}'") from err
+        except SyntaxError as err:
+            raise sdb.CommandError(
+                cmd.name, f"input '{tname}' is not a valid type name") from err
+
+    if tname in TYPE_KEYWORDS:
         #
         # Note: We have to do this because currently in drgn
         # prog.type('struct') returns a different error than
@@ -82,9 +115,12 @@ def get_valid_type_by_name(cmd: sdb.Command, tname: str) -> drgn.Type:
         # it is a structure, an enum, or a union.
         #
         pass
-    for prefix in ["struct ", "enum ", "union "]:
+    except SyntaxError as err:
+        raise sdb.CommandError(
+            cmd.name, f"input '{tname}' is not a valid type name") from err
+    for prefix in TYPE_KEYWORDS:
         try:
-            return sdb.get_type(f"{prefix}{tname}")
+            return sdb.get_type(f"{prefix} {tname}")
         except LookupError:
             pass
     raise sdb.CommandError(

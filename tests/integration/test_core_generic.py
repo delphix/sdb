@@ -119,7 +119,7 @@ POS_CMDS = [
     # ptype
     "ptype spa_t",
     "ptype spa vdev",
-    "ptype zfs_case v_t thread_union",
+    "ptype zfs_case 'struct v' thread_union",
     "ptype 'struct spa'",
 
     # sizeof
@@ -181,8 +181,18 @@ NEG_CMDS = [
 
     # ptype - bogus type
     "ptype bogus_t",
+    "ptype 'struct bogus'",
+    "ptype 'a b c'",
     # ptype - freestanding C keyword
     "ptype struct spa",
+    "ptype 'struct'",
+    "ptype 'struct union'",
+    "ptype 'bogus union'",
+    "ptype 'union struct struct'",
+    # ptype - invalid characters
+    "ptype @",
+    "ptype 2abc",
+    "ptype $abc",
 
     # pretty printer passed incorrect type
     "spa | range_tree",

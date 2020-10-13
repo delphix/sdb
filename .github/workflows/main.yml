@@ -94,10 +94,7 @@ jobs:
   #     comes with Ubuntu is 0.75 which has a couple of bugs triggered
   #     by our codebase (they've been resolved on trunk though so we
   #     may want to change this soon).
-  # [2] We supply --allow-untyped-calls because even though drgn has
-  #     stubs on typeshed now, there are still some untyped functions
-  #     (mainly in the helper API).
-  # [3] We supply --ignore-missing-imports to the tests package because
+  # [2] We supply --ignore-missing-imports to the tests package because
   #     pytest doesn't provide stubs on typeshed.
   #
   mypy:
@@ -109,7 +106,7 @@ jobs:
           python-version: '3.6'
       - run: ./.github/scripts/install-drgn.sh
       - run: python3 -m pip install mypy==0.730
-      - run: python3 -m mypy --strict --allow-untyped-calls --show-error-codes -p sdb
+      - run: python3 -m mypy --strict --show-error-codes -p sdb
       - run: python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests
   #
   # Verify that "shfmt" ran successfully against our shell scripts.
