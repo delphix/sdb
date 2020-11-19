@@ -16,14 +16,38 @@
 
 # pylint: disable=missing-docstring
 
+from textwrap import shorten
 from typing import Callable, Dict, Iterable, Union
 
 import drgn
 from drgn.helpers.linux.pid import for_each_task
+from drgn.helpers.linux.mm import cmdline
 
 import sdb
 from sdb.commands.internal.table import Table
 from sdb.commands.stacks import Stacks
+
+
+def _cmdline(obj: drgn.Object) -> str:
+    try:
+        s = " ".join(map(lambda s: s.decode("utf-8"), cmdline(obj)))
+
+        #
+        # The command line for a given thread can be obnoxiously long,
+        # so (by default) we limit it to 50 characters here. This helps
+        # preserve the readability of the command's output, but comes at
+        # the cost of not always showing the full command line of a
+        # thread.
+        #
+        return shorten(s, width=50)
+    except drgn.FaultError:
+        #
+        # The command line information is contained in the user address
+        # space of each thread, rather than in the kernel's address
+        # space. Thus, often, it may not be possible to retreive the
+        # thread's command line; e.g. when reading from a core dump.
+        #
+        return ""
 
 
 class Threads(sdb.Locator, sdb.PrettyPrinter):
@@ -36,16 +60,16 @@ class Threads(sdb.Locator, sdb.PrettyPrinter):
         pid - the pid of the thread's process
         prio - the priority of the thread
         comm - the thread's command
+        cmdline - the thread's command line (when available)
 
     EXAMPLE
         sdb> threads | filter 'obj.comm == "java"' | threads
-        task               state         pid  prio comm
-        ------------------ ------------- ---- ---- ----
-        0xffff95d48b0e8000 INTERRUPTIBLE 4386 120  java
-        0xffff95d48b0e96c0 INTERRUPTIBLE 4388 120  java
-        0xffff95d48b0ead80 INTERRUPTIBLE 4387 120  java
-        0xffff95d48b0edb00 INTERRUPTIBLE 4304 120  java
-        0xffff95d4af20ad80 INTERRUPTIBLE 4395 120  java
+        task               state         pid  prio comm cmdline
+        ------------------ ------------- ---- ---- ---- ----------------------------------------
+        0xffff8c96a7c70000 INTERRUPTIBLE 3029 120  java /usr/bin/java -Ddelphix.debug=true [...]
+        0xffff8c96a7c71740 INTERRUPTIBLE 3028 120  java /usr/bin/java -Ddelphix.debug=true [...]
+        0xffff8c96a7c75d00 INTERRUPTIBLE 3024 120  java /usr/bin/java -Ddelphix.debug=true [...]
+        0xffff8c9715808000 INTERRUPTIBLE 3027 120  java /usr/bin/java -Ddelphix.debug=true [...]
     """
 
     names = ["threads", "thread"]
@@ -58,6 +82,7 @@ class Threads(sdb.Locator, sdb.PrettyPrinter):
         "pid": lambda obj: int(obj.pid),
         "prio": lambda obj: int(obj.prio),
         "comm": lambda obj: str(obj.comm.string_().decode("utf-8")),
+        "cmdline": _cmdline,
     }
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
