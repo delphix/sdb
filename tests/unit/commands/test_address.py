@@ -37,7 +37,7 @@ def test_single_object() -> None:
 
     assert len(ret) == 1
     assert ret[0].value_() == 0xffffffffc0000000
-    assert ret[0].type_ == MOCK_PROGRAM.type('int *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('int *'))
 
 
 def test_plain_address() -> None:
@@ -47,7 +47,7 @@ def test_plain_address() -> None:
 
     assert len(ret) == 1
     assert ret[0].value_() == 0xffffffffc084eee0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
 
 
 def test_multiple_object() -> None:
@@ -57,11 +57,11 @@ def test_multiple_object() -> None:
 
     assert len(ret) == 3
     assert ret[0].value_() == 0xffffffffc0000000
-    assert ret[0].type_ == MOCK_PROGRAM.type('int *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('int *'))
     assert ret[1].value_() == 0xffffffffc084eee0
-    assert ret[1].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[1].type_, MOCK_PROGRAM.type('void *'))
     assert ret[2].value_() == 0xffff88d26353c108
-    assert ret[2].type_ == MOCK_PROGRAM.type('void **')
+    assert sdb.type_equals(ret[2].type_, MOCK_PROGRAM.type('void **'))
 
 
 def test_piped_invocations() -> None:
@@ -71,11 +71,11 @@ def test_piped_invocations() -> None:
 
     assert len(ret) == 3
     assert ret[0].value_() == 0xffffffffc0000000
-    assert ret[0].type_ == MOCK_PROGRAM.type('int *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('int *'))
     assert ret[1].value_() == 0xffffffffc084eee0
-    assert ret[1].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[1].type_, MOCK_PROGRAM.type('void *'))
     assert ret[2].value_() == 0xffff88d26353c108
-    assert ret[2].type_ == MOCK_PROGRAM.type('void **')
+    assert sdb.type_equals(ret[2].type_, MOCK_PROGRAM.type('void **'))
 
 
 def test_echo_pipe() -> None:
@@ -85,9 +85,9 @@ def test_echo_pipe() -> None:
 
     assert len(ret) == 2
     assert ret[0].value_() == 0xffffffffc084eee0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
     assert ret[1].value_() == 0xffff88d26353c108
-    assert ret[1].type_ == MOCK_PROGRAM.type('void **')
+    assert sdb.type_equals(ret[1].type_, MOCK_PROGRAM.type('void **'))
 
 
 def test_global_not_found() -> None:
