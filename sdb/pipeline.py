@@ -59,7 +59,8 @@ def massage_input_and_call(
             return
 
         # If we are passed a foo_t when we expect a foo_t*, use its address.
-        if target.get_pointer_type(first_obj_type) == expected_type:
+        if target.type_equals(target.get_pointer_type(first_obj_type),
+                              expected_type):
             yield from execute_pipeline(objs, [Address(), cmd])
             return
 

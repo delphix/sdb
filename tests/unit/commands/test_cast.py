@@ -53,7 +53,7 @@ def test_invoke_pipe_input() -> None:
     ret = invoke(MOCK_PROGRAM, objs, line)
 
     assert len(ret) == 1
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
     assert ret[0].value_() == 0x01020304
 
 
@@ -63,7 +63,7 @@ def test_str_pipe_input() -> None:
     ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
     assert ret[0].value_() == 0xffffffffc0000000
 
 
@@ -73,7 +73,7 @@ def test_pipe_input_pointer_to_int() -> None:
     ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
-    assert ret[0].type_ == MOCK_PROGRAM.type('unsigned int')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('unsigned int'))
     assert ret[0].value_() == 0xc0000000
 
 
@@ -92,7 +92,7 @@ def test_double_cast() -> None:
     ret = invoke(MOCK_PROGRAM, [], line)
 
     assert len(ret) == 1
-    assert ret[0].type_ == MOCK_PROGRAM.type('char *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('char *'))
     assert ret[0].value_() == 0xc0000000
 
 
@@ -102,4 +102,4 @@ def test_pointer_to_struct() -> None:
     with pytest.raises(sdb.CommandError) as err:
         invoke(MOCK_PROGRAM, [], line)
 
-    assert "cannot convert 'int *' to 'struct test_struct'" in str(err.value)
+    assert "cannot cast to 'struct test_struct'" in str(err.value)
