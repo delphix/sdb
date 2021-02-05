@@ -150,7 +150,7 @@ def type_equals(a: drgn.Type, b: drgn.Type) -> bool:
     same because we usually just need to know, "is this a foo_t*", without
     regard for which source .c file defined the foo_t.
 
-    Note that the drgn type equality operator (==) attempts to evalue deep
+    Note that the drgn type equality operator (==) attempts to evaluate deep
     type equality and therefore doesn't complete in a reasonable amount of time.
     "Deep type equality" means that two "struct foo"s that each contain a
     "struct bar *member" are not necessarily equal, because we must recursively

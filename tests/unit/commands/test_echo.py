@@ -39,7 +39,7 @@ def test_piped_input() -> None:
 
     assert len(ret) == 1
     assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
 
 
 def test_single_arg_hex() -> None:
@@ -49,7 +49,7 @@ def test_single_arg_hex() -> None:
 
     assert len(ret) == 1
     assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
 
 
 def test_single_arg_decimal() -> None:
@@ -59,7 +59,7 @@ def test_single_arg_decimal() -> None:
 
     assert len(ret) == 1
     assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
 
 
 def test_bogus_arg() -> None:
@@ -79,7 +79,7 @@ def test_test_piped_int() -> None:
 
     assert len(ret) == 1
     assert ret[0].value_() == 1
-    assert ret[0].type_ == MOCK_PROGRAM.type('int')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('int'))
 
 
 def test_single_arg() -> None:
@@ -89,7 +89,7 @@ def test_single_arg() -> None:
 
     assert len(ret) == 1
     assert ret[0].value_() == 1
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
 
 
 def test_multiple_piped() -> None:
@@ -103,9 +103,9 @@ def test_multiple_piped() -> None:
 
     assert len(ret) == 2
     assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
     assert ret[1].value_() == 1
-    assert ret[1].type_ == MOCK_PROGRAM.type('int')
+    assert sdb.type_equals(ret[1].type_, MOCK_PROGRAM.type('int'))
 
 
 def test_multiple_args() -> None:
@@ -115,9 +115,9 @@ def test_multiple_args() -> None:
 
     assert len(ret) == 2
     assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
     assert ret[1].value_() == 1
-    assert ret[1].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[1].type_, MOCK_PROGRAM.type('void *'))
 
 
 def test_piped_and_args_combo() -> None:
@@ -131,13 +131,13 @@ def test_piped_and_args_combo() -> None:
 
     assert len(ret) == 4
     assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
     assert ret[1].value_() == 1
-    assert ret[1].type_ == MOCK_PROGRAM.type('int')
+    assert sdb.type_equals(ret[1].type_, MOCK_PROGRAM.type('int'))
     assert ret[2].value_() == 0
-    assert ret[2].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[2].type_, MOCK_PROGRAM.type('void *'))
     assert ret[3].value_() == 1
-    assert ret[3].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[3].type_, MOCK_PROGRAM.type('void *'))
 
 
 def test_multi_echo_combo() -> None:
@@ -151,12 +151,12 @@ def test_multi_echo_combo() -> None:
 
     assert len(ret) == 5
     assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
     assert ret[1].value_() == 1
-    assert ret[1].type_ == MOCK_PROGRAM.type('int')
+    assert sdb.type_equals(ret[1].type_, MOCK_PROGRAM.type('int'))
     assert ret[2].value_() == 2
-    assert ret[2].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[2].type_, MOCK_PROGRAM.type('void *'))
     assert ret[3].value_() == 3
-    assert ret[3].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[3].type_, MOCK_PROGRAM.type('void *'))
     assert ret[4].value_() == 4
-    assert ret[4].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[4].type_, MOCK_PROGRAM.type('void *'))

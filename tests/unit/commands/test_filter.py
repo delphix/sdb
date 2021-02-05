@@ -85,9 +85,9 @@ def test_multi_void_ptr_input_value_match_ne() -> None:
 
     assert len(ret) == 2
     assert ret[0].value_() == 0
-    assert ret[0].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[0].type_, MOCK_PROGRAM.type('void *'))
     assert ret[1].value_() == 2
-    assert ret[1].type_ == MOCK_PROGRAM.type('void *')
+    assert sdb.type_equals(ret[1].type_, MOCK_PROGRAM.type('void *'))
 
 
 def test_char_array_input_object_match() -> None:
