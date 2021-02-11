@@ -1,46 +1,46 @@
   ID ACTIVE ALGORITHM FRAG      ALLOC        MAXSZ       WEIGHT
  -----------------------------------------------------------------
-   0    P L  SEGMENT(uint64_t)0%     0M  (0.1%)      511MB    1 x 256MB
-   1    S L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-   2    P L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-   3    S L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-   4    P L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-   5    S L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-   6    P L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-   7    S L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-   8    C L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-   9    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-  10    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-  11    - L  SEGMENT(uint64_t)0%     2M  (0.4%)      509MB    1 x 256MB
-  12    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-  13    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-  14    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      511MB    1 x 256MB
-   0    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-   1    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-   2    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-   3    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-   4    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-   5    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-   6    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-   7    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-   8    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-   9    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-  10    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-  11    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-  12    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-  13    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-  14    -    SEGMENT(uint64_t)0%     0M  (0.0%)         0B    1 x 512MB
-   0    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      256MB    1 x 256MB
-   1    - L  SEGMENT(uint64_t)0%   127M (50.0%)      127MB     1 x 64MB
-   2    S L  SEGMENT(uint64_t)0%     0M  (0.1%)      255MB    1 x 128MB
-   3    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      255MB    1 x 128MB
-   4    P L  SEGMENT(uint64_t)0%    32M (12.7%)      223MB    1 x 128MB
-   5    C L  SEGMENT(uint64_t)0%     0M  (0.0%)      255MB    1 x 128MB
-   6    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      256MB    1 x 256MB
-   7    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      256MB    1 x 256MB
-   8    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      256MB    1 x 256MB
-   9    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      256MB    1 x 256MB
-  10    - L  SEGMENT(uint64_t)0%     0M  (0.0%)      256MB    1 x 256MB
+   0    P L  SEGMENT   0%     0M  (0.1%)      511MB    1 x 256MB
+   1    S L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+   2    P L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+   3    S L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+   4    P L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+   5    S L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+   6    P L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+   7    S L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+   8    C L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+   9    - L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+  10    - L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+  11    - L  SEGMENT   0%     2M  (0.4%)      509MB    1 x 256MB
+  12    - L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+  13    - L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+  14    - L  SEGMENT   0%     0M  (0.0%)      511MB    1 x 256MB
+   0    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+   1    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+   2    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+   3    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+   4    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+   5    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+   6    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+   7    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+   8    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+   9    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+  10    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+  11    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+  12    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+  13    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+  14    -    SEGMENT   0%     0M  (0.0%)         0B    1 x 512MB
+   0    - L  SEGMENT   0%     0M  (0.0%)      256MB    1 x 256MB
+   1    - L  SEGMENT   0%   127M (50.0%)      127MB     1 x 64MB
+   2    S L  SEGMENT   0%     0M  (0.1%)      255MB    1 x 128MB
+   3    - L  SEGMENT   0%     0M  (0.0%)      255MB    1 x 128MB
+   4    P L  SEGMENT   0%    32M (12.7%)      223MB    1 x 128MB
+   5    C L  SEGMENT   0%     0M  (0.0%)      255MB    1 x 128MB
+   6    - L  SEGMENT   0%     0M  (0.0%)      256MB    1 x 256MB
+   7    - L  SEGMENT   0%     0M  (0.0%)      256MB    1 x 256MB
+   8    - L  SEGMENT   0%     0M  (0.0%)      256MB    1 x 256MB
+   9    - L  SEGMENT   0%     0M  (0.0%)      256MB    1 x 256MB
+  10    - L  SEGMENT   0%     0M  (0.0%)      256MB    1 x 256MB
    0    -      SPACE     -   218M (42.7%)         0B        587MB
    1    -      SPACE     -   202M (39.5%)         0B        617MB
    2    P L    SPACE     -   347M (67.9%)      157MB        325MB
