@@ -108,7 +108,8 @@ class ZFSHistogram(sdb.Command):
                                offset: int = 0,
                                indent: int = 0) -> None:
         median = ZFSHistogram.histogram_median(hist, offset)
-        print(f'{" " * indent}Approx. Median: {fmt.size_nicenum(median)}')
+        if median > 0:
+            print(f'{" " * indent}Approx. Median: {fmt.size_nicenum(median)}')
 
     @staticmethod
     def print_histogram(hist: drgn.Object,
@@ -135,15 +136,20 @@ class ZFSHistogram(sdb.Command):
         if max_count < HISTOGRAM_WIDTH_MAX:
             max_count = HISTOGRAM_WIDTH_MAX
 
+        if min_bucket <= max_bucket:
+            print(f'{" " * indent}seg-size   count')
+            print(f'{" " * indent}{"-" * 8}   {"-" * 5}')
+
         for bucket in range(min_bucket, max_bucket + 1):
             count = int(hist[bucket])
             stars = round(count * HISTOGRAM_WIDTH_MAX / max_count)
             print(f'{" " * indent}{fmt.size_nicenum(2**(bucket+offset)):>8}: '
                   f'{count:>6} {"*" * stars}')
+        if min_bucket > max_bucket:
+            print(f'{" " * indent}** No histogram data available **')
+        else:
+            ZFSHistogram.print_histogram_median(hist, offset, indent)
 
     def _call(self, objs: Iterable[drgn.Object]) -> None:
         for obj in objs:
-            print('seg-size   count')
-            print(f'{"-" * 8}   {"-" * 5}')
             ZFSHistogram.print_histogram(obj, self.args.offset)
-            ZFSHistogram.print_histogram_median(obj, self.args.offset)

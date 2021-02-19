@@ -74,10 +74,8 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
             if self.args.histogram:
                 ZFSHistogram.print_histogram(spa.spa_normal_class.mc_histogram,
                                              0, 5)
-                ZFSHistogram.print_histogram_median(
-                    spa.spa_normal_class.mc_histogram, 0, 5)
 
-            if self.args.vdevs:
+            if self.args.vdevs or self.args.metaslab:
                 vdevs = sdb.execute_pipeline([spa], [Vdev()])
                 Vdev(self.arg_list).pretty_print(vdevs, 5)
 
