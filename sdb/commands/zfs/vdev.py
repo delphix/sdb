@@ -17,12 +17,13 @@
 # pylint: disable=missing-docstring
 
 import argparse
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Tuple, Optional
 
 import drgn
 import sdb
 from sdb.commands.zfs.internal import enum_lookup
 from sdb.commands.zfs.metaslab import Metaslab
+from sdb.commands.zfs.histograms import ZFSHistogram
 
 
 class Vdev(sdb.Locator, sdb.PrettyPrinter):
@@ -68,6 +69,31 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
         if self.args.weight:
             self.arg_list.append("-w")
 
+    #
+    # Iterate over the metaslabs to accumulate histogram data.
+    #
+    @staticmethod
+    def sum_histograms(
+            metaslabs: Iterable[drgn.Object]) -> Tuple[drgn.Object, int]:
+        shift = -1
+        length = 1
+        first_time = True
+        histsum: List[int] = []
+        for msp in metaslabs:
+            if msp.ms_sm == sdb.get_typed_null(msp.ms_sm.type_):
+                continue
+            histogram = msp.ms_sm.sm_phys.smp_histogram
+            if first_time:
+                shift = int(msp.ms_sm.sm_shift)
+                length = len(histogram)
+                histsum = [0] * length
+            assert length == len(histogram)
+            assert shift == int(msp.ms_sm.sm_shift)
+            for (bucket, value) in enumerate(histogram):
+                histsum[bucket] += int(value)
+            first_time = False
+        return sdb.create_object(f'uint64_t[{length}]', histsum), shift
+
     def pretty_print(self,
                      vdevs: Iterable[drgn.Object],
                      indent: int = 0) -> None:
@@ -106,6 +132,12 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
                     "".ljust(level),
                     vdev.vdev_ops.vdev_op_type.string_().decode("utf-8"),
                 )
+            if self.args.histogram:
+                metaslabs = sdb.execute_pipeline([vdev], [Metaslab()])
+                histsum, shift = self.sum_histograms(metaslabs)
+                if shift > 0:
+                    ZFSHistogram.print_histogram(histsum, shift, indent + 5)
+
             if self.args.metaslab:
                 metaslabs = sdb.execute_pipeline([vdev], [Metaslab()])
                 Metaslab(self.arg_list).pretty_print(metaslabs, indent + 5)

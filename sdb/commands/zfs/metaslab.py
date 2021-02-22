@@ -94,7 +94,7 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
         if msp.ms_fragmentation == -1:
             print("-".rjust(6), end="")
         else:
-            print((str(msp.ms_fragmentation) + "%").rjust(5), end="")
+            print((str(int(msp.ms_fragmentation)) + "%").rjust(5), end="")
         print(
             str(str(int(msp.ms_allocated_space) >> 20) + "M").rjust(7),
             ("({0:.1f}%)".format(
@@ -172,10 +172,8 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
                 if spacemap != sdb.get_typed_null(spacemap.type_):
                     histogram = spacemap.sm_phys.smp_histogram
                     ZFSHistogram.print_histogram(histogram,
-                                                 int(spacemap.sm_shift), indent)
-                    ZFSHistogram.print_histogram_median(histogram,
-                                                        int(spacemap.sm_shift),
-                                                        indent)
+                                                 int(spacemap.sm_shift),
+                                                 indent + 5)
             if self.args.weight:
                 Metaslab.metaslab_weight_print(msp, first_time, indent)
             first_time = False

@@ -41,6 +41,7 @@ CMD_TABLE = [
     "spa -vH",
     "spa -vm",
     "spa -vmH",
+    "spa -mH",
     "spa rpool",
     "spa | pp",
     "spa | head 1 | spa",
