@@ -54,6 +54,7 @@ ADDR               NAME
       0xffffa08948af8000 HEALTHY NONE      /dev/sdb1
       0xffffa08949ff8000 HEALTHY NONE      /dev/sdc1
       0xffffa08949e58000 HEALTHY NONE    /dev/sdd1
+          ** No histogram data available **
 0xffffa089413b8000 meta-domain
      seg-size   count
      --------   -----
