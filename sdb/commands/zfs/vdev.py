@@ -108,7 +108,7 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
                     vdev.vdev_ops.vdev_op_type.string_().decode("utf-8"),
                 )
             if self.args.histogram:
-                if vdev.vdev_mg != sdb.get_typed_null(vdev.vdev_mg.type_):
+                if not sdb.is_null(vdev.vdev_mg):
                     ZFSHistogram.print_histogram(vdev.vdev_mg.mg_histogram, 0,
                                                  indent + 5)
 

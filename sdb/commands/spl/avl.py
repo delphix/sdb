@@ -29,7 +29,7 @@ class Avl(sdb.Walker):
     input_type = "avl_tree_t *"
 
     def _helper(self, node: drgn.Object, offset: int) -> Iterable[drgn.Object]:
-        if node == sdb.get_typed_null(node.type_):
+        if sdb.is_null(node):
             return
 
         lchild = node.avl_child[0]

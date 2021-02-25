@@ -133,7 +133,7 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
             print("".ljust(indent), "-" * 65)
 
         free = msp.ms_size
-        if spacemap != sdb.get_typed_null(spacemap.type_):
+        if not sdb.is_null(spacemap):
             free -= spacemap.sm_phys.smp_alloc
 
         ufrees = msp.ms_unflushed_frees.rt_space
@@ -169,7 +169,7 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
                 Metaslab.print_metaslab(msp, first_time, indent)
             if self.args.histogram:
                 spacemap = msp.ms_sm
-                if spacemap != sdb.get_typed_null(spacemap.type_):
+                if not sdb.is_null(spacemap):
                     histogram = spacemap.sm_phys.smp_histogram
                     ZFSHistogram.print_histogram(histogram,
                                                  int(spacemap.sm_shift),
