@@ -65,10 +65,10 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
         if self.args.weight:
             self.arg_list.append("-w")
 
-    def pretty_print(self, spas: Iterable[drgn.Object]) -> None:
+    def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         print("{:18} {}".format("ADDR", "NAME"))
         print("%s" % ("-" * 60))
-        for spa in spas:
+        for spa in objs:
             print("{:18} {}".format(hex(spa),
                                     spa.spa_name.string_().decode("utf-8")))
             if self.args.histogram:
@@ -77,7 +77,7 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
 
             if self.args.vdevs or self.args.metaslab:
                 vdevs = sdb.execute_pipeline([spa], [Vdev()])
-                Vdev(self.arg_list).pretty_print(vdevs, 5)
+                Vdev(self.arg_list).print_indented(vdevs, 5)
 
     def no_input(self) -> drgn.Object:
         spas = sdb.execute_pipeline(

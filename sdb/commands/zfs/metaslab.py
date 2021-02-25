@@ -160,9 +160,9 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
             print((str(int(msp.ms_fragmentation)) + "%").rjust(6), end="")
         print(nicenum(uchanges_mem).rjust(9))
 
-    def pretty_print(self,
-                     metaslabs: Iterable[drgn.Object],
-                     indent: int = 0) -> None:
+    def print_indented(self,
+                       metaslabs: Iterable[drgn.Object],
+                       indent: int = 0) -> None:
         first_time = True
         for msp in metaslabs:
             if not self.args.weight:
@@ -177,6 +177,9 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
             if self.args.weight:
                 Metaslab.metaslab_weight_print(msp, first_time, indent)
             first_time = False
+
+    def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
+        self.print_indented(objs, 0)
 
     @sdb.InputHandler("vdev_t*")
     def from_vdev(self, vdev: drgn.Object) -> Iterable[drgn.Object]:

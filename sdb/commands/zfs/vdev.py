@@ -69,9 +69,9 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
         if self.args.weight:
             self.arg_list.append("-w")
 
-    def pretty_print(self,
-                     vdevs: Iterable[drgn.Object],
-                     indent: int = 0) -> None:
+    def print_indented(self,
+                       vdevs: Iterable[drgn.Object],
+                       indent: int = 0) -> None:
         print(
             "".ljust(indent),
             "ADDR".ljust(18),
@@ -114,7 +114,10 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
 
             if self.args.metaslab:
                 metaslabs = sdb.execute_pipeline([vdev], [Metaslab()])
-                Metaslab(self.arg_list).pretty_print(metaslabs, indent + 5)
+                Metaslab(self.arg_list).print_indented(metaslabs, indent + 5)
+
+    def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
+        self.print_indented(objs, 0)
 
     @sdb.InputHandler("spa_t*")
     def from_spa(self, spa: drgn.Object) -> Iterable[drgn.Object]:
