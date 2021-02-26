@@ -60,9 +60,9 @@ def get_pointer_type(type_name: str) -> drgn.Type:
     return prog.pointer_type(type_name)
 
 
-def get_typed_null(type_name: str) -> drgn.Object:
+def is_null(obj: drgn.Object) -> bool:
     global prog
-    return drgn.NULL(prog, type_name)
+    return bool(obj == drgn.NULL(prog, obj.type_))
 
 
 def create_object(type_: Union[str, drgn.Type], val: Any) -> drgn.Object:

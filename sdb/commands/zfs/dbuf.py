@@ -81,10 +81,10 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
                 os.os_spa.spa_name.string_().decode("utf-8"))
         return Dbuf.DatasetName(os.os_dsl_dataset)
 
-    def pretty_print(self, dbufs: drgn.Object) -> None:
+    def pretty_print(self, objs: drgn.Object) -> None:
         print("{:>20} {:>8} {:>4} {:>8} {:>5} {}".format(
             "addr", "object", "lvl", "blkid", "holds", "os"))
-        for dbuf in filter(self.argfilter, dbufs):
+        for dbuf in filter(self.argfilter, objs):
             print("{:>20} {:>8d} {:>4d} {:>8d} {:>5d} {}".format(
                 hex(dbuf), int(dbuf.db.db_object), int(dbuf.db_level),
                 int(dbuf.db_blkid), int(dbuf.db_holds.rc_count),
