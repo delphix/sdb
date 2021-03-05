@@ -90,7 +90,7 @@ class ZFSHistogram(sdb.Command):
         for (bucket, value) in enumerate(hist):
             space_in_bucket = int(value) << (bucket + offset)
             if space_left <= space_in_bucket:
-                median = 1 << (bucket + offset)
+                median = 1 << (bucket + offset - 1)
                 #
                 # Size of segments may vary within one bucket thus we
                 # attempt to approximate the median by looking at the
