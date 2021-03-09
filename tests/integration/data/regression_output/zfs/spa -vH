@@ -23,7 +23,7 @@ ADDR               NAME
        64.0MB:      0 
       128.0MB:      0 
       256.0MB:     15 ***************
-     Approx. Median: 384.0MB
+     Approx. Median: 192.0MB
       ADDR               STATE   AUX  DESCRIPTION
       ------------------------------------------------------------
       0xffffa089486fc000 HEALTHY NONE  root
@@ -50,7 +50,7 @@ ADDR               NAME
             64.0MB:      0 
            128.0MB:      0 
            256.0MB:     15 ***************
-          Approx. Median: 384.0MB
+          Approx. Median: 192.0MB
       0xffffa08948af8000 HEALTHY NONE      /dev/sdb1
       0xffffa08949ff8000 HEALTHY NONE      /dev/sdc1
       0xffffa08949e58000 HEALTHY NONE    /dev/sdd1
@@ -76,7 +76,7 @@ ADDR               NAME
        32.0MB:      0 
        64.0MB:      1 *
       128.0MB:      4 ****
-     Approx. Median: 184.0MB
+     Approx. Median: 92.0MB
       ADDR               STATE   AUX  DESCRIPTION
       ------------------------------------------------------------
       0xffffa08953aa4000 HEALTHY NONE  root
@@ -101,7 +101,7 @@ ADDR               NAME
             32.0MB:      0 
             64.0MB:      1 *
            128.0MB:      4 ****
-          Approx. Median: 184.0MB
+          Approx. Median: 92.0MB
       0xffffa08953aac000 HEALTHY NONE      /tmp/dks0
       0xffffa08953ab0000 HEALTHY NONE      /tmp/dks1
       0xffffa08953ab4000 HEALTHY NONE      /tmp/dks2
