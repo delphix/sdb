@@ -6,8 +6,9 @@
 # all version of python3.X-dev so the Github actions jobs can install
 # libkdumpfile with the right version.
 #
-sudo apt-get install autoconf automake liblzo2-dev libsnappy1v5 libtool pkg-config zlib1g-dev
-sudo apt-get install python3.6-dev python3.7-dev python3.8-dev
+sudo apt update
+sudo apt install autoconf automake liblzo2-dev libsnappy1v5 libtool pkg-config zlib1g-dev
+sudo apt install python3.6-dev python3.7-dev python3.8-dev
 
 git clone https://github.com/ptesarik/libkdumpfile.git
 
