@@ -23,7 +23,7 @@ ADDR               NAME
        64.0MB:      0 
       128.0MB:      0 
       256.0MB:     15 ***************
-     Approx. Median: 384.0MB
+     Approx. Median: 192.0MB
       ADDR               STATE   AUX  DESCRIPTION
       ------------------------------------------------------------
       0xffffa089486fc000 HEALTHY NONE  root
@@ -50,7 +50,7 @@ ADDR               NAME
             64.0MB:      0 
            128.0MB:      0 
            256.0MB:     15 ***************
-          Approx. Median: 384.0MB
+          Approx. Median: 192.0MB
            ADDR                 ID           OFFSET     FREE  FRAG     UCMU
            -----------------------------------------------------------------
            0xffffa0894e6e1000    0              0x0    511MB    0%      8KB
@@ -76,7 +76,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e6e4000    1       0x20000000    511MB    0%      8KB
                seg-size   count
                --------   -----
@@ -100,7 +100,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e6e2800    2       0x40000000    511MB    0%      8KB
                seg-size   count
                --------   -----
@@ -124,7 +124,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e6e3800    3       0x60000000    511MB    0%      8KB
                seg-size   count
                --------   -----
@@ -148,7 +148,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e6e3000    4       0x80000000    511MB    0%      8KB
                seg-size   count
                --------   -----
@@ -172,7 +172,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e6e4800    5       0xa0000000    511MB    0%      8KB
                seg-size   count
                --------   -----
@@ -196,7 +196,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e6e7800    6       0xc0000000    511MB    0%      4KB
                seg-size   count
                --------   -----
@@ -220,7 +220,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e6e2000    7       0xe0000000    511MB    0%      8KB
                seg-size   count
                --------   -----
@@ -244,7 +244,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e637800    8      0x100000000    511MB    0%      8KB
                seg-size   count
                --------   -----
@@ -268,7 +268,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e634800    9      0x120000000    511MB    0%      4KB
                seg-size   count
                --------   -----
@@ -291,7 +291,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e633000   10      0x140000000    511MB    0%      4KB
                seg-size   count
                --------   -----
@@ -314,7 +314,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e633800   11      0x160000000    509MB    0%      4KB
                seg-size   count
                --------   -----
@@ -338,7 +338,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e632800   12      0x180000000    511MB    0%      4KB
                seg-size   count
                --------   -----
@@ -362,7 +362,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e634000   13      0x1a0000000    511MB    0%      4KB
                seg-size   count
                --------   -----
@@ -386,7 +386,7 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
            0xffffa0894e631000   14      0x1c0000000    511MB    0%      4KB
                seg-size   count
                --------   -----
@@ -410,10 +410,11 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      0 
                 256.0MB:      1 *
-               Approx. Median: 384.0MB
+               Approx. Median: 192.0MB
       0xffffa08948af8000 HEALTHY NONE      /dev/sdb1
       0xffffa08949ff8000 HEALTHY NONE      /dev/sdc1
       0xffffa08949e58000 HEALTHY NONE    /dev/sdd1
+          ** No histogram data available **
            ADDR                 ID           OFFSET     FREE  FRAG     UCMU
            -----------------------------------------------------------------
            0xffffa0894e631800    0              0x0    512MB    0%       0B
@@ -452,7 +453,7 @@ ADDR               NAME
        32.0MB:      0 
        64.0MB:      1 *
       128.0MB:      4 ****
-     Approx. Median: 184.0MB
+     Approx. Median: 92.0MB
       ADDR               STATE   AUX  DESCRIPTION
       ------------------------------------------------------------
       0xffffa08953aa4000 HEALTHY NONE  root
@@ -477,7 +478,7 @@ ADDR               NAME
             32.0MB:      0 
             64.0MB:      1 *
            128.0MB:      4 ****
-          Approx. Median: 184.0MB
+          Approx. Median: 92.0MB
            ADDR                 ID           OFFSET     FREE  FRAG     UCMU
            -----------------------------------------------------------------
            0xffffa0894c701000    0              0x0    256MB    0%       0B
@@ -501,7 +502,7 @@ ADDR               NAME
                  16.0MB:      0 
                  32.0MB:      0 
                  64.0MB:      1 *
-               Approx. Median: 95.9MB
+               Approx. Median: 48.0MB
            0xffffa0894c700800    2       0x20000000    255MB    0%      8KB
                seg-size   count
                --------   -----
@@ -523,7 +524,7 @@ ADDR               NAME
                  32.0MB:      0 
                  64.0MB:      0 
                 128.0MB:      1 *
-               Approx. Median: 191.9MB
+               Approx. Median: 96.0MB
            0xffffa0894c706000    3       0x30000000    255MB    0%      8KB
                seg-size   count
                --------   -----
@@ -545,7 +546,7 @@ ADDR               NAME
                  32.0MB:      0 
                  64.0MB:      0 
                 128.0MB:      1 *
-               Approx. Median: 192.0MB
+               Approx. Median: 96.0MB
            0xffffa0894c707000    4       0x40000000    223MB    0%      4KB
                seg-size   count
                --------   -----
@@ -567,12 +568,12 @@ ADDR               NAME
                  32.0MB:      0 
                  64.0MB:      0 
                 128.0MB:      1 *
-               Approx. Median: 192.0MB
+               Approx. Median: 96.0MB
            0xffffa0894c706800    5       0x50000000    255MB    0%      4KB
                seg-size   count
                --------   -----
                 128.0MB:      1 *
-               Approx. Median: 192.0MB
+               Approx. Median: 96.0MB
            0xffffa0894c703000    6       0x60000000    256MB    0%       0B
            0xffffa0894c703800    7       0x70000000    256MB    0%       0B
            0xffffa0894c705000    8       0x80000000    256MB    0%       0B

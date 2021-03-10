@@ -23,7 +23,7 @@ ADDR               NAME
        64.0MB:      0 
       128.0MB:      0 
       256.0MB:     15 ***************
-     Approx. Median: 384.0MB
+     Approx. Median: 192.0MB
 0xffffa089413b8000 meta-domain
      seg-size   count
      --------   -----
@@ -45,6 +45,6 @@ ADDR               NAME
        32.0MB:      0 
        64.0MB:      1 *
       128.0MB:      4 ****
-     Approx. Median: 184.0MB
+     Approx. Median: 92.0MB
 0xffffa08955c44000 rpool
      ** No histogram data available **

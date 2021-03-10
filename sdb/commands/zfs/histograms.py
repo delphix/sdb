@@ -90,7 +90,7 @@ class ZFSHistogram(sdb.Command):
         for (bucket, value) in enumerate(hist):
             space_in_bucket = int(value) << (bucket + offset)
             if space_left <= space_in_bucket:
-                median = 1 << (bucket + offset)
+                median = 1 << (bucket + offset - 1)
                 #
                 # Size of segments may vary within one bucket thus we
                 # attempt to approximate the median by looking at the
@@ -136,19 +136,20 @@ class ZFSHistogram(sdb.Command):
         if max_count < HISTOGRAM_WIDTH_MAX:
             max_count = HISTOGRAM_WIDTH_MAX
 
-        if min_bucket <= max_bucket:
-            print(f'{" " * indent}seg-size   count')
-            print(f'{" " * indent}{"-" * 8}   {"-" * 5}')
+        if min_bucket > max_bucket:
+            print(f'{" " * indent}** No histogram data available **')
+            return
+
+        print(f'{" " * indent}seg-size   count')
+        print(f'{" " * indent}{"-" * 8}   {"-" * 5}')
 
         for bucket in range(min_bucket, max_bucket + 1):
             count = int(hist[bucket])
             stars = round(count * HISTOGRAM_WIDTH_MAX / max_count)
             print(f'{" " * indent}{fmt.size_nicenum(2**(bucket+offset)):>8}: '
                   f'{count:>6} {"*" * stars}')
-        if min_bucket > max_bucket:
-            print(f'{" " * indent}** No histogram data available **')
-        else:
-            ZFSHistogram.print_histogram_median(hist, offset, indent)
+
+        ZFSHistogram.print_histogram_median(hist, offset, indent)
 
     def _call(self, objs: Iterable[drgn.Object]) -> None:
         for obj in objs:
