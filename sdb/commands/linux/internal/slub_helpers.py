@@ -16,11 +16,11 @@
 
 # pylint: disable=missing-docstring
 
-from typing import Iterable, Set
+from typing import Iterable, Set, Optional
 
 import drgn
 from drgn.helpers.linux.list import list_for_each_entry
-from drgn.helpers.linux.mm import for_each_page, page_to_virt
+from drgn.helpers.linux.mm import for_each_page, page_to_virt, virt_to_pfn, pfn_to_page
 
 import sdb
 
@@ -134,6 +134,18 @@ def cache_red_left_padding(cache: drgn.Object) -> int:
     if cache.flags & SLAB_RED_ZONE_FLAG:
         padding += int(cache.red_left_pad)
     return padding
+
+
+def lookup_cache_by_address(obj: drgn.Object) -> Optional[drgn.Object]:
+    pfn = virt_to_pfn(sdb.get_prog(), obj)
+    page = pfn_to_page(pfn)
+    cache = page.slab_cache
+    try:
+        # read the name to force FaultError if any
+        _ = cache.name.string_().decode('utf-8')
+    except drgn.FaultError:
+        return None
+    return cache
 
 
 def cache_get_free_pointer(cache: drgn.Object, p: drgn.Object) -> drgn.Object:

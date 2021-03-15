@@ -94,6 +94,13 @@ POS_CMDS = [
     "threads | count",
     'threads | filter \'obj.comm == "java"\' | threads',
     "thread",
+
+    # whatis
+    "dbuf |head 1 |deref |member db_buf |whatis",
+    "whatis 0xffffa089407ca870",
+    "whatis 0xffffa0888c766000 0xffffa089407ca870",
+    "whatis 0xffff",
+    "whatis 0xf987kkbbh"
 ]
 
 STRIPPED_POS_CMDS = [
