@@ -24,7 +24,7 @@ if [ ! -d $DATA_DIR ]; then
 fi
 
 echo "initiating download of $1 from S3 ..."
-/usr/local/bin/aws s3 cp --no-sign-request s3://sdb-regression-dumps/$1 .
+aws s3 cp --no-sign-request s3://sdb-regression-dumps/$1 .
 [ $? -eq 0 ] || exit 1
 
 echo "decompressing dump ..."

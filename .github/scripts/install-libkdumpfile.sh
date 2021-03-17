@@ -8,7 +8,6 @@
 #
 sudo apt update
 sudo apt install autoconf automake liblzo2-dev libsnappy1v5 libtool pkg-config zlib1g-dev
-sudo apt install python3.6-dev python3.7-dev python3.8-dev
 
 git clone https://github.com/ptesarik/libkdumpfile.git
 

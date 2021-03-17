@@ -9,13 +9,13 @@ jobs:
   # Verify the build and installation of SDB.
   #
   install:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - run: python3 setup.py install
@@ -31,10 +31,10 @@ jobs:
   # the "drgn" from source (there's no package currently available).
   #
   pylint:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: '3.6'
       - run: ./.github/scripts/install-drgn.sh
@@ -52,20 +52,22 @@ jobs:
   # can open kdump-compressed crash dumps for the integration tests.
   #
   pytest:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - run: python3 -m pip install aws python-config pytest pytest-cov
+      - run: python3 -m pip install awscli pytest pytest-cov
       - run: ./.github/scripts/install-libkdumpfile.sh
       - run: ./.github/scripts/install-drgn.sh
       - run: ./.github/scripts/download-dump-from-s3.sh dump-201912060006.tar.lzma
       - run: pytest -v --cov sdb --cov-report xml tests
+        env:
+          LD_LIBRARY_PATH: /usr/local/lib
       - uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -73,10 +75,10 @@ jobs:
   # Verify "yapf" runs successfully.
   #
   yapf:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: '3.6'
       - run: python3 -m pip install yapf
@@ -98,10 +100,10 @@ jobs:
   #     pytest doesn't provide stubs on typeshed.
   #
   mypy:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: '3.6'
       - run: ./.github/scripts/install-drgn.sh
@@ -112,7 +114,7 @@ jobs:
   # Verify that "shfmt" ran successfully against our shell scripts.
   #
   shfmt:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: delphix/actions/shfmt@master
