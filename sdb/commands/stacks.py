@@ -1,5 +1,6 @@
 #
 # Copyright 2019 Delphix
+# Copyright 2021 Datto Inc
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -359,8 +360,8 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
     #
     @staticmethod
     def aggregate_stacks(
-        objs: Iterable[drgn.Object]
-    ) -> List[Tuple[Tuple[str, Tuple[int, ...]], List[drgn.Object]]]:
+        objs: Iterable[drgn.Object]) \
+                -> List[Tuple[Tuple[str, Tuple[int, ...]], List[drgn.Object]]]:
         stack_aggr: Dict[Tuple[str, Tuple[int, ...]],
                          List[drgn.Object]] = defaultdict(list)
         for task in objs:
