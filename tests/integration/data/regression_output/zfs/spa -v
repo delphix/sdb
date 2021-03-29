@@ -7,6 +7,7 @@ ADDR               NAME
       0xffffa08949ff4000 HEALTHY NONE    mirror
       0xffffa08948af8000 HEALTHY NONE      /dev/sdb1
       0xffffa08949ff8000 HEALTHY NONE      /dev/sdc1
+      -                  -       -     logs
       0xffffa08949e58000 HEALTHY NONE    /dev/sdd1
 0xffffa089413b8000 meta-domain
       ADDR               STATE   AUX  DESCRIPTION
@@ -16,6 +17,8 @@ ADDR               NAME
       0xffffa08953aac000 HEALTHY NONE      /tmp/dks0
       0xffffa08953ab0000 HEALTHY NONE      /tmp/dks1
       0xffffa08953ab4000 HEALTHY NONE      /tmp/dks2
+      -                  -       -     cache
+      0xffffa088ce7d0000 HEALTHY NONE    /tmp/dks3
 0xffffa08955c44000 rpool
       ADDR               STATE   AUX  DESCRIPTION
       ------------------------------------------------------------

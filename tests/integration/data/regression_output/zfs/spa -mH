@@ -413,6 +413,7 @@ ADDR               NAME
                Approx. Median: 192.0MB
       0xffffa08948af8000 HEALTHY NONE      /dev/sdb1
       0xffffa08949ff8000 HEALTHY NONE      /dev/sdc1
+      -                  -       -     logs
       0xffffa08949e58000 HEALTHY NONE    /dev/sdd1
           ** No histogram data available **
            ADDR                 ID           OFFSET     FREE  FRAG     UCMU
@@ -582,6 +583,8 @@ ADDR               NAME
       0xffffa08953aac000 HEALTHY NONE      /tmp/dks0
       0xffffa08953ab0000 HEALTHY NONE      /tmp/dks1
       0xffffa08953ab4000 HEALTHY NONE      /tmp/dks2
+      -                  -       -     cache
+      0xffffa088ce7d0000 HEALTHY NONE    /tmp/dks3
 0xffffa08955c44000 rpool
      ** No histogram data available **
       ADDR               STATE   AUX  DESCRIPTION
