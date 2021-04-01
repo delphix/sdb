@@ -1,5 +1,5 @@
 # sdb
-The Slick/Simple Debugger
+The Slick Debugger
 
 ![](https://github.com/delphix/sdb/workflows/.github/workflows/main.yml/badge.svg)
 
@@ -20,6 +20,35 @@ $ sudo python3 setup.py install
 ```
 
 The above should install `sdb` under `/usr/local/bin/`.
+
+### Quickstart
+
+Running `sudo sdb` attaches sdb to the running kernel by default.
+To debug a running program, run `sudo sdb -p <PID>`.
+For post-mortem debugging (either a kernel crash dump or a userland core dump), use `sudo sdb <vmlinux path|userland binary path> <dump>`.
+
+```
+$ sudo sdb
+sdb> find_task 1 | member comm
+(char [16])"systemd"
+sdb> find_task 1 | stack
+TASK_STRUCT        STATE             COUNT
+==========================================
+0xffff89cea441dd00 INTERRUPTIBLE         1
+                  __schedule+0x2e5
+                  schedule+0x33
+                  schedule_hrtimeout_range_clock+0xfd
+                  schedule_hrtimeout_range+0x13
+                  ep_poll+0x40a
+                  do_epoll_wait+0xb7
+                  __x64_sys_epoll_wait+0x1e
+                  do_syscall_64+0x57
+                  entry_SYSCALL_64+0x7c
+sdb> addr modules | lxlist "struct module" list | member name ! sort | head -n 3
+(char [56])"aesni_intel"
+(char [56])"async_memcpy"
+(char [56])"async_pq"
+```
 
 ### Resources
 
