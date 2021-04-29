@@ -133,8 +133,7 @@ class ZFSHistogram(sdb.Command):
                 max_count = count
 
         HISTOGRAM_WIDTH_MAX = 40
-        if max_count < HISTOGRAM_WIDTH_MAX:
-            max_count = HISTOGRAM_WIDTH_MAX
+        max_count = max(max_count, HISTOGRAM_WIDTH_MAX)
 
         if min_bucket > max_bucket:
             print(f'{" " * indent}** No histogram data available **')
