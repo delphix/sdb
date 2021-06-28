@@ -1,0 +1,11 @@
+ADDR                    OBJ UNLINKED    BLKSZ               SIZE              INODE             ZFSVFS FILENAME          
+0xffffa08884644000      123        0      512                  7 0xffffa088846441f8 0xffffa08953ea8000 etc/profile.d     
+0xffffa08884644440    68902        0      512                298 0xffffa08884644638 0xffffa08953ea8000 usr/lib/systemd/user/gpg-agent-browser.socket
+0xffffa08884644880    68905        0      512                223 0xffffa08884644a78 0xffffa08953ea8000 usr/lib/systemd/user/gpg-agent.service
+0xffffa08884644cc0    68898        0      512                231 0xffffa08884644eb8 0xffffa08953ea8000 usr/lib/systemd/user/dirmngr.service
+0xffffa08884645100     1900        0     4096               3635 0xffffa088846452f8 0xffffa08953ea8000 etc/security/group.conf
+0xffffa08884645540    68904        0      512                308 0xffffa08884645738 0xffffa08953ea8000 usr/lib/systemd/user/gpg-agent-ssh.socket
+0xffffa08884645980     2037        0      512                 96 0xffffa08884645b78 0xffffa08953ea8000 etc/profile.d/01-locale-fix.sh
+0xffffa08884645dc0    67553        0      512                 27 0xffffa08884645fb8 0xffffa08953ea8000 usr/lib/systemd/user/sockets.target.wants/gpg-agent-browser.socket
+0xffffa08884646200    68899        0      512                204 0xffffa088846463f8 0xffffa08953ea8000 usr/lib/systemd/user/dirmngr.socket
+0xffffa08884646640    67554        0      512                 25 0xffffa08884646838 0xffffa08953ea8000 usr/lib/systemd/user/sockets.target.wants/gpg-agent-extra.socket
