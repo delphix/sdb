@@ -34,6 +34,9 @@ CMD_TABLE = [
     "dbuf | dbuf -l 1",
     'dbuf | dbuf -l 1 | head | dbuf',
 
+    # rrwlock
+    "spa | member spa_dsl_pool | member dp_config_rwlock | rrwlock",
+
     # spa + vdev + metaslab
     "spa",
     "spa -H",
