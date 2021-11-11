@@ -34,7 +34,7 @@ CMD_TABLE = [
     "dbuf | dbuf -l 1",
     'dbuf | dbuf -l 1 | head | dbuf',
 
-    # spa + vdev + metaslab
+    # spa + vdev + metaslab + nvlist
     "spa",
     "spa -H",
     "spa -v",
@@ -51,6 +51,7 @@ CMD_TABLE = [
     "spa | vdev | metaslab -w",
     "spa | vdev | metaslab | member ms_allocatable | range_tree",
     "spa | vdev | metaslab | member ms_allocatable.rt_root | zfs_btree",
+    "spa | member spa_load_info | nvlist",
 
     # zfs_dbgmsg
     "zfs_dbgmsg",
