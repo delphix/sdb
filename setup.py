@@ -12,6 +12,8 @@ setup(
         "sdb.commands.internal",
         "sdb.commands.linux",
         "sdb.commands.linux.internal",
+        "sdb.commands.nvpair",
+        "sdb.commands.nvpair.internal",
         "sdb.commands.spl",
         "sdb.commands.spl.internal",
         "sdb.commands.zfs",
