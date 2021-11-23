@@ -1,14 +1,14 @@
 image: focal:latest
-image: python-3.8
+image: "python:3.8" 
 
 before_script:
   - python --version
   - pip install -r requirements.txt
 
-stages:
-    - Static Analysis
+ stages:
+  - Static Analysis
 
 pylint:
-  stage: Static Analysis
-  script:
-  - pylint -d duplicate-code -d invalid-name sdb
+    stage: Static Analysis
+    script:
+        - pylint -d duplicate-code -d invalid-name sdb
