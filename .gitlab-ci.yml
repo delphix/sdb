@@ -9,4 +9,4 @@ job:
   tags:
     - use1-ci-builder-20
   script:
-    - pylint -d duplicate-code -d invalid-name sdb
+    - pylint disable=consider-using-f-string -d duplicate-code -d invalid-name sdb
