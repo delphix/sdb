@@ -2,7 +2,7 @@ image: "python:3.8"
 
 before_script:
   - python --version
-  - python3 -m pip install pylint==2.10.0
+  - python3 -m pip install pylint==2.6
   - pip3 install drgn
 
 job:
