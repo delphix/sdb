@@ -1,8 +1,7 @@
 image: "python:3.8" 
 
-job:
-  tags:
-    - use1-ci-builder-20
+tags:
+  - use1-ci-builder-20
 
 before_script:
   - python --version
