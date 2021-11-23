@@ -3,6 +3,7 @@ image: "python:3.8"
 before_script:
   - python --version
   - python3 -m pip install pylint==2.6
+  - python3 -m pip install yapf
   - pip3 install drgn
 
 job:
@@ -10,3 +11,4 @@ job:
     - use1-ci-builder-20
   script:
     - pylint -d duplicate-code -d invalid-name sdb
+    - yapf --diff --style google --recursive sdb
