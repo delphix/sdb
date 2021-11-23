@@ -1,3 +1,6 @@
+#
+# Code quality checking for sdb
+#
 image: "python:3.8" 
 
 before_script:
