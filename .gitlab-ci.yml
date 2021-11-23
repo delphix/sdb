@@ -1,15 +1,14 @@
 image: "python:3.8" 
 
-job:
-  before_script:
-    - python --version
-    - pip install -r requirements.txt
 
-  # stages
-  stages:
-    - Static Analysis
+before_script:
+  - python --version
+  - pip install -r requirements.txt
 
-  pylint:
-    stage: Static Analysis
-    script:
-        - pylint -d duplicate-code -d invalid-name sdb
+stages:
+  - Static Analysis
+
+pylint:
+  stage: Static Analysis
+  script:
+    - pylint -d duplicate-code -d invalid-name sdb
