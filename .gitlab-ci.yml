@@ -1,16 +1,11 @@
 image: "python:3.8" 
 
-tags:
-  - use1-ci-builder-20
-
 before_script:
   - python --version
   - pip install -r requirements.txt
 
-stages:
-  - Static Analysis
-
-pylint:
-  stage: Static Analysis
+job:
+  tags:
+    - use1-ci-builder-20
   script:
     - pylint -d duplicate-code -d invalid-name sdb
