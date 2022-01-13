@@ -1,0 +1,19 @@
+#
+# Code quality checking for sdb
+#
+image: "python:3.8" 
+
+before_script:
+  - python --version
+  - python3 -m pip install pylint==2.6
+  - python3 -m pip install yapf
+  - python3 -m pip install mypy==0.730
+  - pip3 install drgn
+
+job:
+  tags:
+    - use1-ci-builder-20
+  script:
+    - pylint -d duplicate-code -d invalid-name sdb
+    - yapf --diff --style google --recursive sdb
+    - python3 -m mypy --strict --show-error-codes -p sdb

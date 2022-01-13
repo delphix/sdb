@@ -601,7 +601,7 @@ class Walk(Command):
         for type_, class_ in Walker.allWalkers.items():
             try:
                 baked[type_canonicalize_name(type_)] = class_
-            except LookupError as exc:
+            except LookupError:
                 pass
 
         has_input = False
