@@ -23,7 +23,6 @@ import sdb
 
 
 class Exit(sdb.Command):
-
     "Exit the application"
 
     names = ["exit", "quit"]
