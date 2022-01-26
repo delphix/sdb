@@ -71,6 +71,12 @@ CMD_TABLE = [
 
     # zfs_refcount
     "spa | member spa_refcount | zfs_refcount",
+
+    # znode
+    "znode |head 10 |znode",
+    "echo 0xffffa08884646ec0 | znode",
+    "echo 0xffffa08884646ec0 | znode | znode2inode",
+    "echo 0xffffa088846470b8 | cast struct inode * | inode2znode",
 ] # yapf: disable
 
 
