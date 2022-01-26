@@ -72,6 +72,8 @@ POS_CMDS = [
     "slabs | pp",
     "slabs -s util | slabs",
     "slabs | head 2 | slabs",
+    'slabs | filter \'obj.name == "dnode_t"\' |walk | tail 8 | head 1 | cast dnode_t * | deref |member dn_phys |member dn_blkptr[0] |blkptr',
+    'slabs | filter \'obj.name == "dnode_t"\' |walk | head 6056 | tail 1| cast dnode_t * | deref |member dn_phys |member dn_blkptr[0] |blkptr',
 
     # slub
     'slabs | filter \'obj.name == "zio_cache"\' | slub_cache',
