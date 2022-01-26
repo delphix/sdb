@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Chuck Tuffli
+# Copyright 2019 Delphix
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,16 +16,12 @@
 
 # pylint: disable=missing-docstring
 
-from typing import Iterable
+import glob
+import importlib
+import os
 
-import drgn
-import sdb
-
-
-class Exit(sdb.Command):
-    "Exit the application"
-
-    names = ["exit", "quit"]
-
-    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        raise SystemExit
+for path in glob.glob("{}/*.py".format(os.path.dirname(__file__))):
+    if path != __file__:
+        module = os.path.splitext(os.path.basename(path))[0]
+        importlib.import_module(
+            "sdb.commands.nvpair.internal.{}".format(module))

@@ -53,6 +53,10 @@ POS_CMDS = [
     # lxlist
     "addr modules | lxlist module list | member name",
 
+    # mutex
+    "spa | member spa_activities_lock | member m_mutex | mutex",
+    "echo 0xffffa0894e7210b0 | mutex",
+
     # pid
     "pid 1",
     "pid 1 10 12437",
@@ -68,6 +72,8 @@ POS_CMDS = [
     "slabs | pp",
     "slabs -s util | slabs",
     "slabs | head 2 | slabs",
+    'slabs | filter \'obj.name == "dnode_t"\' |walk | tail 8 | head 1 | cast dnode_t * | deref |member dn_phys |member dn_blkptr[0] |blkptr',
+    'slabs | filter \'obj.name == "dnode_t"\' |walk | head 6056 | tail 1| cast dnode_t * | deref |member dn_phys |member dn_blkptr[0] |blkptr',
 
     # slub
     'slabs | filter \'obj.name == "zio_cache"\' | slub_cache',
@@ -132,6 +138,9 @@ NEG_CMDS = [
     # lxlist
     "addr modules | lxlist bogus_type list | member name",
     "addr modules | lxlist module bogus_member | member name",
+
+    # mutex
+    "spa | member spa_feat_stats_lock | mutex",
 
     # percpu - not valid CPU number
     'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu 2',

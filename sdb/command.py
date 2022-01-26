@@ -597,10 +597,13 @@ class Walk(Command):
         return msg
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        baked = {
-            type_canonicalize_name(type_): class_
-            for type_, class_ in Walker.allWalkers.items()
-        }
+        baked = dict()
+        for type_, class_ in Walker.allWalkers.items():
+            try:
+                baked[type_canonicalize_name(type_)] = class_
+            except LookupError:
+                pass
+
         has_input = False
         for i in objs:
             has_input = True

@@ -1,0 +1,18 @@
+writer wanted?:   (boolean_t)B_FALSE
+writer thread_t*: 0x0
+anonymous readers:
+    zfs_refcount_t at 0xffffa0894e6e5748 has 0 current holds tracked=0
+linked readers:
+    zfs_refcount_t at 0xffffa0894e6e5750 has 0 current holds tracked=0
+writer wanted?:   (boolean_t)B_FALSE
+writer thread_t*: 0x0
+anonymous readers:
+    zfs_refcount_t at 0xffffa0894c707f48 has 0 current holds tracked=0
+linked readers:
+    zfs_refcount_t at 0xffffa0894c707f50 has 0 current holds tracked=0
+writer wanted?:   (boolean_t)B_FALSE
+writer thread_t*: 0x0
+anonymous readers:
+    zfs_refcount_t at 0xffffa089535c0748 has 0 current holds tracked=0
+linked readers:
+    zfs_refcount_t at 0xffffa089535c0750 has 0 current holds tracked=0

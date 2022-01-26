@@ -1,0 +1,5 @@
+sdb: mutex: expected input of type struct mutex *, but received type typedef struct {
+	struct mutex m_mutex;
+	spinlock_t m_lock;
+	kthread_t *m_owner;
+} kmutex_t

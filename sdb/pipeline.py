@@ -129,12 +129,6 @@ def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
     # at the end.
     #
     if shell_cmd is not None:
-        #
-        # This is a false-positive from pylint as we need
-        # to explicitly wait for shell_proc to be done and
-        # re-arrange our std_out.
-        #
-        # pylint: disable=consider-using-with
         shell_proc = subprocess.Popen(shell_cmd,
                                       shell=True,
                                       stdin=subprocess.PIPE,

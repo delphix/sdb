@@ -20,7 +20,39 @@ import argparse
 from typing import Iterable
 
 import drgn
+from drgn.helpers.linux.pid import find_task, for_each_pid
+from drgn.helpers.linux.mm import cmdline
 import sdb
+
+
+class Process:
+
+    def __init__(self, pid: int = 0) -> None:
+        self.pid = pid
+        self.prog = sdb.get_prog()
+
+    # yield all the pid_t in the process table
+    def all(self) -> Iterable[drgn.Object]:
+        for pid in for_each_pid(self.prog):
+            yield pid
+
+    def print_process(self, indent: int = 0) -> None:
+        # handle exception when no cmd line is present
+        try:
+            cmd = cmdline(find_task(sdb.get_prog(), self.pid))
+        except drgn.FaultError:
+            cmd = []
+        print("--------------------------------")
+        print(f"PID: {int(self.pid)} ", end='')
+        for c in cmd:
+            c_str = c.decode("utf-8")
+            print(f"{c_str} ", end='')
+        print("\n")
+        trace = sdb.get_prog().stack_trace(self.pid)
+        for frame in trace:
+            print(f"{' '*indent}{frame}")
+        print("--------------------------------")
+        print("\n")
 
 
 class FindPid(sdb.Command):

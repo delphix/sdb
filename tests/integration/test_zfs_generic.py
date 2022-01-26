@@ -28,11 +28,18 @@ CMD_TABLE = [
     # arc
     "arc",
 
+    # blkptr
+    "spa | head 1 | deref |member spa_uberblock | member ub_rootbp | blkptr",
+    "dbuf | head 1 | member db_blkptr | blkptr",
+
     # dbuf
     "dbuf",
     "dbuf -l 1",
     "dbuf | dbuf -l 1",
     'dbuf | dbuf -l 1 | head | dbuf',
+
+    # rrwlock
+    "spa | member spa_dsl_pool | member dp_config_rwlock | rrwlock",
 
     # spa + vdev + metaslab
     "spa",
@@ -61,6 +68,9 @@ CMD_TABLE = [
     "spa data | vdev | metaslab | filter 'obj.ms_loaded == 1' | head 1 | member ms_sm.sm_phys.smp_histogram | zhist",
     "spa data | vdev | metaslab | filter 'obj.ms_loaded == 1' | head 1 | member ms_sm.sm_phys.smp_histogram | zhist 9",
     "spa data | vdev | metaslab | filter 'obj.ms_loaded == 1' | head 1 | member ms_allocatable.rt_histogram | zhist",
+
+    # zfs_refcount
+    "spa | member spa_refcount | zfs_refcount",
 
     # znode
     "znode |head 10 |znode",

@@ -17,6 +17,7 @@
 # pylint: disable=missing-docstring
 
 import os
+import time
 
 import drgn
 import sdb
@@ -39,6 +40,10 @@ def nicenum(num: int, suffix: str = "B") -> str:
     return "{}{}{}".format(int(num), "Y", suffix)
 
 
+def gethrtime() -> int:
+    return int(time.clock_gettime(time.CLOCK_MONOTONIC) * NANOSEC)
+
+
 def P2PHASE(x: drgn.Object, align: int) -> int:
     return int(x & (align - 1))
 
@@ -49,6 +54,10 @@ def BF64_DECODE(x: drgn.Object, low: int, length: int) -> int:
 
 def BF64_GET(x: drgn.Object, low: int, length: int) -> int:
     return BF64_DECODE(x, low, length)
+
+
+def BF64_GET_SB(x: int, low: int, length: int, shift: int, bias: int) -> int:
+    return (BF64_GET(x, low, length) + bias) << shift
 
 
 def WEIGHT_IS_SPACEBASED(weight: int) -> bool:
@@ -70,3 +79,5 @@ METASLAB_WEIGHT_TYPE = int(1 << 60)
 METASLAB_ACTIVE_MASK = (METASLAB_WEIGHT_PRIMARY | METASLAB_WEIGHT_SECONDARY |
                         METASLAB_WEIGHT_CLAIM)
 BTREE_LEAF_SIZE = 4096
+NANOSEC = 1000000000
+MSEC = 1000
