@@ -133,7 +133,7 @@ class Znode(sdb.Locator, sdb.PrettyPrinter):
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         print("{:18} {:>8} {:8} {:>8} {:>18} {:>18} {:>18} {:<18}".format(
-            "ADDR", "OBJ", "UNLINKED", "BLKSZ", "SIZE", "INODE", "ZFSVFS", 
+            "ADDR", "OBJ", "UNLINKED", "BLKSZ", "SIZE", "INODE", "ZFSVFS",
             "FILENAME"))
         for znode in objs:
             i = drgn.cast('int', znode.z_id)
