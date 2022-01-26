@@ -95,6 +95,15 @@ POS_CMDS = [
     "stacks -m zfs | count",
     "echo 0xffffa089669edc00 | stack",
 
+    # ps
+    "ps",
+    "ps -C bash",
+    "ps -p 4275",
+    "ps -e",
+    "ps -x",
+    "ps -o pid,ppid",
+    "ps -A",
+
     # threads
     "threads",
     "threads | count",
