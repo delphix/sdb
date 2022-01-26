@@ -53,6 +53,10 @@ POS_CMDS = [
     # lxlist
     "addr modules | lxlist module list | member name",
 
+    # mutex
+    "spa | member spa_activities_lock | member m_mutex | mutex",
+    "echo 0xffffa0894e7210b0 | mutex",
+
     # pid
     "pid 1",
     "pid 1 10 12437",
@@ -132,6 +136,9 @@ NEG_CMDS = [
     # lxlist
     "addr modules | lxlist bogus_type list | member name",
     "addr modules | lxlist module bogus_member | member name",
+
+    # mutex
+    "spa | member spa_feat_stats_lock | mutex",
 
     # percpu - not valid CPU number
     'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu 2',
