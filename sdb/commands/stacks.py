@@ -226,8 +226,11 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
     def get_frame_pcs(task: drgn.Object) -> List[int]:
         frame_pcs = []
         try:
+            prev_pc = None
             for frame in sdb.get_prog().stack_trace(task):
-                frame_pcs.append(frame.pc)
+                if frame.pc != prev_pc:
+                    frame_pcs.append(frame.pc)
+                prev_pc = frame.pc
         except ValueError:
             #
             # Unwinding the stack of a running/runnable task will

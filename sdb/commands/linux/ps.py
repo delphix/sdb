@@ -63,7 +63,8 @@ class Ps(Threads):
         "task":
             lambda obj: hex(obj.value_()),
         "uid":
-            lambda obj: int(obj.real_cred.uid.val),
+            lambda obj: int(
+                sdb.create_object("struct cred *", obj.real_cred).uid.val),
         "pid":
             lambda obj: int(obj.pid),
         "time":
