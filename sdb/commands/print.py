@@ -76,6 +76,10 @@ class Print(sdb.SingleInputCommand):
             action="store_true",
             help=("don't symbolize and don't print type names,"
                   " member names in structs, nor indices in arrays"))
+        parser.add_argument("-S",
+                            "--string",
+                            action="store_true",
+                            help="print as string with no address")
         return parser
 
     def _call_one(self, obj: drgn.Object) -> None:
@@ -85,13 +89,19 @@ class Print(sdb.SingleInputCommand):
             raw = True
             nosym = True
 
-        print(
-            obj.format_(dereference=self.args.dereference,
-                        char=self.args.char,
-                        symbolize=not nosym,
-                        members_same_line=self.args.sameline,
-                        type_name=not raw,
-                        member_type_names=not raw,
-                        element_type_names=not raw,
-                        member_names=not self.args.RAW,
-                        element_indices=not self.args.RAW))
+        if self.args.string:
+            try:
+                outstr = obj.string_().decode("utf-8")
+            except drgn.FaultError:
+                outstr = ""
+        else:
+            outstr = obj.format_(dereference=self.args.dereference,
+                                 char=self.args.char,
+                                 symbolize=not nosym,
+                                 members_same_line=self.args.sameline,
+                                 type_name=not raw,
+                                 member_type_names=not raw,
+                                 element_type_names=not raw,
+                                 member_names=not self.args.RAW,
+                                 element_indices=not self.args.RAW)
+        print(outstr)
