@@ -228,9 +228,13 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
         try:
             prev_pc = None
             for frame in sdb.get_prog().stack_trace(task):
-                if frame.pc != prev_pc:
+                try:
+                    pc = frame.pc
+                except LookupError:
+                    continue
+                if pc != prev_pc:
                     frame_pcs.append(frame.pc)
-                prev_pc = frame.pc
+                prev_pc = pc
         except ValueError:
             #
             # Unwinding the stack of a running/runnable task will
