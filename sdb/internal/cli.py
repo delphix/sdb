@@ -21,8 +21,9 @@ like the entry point, command line interface, etc...
 import argparse
 import os
 import sys
+import string
 
-from typing import List
+from typing import Iterable, List
 
 import drgn
 import sdb
@@ -117,22 +118,31 @@ def parse_arguments() -> argparse.Namespace:
         parser.error(
             "cannot specify an object file while also specifying --pid")
 
-    #
-    # We currently cannot handle object files without cores.
-    #
-    if args.object and not args.core:
-        parser.error("raw object file target is not supported yet")
-
     return args
 
 
-def load_debug_info(prog: drgn.Program, dpaths: List[str]) -> None:
+def load_debug_info(prog: drgn.Program,
+                    dpaths: List[str],
+                    vml: str = "") -> None:
     """
     Iterates over all the paths provided (`dpaths`) and attempts
     to load any debug information it finds. If the path provided
     is a directory, the whole directory is traversed in search
     of debug info.
     """
+    if vml:
+        found = False
+        for target in ['/usr/lib/debug', '/root']:
+            vmlinux = []
+            for root, _dirs, files in os.walk(target):
+                if vml in files:
+                    found = True
+                    vmlinux.append(os.sep.join([root, vml]))
+                    print(f"sdb using {vmlinux} auto-detected from core file")
+                    prog.load_debug_info(vmlinux)
+                    break
+            if found:
+                break
     for path in dpaths:
         if os.path.isfile(path):
             prog.load_debug_info([path])
@@ -147,12 +157,74 @@ def load_debug_info(prog: drgn.Program, dpaths: List[str]) -> None:
             print("sdb: " + path + " is not a regular file or directory")
 
 
+def strings(fname: str, minlen: int = 4, maxlen: int = 16384) -> Iterable[str]:
+    """
+    Generate strings of at least minlen from the binary file.
+    """
+    with open(fname, errors="ignore") as f:
+        result = ""
+        for c in f.read(maxlen):
+            if c in string.printable:
+                result += c
+                continue
+            if len(result) >= minlen:
+                yield result
+            result = ""
+        if len(result) >= minlen:  # catch result at EOF
+            yield result
+
+
+def detect_from_core(core: str) -> str:
+    """
+    Parse through the core looking for OSRELEASE=<core>
+    """
+    match = "OSRELEASE"
+    line = ""
+    vm = ""
+    for s in strings(core, len(match), 16384):
+        if s.startswith(match):
+            line = s
+            break
+    if line:
+        split_list = line.split("\n")
+        if len(split_list) > 1:
+            line = split_list[0]
+        split_list = line.split("=")
+        if len(split_list) > 1:
+            vm = split_list[1]
+    return vm
+
+
+def is_core(filename: str) -> bool:
+    """
+    Parse beginning of the given file to see if it starts with 'KDUMP'
+    """
+    match = "KDUMP"
+    for s in strings(filename, len(match), 64):
+        if s.startswith(match):
+            return True
+    return False
+
+
+def fixup_args(args: argparse.Namespace) -> None:
+    """
+    When only one of 'object' or 'core' is supplied, arg 'object'
+    could either be a vmlinux or core dump, so we have to sort
+    that out.
+    """
+    if args.object and not args.core and is_core(args.object):
+        args.core = args.object
+        args.object = ""
+
+
 def setup_target(args: argparse.Namespace) -> drgn.Program:
     """
     Based on the validated input from the command line, setup the
     drgn.Program for our target and its metadata.
     """
     prog = drgn.Program()
+    vml = ""
+    fixup_args(args)
     if args.core:
         try:
             prog.set_core_dump(args.core)
@@ -160,13 +232,13 @@ def setup_target(args: argparse.Namespace) -> drgn.Program:
             print(f"sdb: no such file: '{args.core}'")
             sys.exit(2)
 
-        #
-        # This is currently a short-coming of drgn. Whenever we
-        # open a crash/core dump we need to specify the vmlinux
-        # or userland binary using the non-default debug info
-        # load API.
-        #
-        args.symbol_search = [args.object] + args.symbol_search
+        # If vmlinux file (args.object) not supplied, try to find its
+        # name in the core dump
+        if not args.object:
+            kernel = detect_from_core(args.core)
+            vml = "vmlinux-" + kernel
+        else:
+            args.symbol_search = [args.object] + args.symbol_search
     elif args.pid:
         prog.set_pid(args.pid)
     else:
@@ -186,12 +258,12 @@ def setup_target(args: argparse.Namespace) -> drgn.Program:
             # we quiet any errors when loading the *default debug info*
             # if we are looking at a crash/core dump.
             #
-            if not args.quiet and not args.object:
+            if not args.quiet and not args.core:
                 print("sdb: " + str(debug_info_err), file=sys.stderr)
 
     if args.symbol_search:
         try:
-            load_debug_info(prog, args.symbol_search)
+            load_debug_info(prog, args.symbol_search, vml)
         except (
                 drgn.MissingDebugInfoError,
                 OSError,
