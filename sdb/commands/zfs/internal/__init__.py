@@ -17,6 +17,7 @@
 # pylint: disable=missing-docstring
 
 import os
+import time
 
 import drgn
 import sdb
@@ -37,6 +38,10 @@ def nicenum(num: int, suffix: str = "B") -> str:
             return "{}{}{}".format(int(num), unit, suffix)
         num = int(num / 1024)
     return "{}{}{}".format(int(num), "Y", suffix)
+
+
+def gethrtime() -> int:
+    return int(time.clock_gettime(time.CLOCK_MONOTONIC) * NANOSEC)
 
 
 def P2PHASE(x: drgn.Object, align: int) -> int:
@@ -70,3 +75,5 @@ METASLAB_WEIGHT_TYPE = int(1 << 60)
 METASLAB_ACTIVE_MASK = (METASLAB_WEIGHT_PRIMARY | METASLAB_WEIGHT_SECONDARY |
                         METASLAB_WEIGHT_CLAIM)
 BTREE_LEAF_SIZE = 4096
+NANOSEC = 1000000000
+MSEC = 1000
