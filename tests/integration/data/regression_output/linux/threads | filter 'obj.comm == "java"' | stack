@@ -2,15 +2,20 @@ TASK_STRUCT        STATE             COUNT
 ==========================================
 0xffffa08960a38000 INTERRUPTIBLE        57
                   __schedule+0x2c0
+                  __schedule+0x2c0
                   schedule+0x2c
+                  futex_wait_queue_me+0xc4
                   futex_wait_queue_me+0xc4
                   futex_wait+0x10a
                   do_futex+0x364
+                  __x64_sys_futex+0x13f
+                  __x64_sys_futex+0x13f
                   __x64_sys_futex+0x13f
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
 
 0xffffa08960a24500 INTERRUPTIBLE        12
+                  __schedule+0x2c0
                   __schedule+0x2c0
                   schedule+0x2c
                   schedule_hrtimeout_range_clock+0xb9
@@ -18,44 +23,57 @@ TASK_STRUCT        STATE             COUNT
                   ep_poll+0x258
                   do_epoll_wait+0xb0
                   __x64_sys_epoll_wait+0x1e
+                  __x64_sys_epoll_wait+0x1e
+                  __x64_sys_epoll_wait+0x1e
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
 
 0xffffa088f740dc00 INTERRUPTIBLE         6
                   __schedule+0x2c0
+                  __schedule+0x2c0
                   schedule+0x2c
                   pipe_wait+0x70
                   pipe_read+0x21f
                   new_sync_read+0x109
+                  new_sync_read+0x109
                   __vfs_read+0x29
                   vfs_read+0x8e
                   ksys_read+0x5c
+                  __x64_sys_read+0x1a
+                  __x64_sys_read+0x1a
                   __x64_sys_read+0x1a
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
 
 0xffffa088f740ae00 INTERRUPTIBLE         3
                   __schedule+0x2c0
+                  __schedule+0x2c0
                   schedule+0x2c
                   do_wait+0x1cb
                   kernel_wait4+0x89
                   __do_sys_wait4+0x95
+                  __x64_sys_wait4+0x1e
                   __x64_sys_wait4+0x1e
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
 
 0xffffa088ef2d1700 INTERRUPTIBLE         2
                   __schedule+0x2c0
+                  __schedule+0x2c0
                   schedule+0x2c
                   schedule_timeout+0x1db
                   inet_csk_accept+0x246
+                  inet_csk_accept+0x246
                   inet_accept+0x45
                   __sys_accept4+0x104
+                  __x64_sys_accept+0x1c
+                  __x64_sys_accept+0x1c
                   __x64_sys_accept+0x1c
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
 
 0xffffa0889cd4dc00 INTERRUPTIBLE         2
+                  __schedule+0x2c0
                   __schedule+0x2c0
                   schedule+0x2c
                   schedule_hrtimeout_range_clock+0x181
@@ -63,16 +81,22 @@ TASK_STRUCT        STATE             COUNT
                   ep_poll+0x258
                   do_epoll_wait+0xb0
                   __x64_sys_epoll_wait+0x1e
+                  __x64_sys_epoll_wait+0x1e
+                  __x64_sys_epoll_wait+0x1e
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
 
 0xffffa088f0979700 INTERRUPTIBLE         1
+                  __schedule+0x2c0
                   __schedule+0x2c0
                   schedule+0x2c
                   schedule_hrtimeout_range_clock+0x181
                   schedule_hrtimeout_range+0x13
                   poll_schedule_timeout.constprop.11+0x46
                   do_sys_poll+0x3d6
+                  do_sys_poll+0x3d6
+                  __x64_sys_poll+0x3b
+                  __x64_sys_poll+0x3b
                   __x64_sys_poll+0x3b
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
