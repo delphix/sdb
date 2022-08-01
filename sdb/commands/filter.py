@@ -113,8 +113,8 @@ class Filter(sdb.SingleInputCommand):
             if not isinstance(lhs, drgn.Object):
                 raise sdb.CommandInvalidInputError(
                     self.name,
-                    "left hand side has unsupported type ({})".format(
-                        type(lhs).__name__))
+                    f"left hand side has unsupported type ({type(lhs).__name__})"
+                )
 
             if isinstance(rhs, str):
                 lhs = lhs.string_().decode("utf-8")
@@ -127,10 +127,10 @@ class Filter(sdb.SingleInputCommand):
             else:
                 raise sdb.CommandInvalidInputError(
                     self.name,
-                    "right hand side has unsupported type ({})".format(
-                        type(rhs).__name__))
+                    f"right hand side has unsupported type ({type(rhs).__name__})"
+                )
 
-            if eval("lhs {} rhs".format(self.compare), {'__builtins__': None}, {
+            if eval(f"lhs {self.compare} rhs", {'__builtins__': None}, {
                     'lhs': lhs,
                     'rhs': rhs
             }):

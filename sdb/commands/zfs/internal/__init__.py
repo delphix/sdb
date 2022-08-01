@@ -34,9 +34,9 @@ def enum_lookup(enum_type_name: str, value: int) -> str:
 def nicenum(num: int, suffix: str = "B") -> str:
     for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
         if num < 1024:
-            return "{}{}{}".format(int(num), unit, suffix)
+            return f"{int(num)}{unit}{suffix}"
         num = int(num / 1024)
-    return "{}{}{}".format(int(num), "Y", suffix)
+    return "{int(num)}Y{suffix}"
 
 
 def P2PHASE(x: drgn.Object, align: int) -> int:

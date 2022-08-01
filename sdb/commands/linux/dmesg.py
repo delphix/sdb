@@ -54,4 +54,4 @@ class DMesg(sdb.Locator, sdb.PrettyPrinter):
             message = drgn.cast("char *", obj) + obj.type_.type.size
             text = message.string_().decode('utf-8', 'ignore')
 
-            print("[{:5d}.{:06d}]: {:s}".format(secs, usecs, text))
+            print(f"[{secs:5d}.{usecs:06d}]: {text}")

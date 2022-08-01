@@ -138,11 +138,12 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
             # yield the requested top-level vdevs
             for i in self.args.vdev_ids:
                 if i >= spa.spa_root_vdev.vdev_children:
+                    children = int(spa.spa_root_vdev.vdev_children)
+                    spa_name = spa.spa_name.string_().decode("utf-8")
                     raise sdb.CommandError(
                         self.name,
-                        "vdev id {} not valid; there are only {} vdevs in {}".
-                        format(i, int(spa.spa_root_vdev.vdev_children),
-                               spa.spa_name.string_().decode("utf-8")))
+                        f"vdev id {i} not valid; there are only {children} vdevs in {spa_name}"
+                    )
                 yield spa.spa_root_vdev.vdev_child[i]
         else:
             yield from self.from_vdev(spa.spa_root_vdev)

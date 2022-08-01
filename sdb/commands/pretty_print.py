@@ -41,8 +41,7 @@ class PrettyPrint(sdb.Command):
 
         if handling_class is None:
             if first_obj_type is not None:
-                msg = 'could not find pretty-printer for type {}\n'.format(
-                    first_obj_type)
+                msg = f'could not find pretty-printer for type {first_obj_type}\n'
             else:
                 msg = 'could not find pretty-printer\n'
             msg += "The following types have pretty-printers:\n"

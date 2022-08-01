@@ -186,6 +186,6 @@ def test_cmd_stripped_output_and_error_code_0(capsys: Any, cmd: str) -> None:
     assert repl_invoke(cmd) == 0
     captured = capsys.readouterr()
     slurped = slurp_output_file("linux", cmd)
-    for i in range(len(captured.out)):
-        assert captured.out[i].strip() == slurped[i].strip()
+    for i, n in enumerate(captured.out):
+        assert n.strip() == slurped[i].strip()
     assert len(captured.out) == len(slurped)

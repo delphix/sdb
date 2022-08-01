@@ -20,11 +20,11 @@ import glob
 import importlib
 import os
 
-for path in glob.glob("{}/*.py".format(os.path.dirname(__file__))):
+for path in glob.glob(f"{os.path.dirname(__file__)}/*.py"):
     if path != __file__:
         module = os.path.splitext(os.path.basename(path))[0]
-        importlib.import_module("sdb.commands.linux.{}".format(module))
+        importlib.import_module(f"sdb.commands.linux.{module}")
 
-for path in glob.glob("{}/*/__init__.py".format(os.path.dirname(__file__))):
+for path in glob.glob(f"{os.path.dirname(__file__)}/*/__init__.py"):
     module = os.path.basename(os.path.dirname(path))
-    importlib.import_module("sdb.commands.linux.{}".format(module))
+    importlib.import_module(f"sdb.commands.linux.{module}")

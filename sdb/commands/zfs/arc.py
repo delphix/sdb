@@ -32,7 +32,7 @@ class ARCStats(sdb.Locator, sdb.PrettyPrinter):
         names = [memb.name for memb in sdb.get_type('struct arc_stats').members]
 
         for name in names:
-            print("{:32} = {}".format(name, int(obj.member_(name).value.ui64)))
+            print(f"{name:32} = {int(obj.member_(name).value.ui64)}")
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         for obj in objs:

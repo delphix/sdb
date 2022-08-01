@@ -51,42 +51,34 @@ prog: drgn.Program
 
 
 def get_type(type_name: str) -> drgn.Type:
-    global prog
     return prog.type(type_name)
 
 
 def get_pointer_type(type_name: str) -> drgn.Type:
-    global prog
     return prog.pointer_type(type_name)
 
 
 def is_null(obj: drgn.Object) -> bool:
-    global prog
     return bool(obj == drgn.NULL(prog, obj.type_))
 
 
 def create_object(type_: Union[str, drgn.Type], val: Any) -> drgn.Object:
-    global prog
     return drgn.Object(prog, type_, value=val)
 
 
 def get_target_flags() -> drgn.ProgramFlags:
-    global prog
     return prog.flags
 
 
 def get_object(obj_name: str) -> drgn.Object:
-    global prog
     return prog[obj_name]
 
 
 def get_symbol(sym: Union[str, int]) -> drgn.Symbol:
-    global prog
     return prog.symbol(sym)
 
 
 def get_prog() -> drgn.Program:
-    global prog
     return prog
 
 
@@ -104,7 +96,6 @@ def type_canonicalize(t: drgn.Type) -> drgn.Type:
 
     Note: function type's arguments and return types are not canonicalized.
     """
-    global prog
     if t.kind == drgn.TypeKind.TYPEDEF:
         return type_canonicalize(t.type)
     if t.kind == drgn.TypeKind.POINTER:
@@ -125,7 +116,6 @@ def type_canonicalize_name(type_name: str) -> str:
     """
     Return the "canonical name" of this type name.  See type_canonicalize().
     """
-    global prog
     return type_canonical_name(prog.type(type_name))
 
 

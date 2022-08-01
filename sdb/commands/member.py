@@ -178,8 +178,7 @@ class Member(sdb.SingleInputCommand):
                 if not tokens[1].isdigit():
                     raise sdb.CommandError(
                         self.name,
-                        "incorrect index: '{}' is not a number".format(
-                            tokens[1]))
+                        f"incorrect index: '{tokens[1]}' is not a number")
                 is_index = True
                 idx = tokens[1]
                 sep = MemberExprSep.ARRAY
@@ -191,8 +190,7 @@ class Member(sdb.SingleInputCommand):
 
             if not is_index and not identifier.isidentifier():
                 raise sdb.CommandError(
-                    self.name,
-                    "{} is not an acceptable identifier".format(identifier))
+                    self.name, f"{identifier} is not an acceptable identifier")
 
             if not is_index:
                 assert idx == ""
@@ -238,8 +236,8 @@ class Member(sdb.SingleInputCommand):
         if kind == drgn.TypeKind.STRUCT and sep != MemberExprSep.DOT:
             raise sdb.CommandError(
                 self.name,
-                "'{}' is a struct - use the dot(.) notation for member access".
-                format(obj.type_))
+                f"'{obj.type_}' is a struct - use the dot(.) notation for member access"
+            )
 
         if kind == drgn.TypeKind.POINTER:
             assert sep in [
@@ -249,8 +247,9 @@ class Member(sdb.SingleInputCommand):
 
         if kind == drgn.TypeKind.ARRAY and sep != MemberExprSep.ARRAY:
             raise sdb.CommandError(
-                self.name, "'{}' is an array - cannot use '{}' notation".format(
-                    obj.type_, sep.value))
+                self.name,
+                f"'{obj.type_}' is an array - cannot use '{sep.value}' notation"
+            )
 
     def _validate_array_index(self, type_: drgn.Type, idx: int) -> None:
         """
