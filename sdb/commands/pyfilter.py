@@ -49,7 +49,7 @@ class PyFilter(sdb.Command):
 
         def filter_cb(obj: drgn.Object) -> Optional[drgn.Object]:
             # pylint: disable=eval-used
-            eval(self.code, {'__builtins__': None}, {'obj': obj})
+            return eval(self.code, {'__builtins__': None}, {'obj': obj})
 
         try:
             yield from filter(filter_cb, objs)
