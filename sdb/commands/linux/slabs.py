@@ -104,7 +104,7 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
         # that will be the input of the next command in the pipeline.
         #
         if self.args.s and not self.islast:
-            if self.args.s not in Slabs.FIELDS.keys():
+            if Slabs.FIELDS[self.args.s] is None:
                 raise sdb.CommandInvalidInputError(
                     self.name, f"'{self.args.s}' is not a valid field")
             yield from sorted(
@@ -154,8 +154,8 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
 
         for field in fields:
             if field not in self.FIELDS:
-                raise sdb.CommandError(
-                    self.name, "'{:s}' is not a valid field".format(field))
+                raise sdb.CommandError(self.name,
+                                       f"'{field}' is not a valid field")
 
         sort_field = ""
         if self.args.s:

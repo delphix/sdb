@@ -30,7 +30,7 @@ import drgn
 
 from sdb.target import type_canonicalize_name, type_canonical_name, type_canonicalize, get_prog
 from sdb.error import CommandError, SymbolNotFoundError
-import sdb.target as target
+from sdb import target
 
 #
 # The register_command is used by the Command class when its
@@ -45,8 +45,6 @@ def register_command(name: str, class_: Type["Command"]) -> None:
     Register the specified command name and command class, such that the
     command will be available from the SDB REPL.
     """
-    # pylint: disable=global-statement
-    global all_commands
     all_commands[name] = class_
 
 
@@ -54,8 +52,6 @@ def get_registered_commands() -> Dict[str, Type["Command"]]:
     """
     Return a dictionary of command names to command classes.
     """
-    # pylint: disable=global-statement
-    global all_commands
     return all_commands
 
 
@@ -108,11 +104,12 @@ class Command:
             #
             if i == 0:
                 line = line.replace('usage: ', '')
-            print("    {}".format(line))
+            print(f"    {line}")
 
         if len(cls.names) > 1:
+            aliases = ", ".join(cls.names)
             print("ALIASES")
-            print("    {}".format(", ".join(cls.names)))
+            print(f"    {aliases}")
             print()
 
         indent = "    "
@@ -168,7 +165,7 @@ class Command:
                     f" case it will consume no objects as input; instead it"
                     f" will locate all objects of type '{cls.output_type}',"
                     f" and emit them as output.")
-            types = list()
+            types = []
             for (_, method) in inspect.getmembers(cls, inspect.isroutine):
                 if hasattr(method, "input_typename_handled"):
                     types.append(method.input_typename_handled)
@@ -203,7 +200,7 @@ class Command:
             #
             for line in inspect.getdoc(  # type: ignore[union-attr]
                     cls).splitlines()[2:]:
-                print("{}".format(line))
+                print(f"{line}")
             print()
 
     #
@@ -588,12 +585,11 @@ class Walk(Command):
     def _help_message(input_type: drgn.Type = None) -> str:
         msg = ""
         if input_type is not None:
-            msg = msg + "no walker found for input of type {}\n".format(
-                input_type)
-        msg = msg + "The following types have walkers:\n"
-        msg = msg + "\t%-20s %-20s\n" % ("WALKER", "TYPE")
+            msg += f"no walker found for input of type {input_type}\n"
+        msg += "The following types have walkers:\n"
+        msg += f"\t{'WALKER':-20s} {'TYPE':-20s}\n"
         for type_, class_ in Walker.allWalkers.items():
-            msg = msg + "\t%-20s %-20s\n" % (class_.names[0], type_)
+            msg += f"\t{class_.names[0]:-20s} {type_:-20s}\n"
         return msg
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
@@ -645,11 +641,12 @@ class Walker(Command):
         assert self.input_type is not None
         expected_type = type_canonicalize_name(self.input_type)
         for obj in objs:
-            if type_canonical_name(obj.type_) != expected_type:
+            canonical_type = type_canonical_name(obj.type_)
+            if canonical_type != expected_type:
                 raise CommandError(
                     self.name,
-                    'expected input of type {}, but received {}'.format(
-                        expected_type, type_canonical_name(obj.type_)))
+                    f'expected input of type {expected_type}, but received {canonical_type}'
+                )
 
             yield from self.walk(obj)
 
@@ -724,7 +721,7 @@ class Locator(Command):
         out_type = None
         if self.output_type is not None:
             out_type = target.get_type(self.output_type)
-        baked = dict()
+        baked = {}
         for (_, method) in inspect.getmembers(self, inspect.ismethod):
             if not hasattr(method, "input_typename_handled"):
                 continue
@@ -762,8 +759,8 @@ class Locator(Command):
                     pass
 
             # error
-            raise CommandError(
-                self.name, 'no handler for input of type {}'.format(i.type_))
+            raise CommandError(self.name,
+                               f'no handler for input of type {i.type_}')
 
     def _call(self,
               objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:

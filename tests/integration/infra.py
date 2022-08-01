@@ -96,6 +96,8 @@ def slurp_output_file(modname: str, cmd: str) -> str:
     Given a module name and a command, find the output file
     and return all of its contents as a string.
     """
+    # The pylint below is a false positive
+    # pylint: disable=unspecified-encoding
     return Path(f"{TEST_OUTPUT_DIR}/{modname}/{cmd}").read_text()
 
 
@@ -113,7 +115,7 @@ def generate_output_for_commands(cmds: List[str], dirpath: str) -> None:
         shutil.rmtree(dirpath)
     os.makedirs(dirpath)
     for cmd in cmds:
-        with open(f"{dirpath}/{cmd}", 'w') as f:
+        with open(f"{dirpath}/{cmd}", 'w', encoding="utf-8") as f:
             with redirect_stdout(f):
                 repl_invoke(cmd)
 

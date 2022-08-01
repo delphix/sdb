@@ -2,6 +2,7 @@ TASK_STRUCT        STATE             COUNT
 ==========================================
 0xffffa0895684c500 INTERRUPTIBLE        13
                   __schedule+0x2c0
+                  __schedule+0x2c0
                   schedule+0x2c
                   cv_wait_common+0x11f
                   __cv_wait_sig+0x15
@@ -11,6 +12,7 @@ TASK_STRUCT        STATE             COUNT
                   ret_from_fork+0x1f
 
 0xffffa08956849700 INTERRUPTIBLE         1
+                  __schedule+0x2c0
                   __schedule+0x2c0
                   schedule+0x2c
                   schedule_hrtimeout_range_clock+0xb9

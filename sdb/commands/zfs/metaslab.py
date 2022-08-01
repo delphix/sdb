@@ -97,8 +97,8 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
             print((str(int(msp.ms_fragmentation)) + "%").rjust(5), end="")
         print(
             str(str(int(msp.ms_allocated_space) >> 20) + "M").rjust(7),
-            ("({0:.1f}%)".format(
-                int(msp.ms_allocated_space) * 100 / int(msp.ms_size)).rjust(7)),
+            f"({(int(msp.ms_allocated_space) * 100 / int(msp.ms_size)):.1f}%)".
+            rjust(7),
             nicenum(msp.ms_max_size).rjust(10),
             end="",
         )
@@ -187,10 +187,11 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
             # yield the requested metaslabs
             for i in self.args.metaslab_ids:
                 if i >= vdev.vdev_ms_count:
+                    ms_count = int(vdev.vdev_ms_count)
+                    vdev = int(vdev.vdev_id)
                     raise sdb.CommandError(
-                        self.name, "metaslab id {} not valid; "
-                        "there are only {} metaslabs in vdev id {}".format(
-                            i, int(vdev.vdev_ms_count), int(vdev.vdev_id)))
+                        self.name, f"metaslab id {i} not valid; "
+                        f"there are only {ms_count} metaslabs in vdev {vdev}")
                 yield vdev.vdev_ms[i]
         else:
             for i in range(int(vdev.vdev_ms_count)):

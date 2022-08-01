@@ -20,7 +20,7 @@ import glob
 import importlib
 import os
 
-for path in glob.glob("{}/*.py".format(os.path.dirname(__file__))):
+for path in glob.glob(f"{os.path.dirname(__file__)}/*.py"):
     if path != __file__:
         module = os.path.splitext(os.path.basename(path))[0]
-        importlib.import_module("sdb.commands.zfs.{}".format(module))
+        importlib.import_module(f"sdb.commands.zfs.{module}")

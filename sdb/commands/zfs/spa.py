@@ -66,11 +66,11 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
             self.arg_list.append("-w")
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
-        print("{:18} {}".format("ADDR", "NAME"))
-        print("%s" % ("-" * 60))
+        print(f"{'ADDR':18} NAME")
+        print(f"{('-' * 60)}")
         for spa in objs:
-            print("{:18} {}".format(hex(spa),
-                                    spa.spa_name.string_().decode("utf-8")))
+            spa_name = spa.spa_name.string_().decode("utf-8")
+            print(f"{hex(spa):18} {spa_name}")
             if self.args.histogram:
                 ZFSHistogram.print_histogram(spa.spa_normal_class.mc_histogram,
                                              0, 5)

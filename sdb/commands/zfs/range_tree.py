@@ -71,7 +71,6 @@ class RangeSeg(sdb.Locator):
     """
     names = ['range_seg']
 
-    #pylint: disable=no-self-use
     @sdb.InputHandler('range_tree_t *')
     def from_range_tree(self, rt: drgn.Object) -> Iterable[drgn.Object]:
         enum_dict = dict(sdb.get_type('enum range_seg_type').enumerators)
