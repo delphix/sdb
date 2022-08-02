@@ -23,8 +23,8 @@ from typing import Iterable, List, Tuple
 
 import drgn
 
-import sdb.parser as parser
-import sdb.target as target
+from sdb import parser
+from sdb import target
 from sdb.error import CommandArgumentsError, CommandNotFoundError
 from sdb.command import Address, Cast, Command, get_registered_commands
 

@@ -173,8 +173,7 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
             "-t",
             "--tstate",
             help="only print threads which are in TSTATE thread state")
-        parser.epilog = "TSTATE := [{:s}]".format(", ".join(
-            Stacks.TASK_STATES.values()))
+        parser.epilog = f'TSTATE := [{", ".join(Stacks.TASK_STATES.values()):s}]'
         return parser
 
     #
@@ -346,9 +345,9 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
         return False
 
     def print_header(self) -> None:
-        header = "{:<18} {:<16s}".format("TASK_STRUCT", "STATE")
+        header = f"{'TASK_STRUCT':<18} {'STATE':<16s}"
         if not self.args.all:
-            header += " {:>6s}".format("COUNT")
+            header += f" {'COUNT':>6s}"
         print(header)
         print("=" * 42)
 
@@ -377,11 +376,10 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
 
             if self.args.all:
                 for task in tasks:
-                    stacktrace_info += "{:<18s} {:<16s}\n".format(
-                        hex(task.value_()), task_state)
+                    stacktrace_info += f"{hex(task.value_()):<18s} {task_state:<16s}\n"
             else:
-                stacktrace_info += "{:<18s} {:<16s} {:6d}\n".format(
-                    hex(tasks[0].value_()), task_state, len(tasks))
+                task_ptr = hex(tasks[0].value_())
+                stacktrace_info += f"{task_ptr:<18s} {task_state:<16s} {len(tasks):6d}\n"
 
             frame_pcs: Tuple[int, ...] = stack_key[1]
             for frame_pc in frame_pcs:
@@ -392,7 +390,7 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
                 except LookupError:
                     func = hex(frame_pc)
                     offset = 0x0
-                stacktrace_info += "{:18s}{}+{}\n".format("", func, hex(offset))
+                stacktrace_info += f"{'':18s}{func}+{hex(offset)}\n"
             print(stacktrace_info)
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:

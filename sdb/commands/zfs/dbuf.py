@@ -77,18 +77,22 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
     @staticmethod
     def ObjsetName(os: drgn.Object) -> str:
         if not os.os_dsl_dataset:
-            return '{}/_MOS'.format(
-                os.os_spa.spa_name.string_().decode("utf-8"))
+            spa_name = os.os_spa.spa_name.string_().decode("utf-8")
+            return f'{spa_name}/_MOS'
         return Dbuf.DatasetName(os.os_dsl_dataset)
 
     def pretty_print(self, objs: drgn.Object) -> None:
-        print("{:>20} {:>8} {:>4} {:>8} {:>5} {}".format(
-            "addr", "object", "lvl", "blkid", "holds", "os"))
+        print(
+            f"{'addr':>20} {'object':>8} {'lvl':>4} {'blkid':>8} {'holds':>5} os"
+        )
         for dbuf in filter(self.argfilter, objs):
-            print("{:>20} {:>8d} {:>4d} {:>8d} {:>5d} {}".format(
-                hex(dbuf), int(dbuf.db.db_object), int(dbuf.db_level),
-                int(dbuf.db_blkid), int(dbuf.db_holds.rc_count),
-                Dbuf.ObjsetName(dbuf.db_objset)))
+            entry = (f"{hex(dbuf):>20}"
+                     f" {int(dbuf.db.db_object):>8d}"
+                     f" {int(dbuf.db_level):>4d}"
+                     f" {int(dbuf.db_blkid):>8d}"
+                     f" {int(dbuf.db_holds.rc_count):>5d}"
+                     f" {Dbuf.ObjsetName(dbuf.db_objset)}")
+            print(entry)
 
     def argfilter(self, db: drgn.Object) -> bool:
         # self.args.object (and friends) may be set to 0, indicating a search

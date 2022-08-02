@@ -46,7 +46,7 @@ class SdbSum(sdb.Command):
         result = 0
         for obj in objs:
             type_ = sdb.type_canonicalize(obj.type_)
-            if type_.kind != drgn.TypeKind.INT and type_.kind != drgn.TypeKind.POINTER:
+            if type_.kind not in (drgn.TypeKind.INT, drgn.TypeKind.POINTER):
                 raise sdb.CommandError(
                     self.name, f"'{type_.type_name()}' is not an integer type")
             result += int(obj.value_())

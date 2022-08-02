@@ -46,9 +46,12 @@ class PyFilter(sdb.Command):
             raise sdb.CommandEvalSyntaxError(self.name, err)
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        # pylint: disable=eval-used
-        func = lambda obj: eval(self.code, {'__builtins__': None}, {'obj': obj})
+
+        def filter_cb(obj: drgn.Object) -> Optional[drgn.Object]:
+            # pylint: disable=eval-used
+            return eval(self.code, {'__builtins__': None}, {'obj': obj})
+
         try:
-            yield from filter(func, objs)
+            yield from filter(filter_cb, objs)
         except (TypeError, AttributeError) as err:
             raise sdb.CommandError(self.name, str(err))

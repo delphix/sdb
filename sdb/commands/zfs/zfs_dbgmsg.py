@@ -42,11 +42,10 @@ class ZfsDbgmsg(sdb.Locator, sdb.PrettyPrinter):
                   print_timestamp: bool = False,
                   print_address: bool = False) -> None:
         if print_address:
-            print("{} ".format(hex(obj)), end="")
+            print(f"{hex(obj)} ", end="")
         if print_timestamp:
             timestamp = datetime.datetime.fromtimestamp(int(obj.zdm_timestamp))
-            print("{}: ".format(timestamp.strftime("%Y-%m-%dT%H:%M:%S")),
-                  end="")
+            print(f"{timestamp.strftime('%Y-%m-%dT%H:%M:%S')}: ", end="")
 
         print(drgn.cast("char *", obj.zdm_msg).string_().decode("utf-8"))
 
