@@ -133,6 +133,9 @@ POS_CMDS = [
     "spa | vdev | metaslab | deref | sizeof | sum",
     "threads | sizeof | sum",
     "threads | deref | sizeof | sum",
+
+    # walker
+    "spa | member spa_config_list | walk",
 ]
 
 NEG_CMDS = [
