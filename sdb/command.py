@@ -365,7 +365,7 @@ class SingleInputCommand(Command):
                     err_msg = f"invalid memory access: {str(err)}"
                 else:
                     err_msg = "invalid memory access while handling object "
-                    err_msg += "at address {hex(obj.address_of_().value_())}"
+                    err_msg += f"at address {hex(obj.address_of_().value_())}"
                 cmd_err = CommandError(self.name, err_msg)
                 print(cmd_err.text)
             if result is not None:

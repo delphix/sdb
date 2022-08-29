@@ -1,0 +1,42 @@
+name=enabled_feat type=DATA_TYPE_NVLIST values=
+    name=org.zfsonlinux:large_dnode type=DATA_TYPE_UINT64 value=0
+    name=com.delphix:redaction_bookmarks type=DATA_TYPE_UINT64 value=0
+    name=com.delphix:extensible_dataset type=DATA_TYPE_UINT64 value=1
+    name=com.delphix:bookmark_written type=DATA_TYPE_UINT64 value=0
+    name=com.delphix:hole_birth type=DATA_TYPE_UINT64 value=1
+    name=org.illumos:skein type=DATA_TYPE_UINT64 value=0
+    name=org.illumos:sha512 type=DATA_TYPE_UINT64 value=0
+    name=org.illumos:lz4_compress type=DATA_TYPE_UINT64 value=1
+    name=com.delphix:redacted_datasets type=DATA_TYPE_UINT64 value=0
+    name=com.datto:bookmark_v2 type=DATA_TYPE_UINT64 value=0
+    name=com.delphix:embedded_data type=DATA_TYPE_UINT64 value=1
+    name=com.delphix:device_removal type=DATA_TYPE_UINT64 value=0
+    name=org.open-zfs:large_blocks type=DATA_TYPE_UINT64 value=0
+    name=com.joyent:multi_vdev_crash_dump type=DATA_TYPE_UINT64 value=0
+    name=com.datto:encryption type=DATA_TYPE_UINT64 value=0
+    name=org.illumos:edonr type=DATA_TYPE_UINT64 value=0
+    name=com.delphix:spacemap_v2 type=DATA_TYPE_UINT64 value=1
+    name=com.joyent:filesystem_limits type=DATA_TYPE_UINT64 value=0
+    name=com.datto:resilver_defer type=DATA_TYPE_UINT64 value=0
+    name=com.delphix:spacemap_histogram type=DATA_TYPE_UINT64 value=24
+    name=com.delphix:async_destroy type=DATA_TYPE_UINT64 value=0
+    name=org.zfsonlinux:userobj_accounting type=DATA_TYPE_UINT64 value=1
+    name=com.delphix:zpool_checkpoint type=DATA_TYPE_UINT64 value=0
+    name=com.delphix:obsolete_counts type=DATA_TYPE_UINT64 value=0
+    name=com.delphix:empty_bpobj type=DATA_TYPE_UINT64 value=0
+    name=com.delphix:bookmarks type=DATA_TYPE_UINT64 value=0
+    name=com.delphix:enabled_txg type=DATA_TYPE_UINT64 value=26
+    name=com.delphix:log_spacemap type=DATA_TYPE_UINT64 value=1
+    name=org.zfsonlinux:allocation_classes type=DATA_TYPE_UINT64 value=0
+    name=org.zfsonlinux:project_quota type=DATA_TYPE_UINT64 value=1
+    name=com.delphix:livelist type=DATA_TYPE_UINT64 value=0
+name=can_rdonly type=DATA_TYPE_BOOLEAN value=
+name=rewind_txg_ts type=DATA_TYPE_UINT64 value=1575588901
+name=seconds_of_rewind type=DATA_TYPE_INT64 value=-1575588901
+name=verify_data_errors type=DATA_TYPE_UINT64 value=0
+----
+----
+name=rewind_txg_ts type=DATA_TYPE_UINT64 value=1575589714
+name=seconds_of_rewind type=DATA_TYPE_INT64 value=-1575589714
+name=verify_data_errors type=DATA_TYPE_UINT64 value=3
+----
