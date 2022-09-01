@@ -61,6 +61,12 @@ CMD_TABLE = [
     "spa data | vdev | metaslab | filter 'obj.ms_loaded == 1' | head 1 | member ms_sm.sm_phys.smp_histogram | zhist",
     "spa data | vdev | metaslab | filter 'obj.ms_loaded == 1' | head 1 | member ms_sm.sm_phys.smp_histogram | zhist 9",
     "spa data | vdev | metaslab | filter 'obj.ms_loaded == 1' | head 1 | member ms_allocatable.rt_histogram | zhist",
+
+    # znode
+    "znode |head 10 |znode",
+    "echo 0xffffa08884646ec0 | znode",
+    "echo 0xffffa08884646ec0 | znode | znode2inode",
+    "echo 0xffffa088846470b8 | cast struct inode * | inode2znode",
 ] # yapf: disable
 
 
