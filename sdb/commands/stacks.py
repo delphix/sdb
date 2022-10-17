@@ -358,8 +358,8 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
     #
     @staticmethod
     def aggregate_stacks(
-        objs: Iterable[drgn.Object]
-    ) -> List[Tuple[Tuple[str, Tuple[int, ...]], List[drgn.Object]]]:
+        objs: Iterable[drgn.Object]) \
+                -> List[Tuple[Tuple[str, Tuple[int, ...]], List[drgn.Object]]]:
         stack_aggr: Dict[Tuple[str, Tuple[int, ...]],
                          List[drgn.Object]] = defaultdict(list)
         for task in objs:

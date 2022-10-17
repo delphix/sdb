@@ -17,7 +17,7 @@
 # pylint: disable=missing-docstring
 
 from textwrap import shorten
-from typing import Callable, Dict, Iterable, Union
+from typing import Callable, Dict, Iterable, List, Union
 
 import drgn
 from drgn.helpers.linux.pid import for_each_task
@@ -85,13 +85,26 @@ class Threads(sdb.Locator, sdb.PrettyPrinter):
         "cmdline": _cmdline,
     }
 
+    def get_filtered_fields(self) -> List[str]:
+        return list(self.FIELDS.keys())
+
+    def get_table_key(self) -> str:
+        # pylint: disable=R0201
+        return "task"
+
+    def show_headers(self) -> bool:
+        # pylint: disable=R0201
+        return True
+
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
-        fields = list(Threads.FIELDS.keys())
-        table = Table(fields, None, {"task": str})
+        fields = self.get_filtered_fields()
+        table_key = self.get_table_key()
+
+        table = Table(fields, None, {table_key: str})
         for obj in objs:
-            row_dict = {field: Threads.FIELDS[field](obj) for field in fields}
-            table.add_row(row_dict["task"], row_dict)
-        table.print_()
+            row_dict = {field: self.FIELDS[field](obj) for field in fields}
+            table.add_row(row_dict[table_key], row_dict)
+        table.print_(print_headers=self.show_headers())
 
     def no_input(self) -> Iterable[drgn.Object]:
         yield from for_each_task(sdb.get_prog())
