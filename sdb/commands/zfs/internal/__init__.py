@@ -51,6 +51,10 @@ def BF64_GET(x: drgn.Object, low: int, length: int) -> int:
     return BF64_DECODE(x, low, length)
 
 
+def BF64_GET_SB(x: int, low: int, length: int, shift: int, bias: int) -> int:
+    return (BF64_GET(x, low, length) + bias) << shift
+
+
 def WEIGHT_IS_SPACEBASED(weight: int) -> bool:
     return weight == 0 or (BF64_GET(weight, 60, 1) != 0)
 
