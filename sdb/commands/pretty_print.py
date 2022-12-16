@@ -23,7 +23,6 @@ import sdb
 
 
 class PrettyPrint(sdb.Command):
-
     names = ["pretty_print", "pp"]
 
     def _call(self, objs: Iterable[drgn.Object]) -> None:

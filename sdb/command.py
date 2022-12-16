@@ -24,7 +24,7 @@ registered commands during a session.
 import argparse
 import inspect
 import textwrap
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, TypeVar
 
 import drgn
 
@@ -275,6 +275,29 @@ class Command:
         """
         raise NotImplementedError()
 
+    def _valid_input_types(self) -> Set[str]:
+        """
+        Returns a set of strings which are the canonicalized names of valid input types
+        for this command
+        """
+        assert self.input_type is not None
+        return {type_canonicalize_name(self.input_type)}
+
+    def __input_type_check(
+            self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        valid_input_types = self._valid_input_types()
+        prev_type = None
+        for obj in objs:
+            cur_type = type_canonical_name(obj.type_)
+            if cur_type not in valid_input_types or (prev_type and
+                                                     cur_type != prev_type):
+                raise CommandError(
+                    self.name,
+                    f'expected input of type {self.input_type}, but received '
+                    f'type {obj.type_}')
+            prev_type = cur_type
+            yield obj
+
     def __invalid_memory_objects_check(self, objs: Iterable[drgn.Object],
                                        fatal: bool) -> Iterable[drgn.Object]:
         """
@@ -312,7 +335,11 @@ class Command:
         # the command is running.
         #
         try:
-            result = self._call(objs)
+            if self.input_type and objs:
+                result = self._call(self.__input_type_check(objs))
+            else:
+                result = self._call(objs)
+
             if result is not None:
                 #
                 # The whole point of the SingleInputCommands are that
@@ -320,7 +347,7 @@ class Command:
                 # a bad dereference. That's why we check here whether
                 # the command that we are running is a subclass of
                 # SingleInputCommand and we set the `fatal` flag
-                # accordinly.
+                # accordingly.
                 #
                 yield from self.__invalid_memory_objects_check(
                     result, not issubclass(self.__class__, SingleInputCommand))
@@ -669,22 +696,6 @@ class PrettyPrinter(Command):
         # pylint: disable=missing-docstring
         raise NotImplementedError
 
-    def check_input_type(self,
-                         objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        """
-        This function acts as a generator, checking that each passed object
-        matches the input type for the command
-        """
-        assert self.input_type is not None
-        type_name = type_canonicalize_name(self.input_type)
-        for obj in objs:
-            if type_canonical_name(obj.type_) != type_name:
-                raise CommandError(
-                    self.name,
-                    f'expected input of type {self.input_type}, but received '
-                    f'type {obj.type_}')
-            yield obj
-
     def _call(  # type: ignore[return]
             self,
             objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
@@ -693,7 +704,7 @@ class PrettyPrinter(Command):
         verifying the types as we go.
         """
         assert self.input_type is not None
-        self.pretty_print(self.check_input_type(objs))
+        self.pretty_print(objs)
 
 
 class Locator(Command):
@@ -707,6 +718,26 @@ class Locator(Command):
     """
 
     output_type: Optional[str] = None
+
+    def _valid_input_types(self) -> Set[str]:
+        """
+        Some Locators support multiple input types. Check for InputHandler
+        implementations to expand the set of valid input types.
+        """
+        assert self.input_type is not None
+        valid_types = [type_canonicalize_name(self.input_type)]
+
+        for (_, method) in inspect.getmembers(self, inspect.ismethod):
+            if hasattr(method, "input_typename_handled"):
+                valid_types.append(
+                    type_canonicalize_name(method.input_typename_handled))
+
+        valid_types += [
+            type_canonicalize_name(type_)
+            for type_, class_ in Walker.allWalkers.items()
+        ]
+
+        return set(valid_types)
 
     def no_input(self) -> Iterable[drgn.Object]:
         # pylint: disable=missing-docstring
