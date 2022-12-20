@@ -22,6 +22,8 @@ from typing import Iterable
 import drgn
 import sdb
 
+from drgn.helpers.linux.pid import find_pid, find_task
+
 
 class FindPid(sdb.Command):
     """
@@ -56,7 +58,7 @@ class FindPid(sdb.Command):
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for pid in self.args.pid:
-            yield drgn.helpers.linux.pid.find_pid(sdb.get_prog(), pid)
+            yield find_pid(sdb.get_prog(), pid)
 
 
 class FindTask(sdb.Command):
@@ -87,4 +89,4 @@ class FindTask(sdb.Command):
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for pid in self.args.pid:
-            yield drgn.helpers.linux.pid.find_task(sdb.get_prog(), pid)
+            yield find_task(sdb.get_prog(), pid)

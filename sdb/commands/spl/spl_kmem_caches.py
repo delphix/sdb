@@ -212,7 +212,7 @@ class SplKmemCacheWalker(sdb.Walker):
     EXAMPLES
         Print all the objects in the ddt_cache:
 
-            sdb> spl_kmem_caches | filter obj.skc_name == "ddt_cache" | spl_cache
+            sdb> spl_kmem_caches | filter 'obj.skc_name == "ddt_cache"' | spl_cache
             (void *)0xffffa08937e80040
             (void *)0xffffa08937e86180
             (void *)0xffffa08937e8c2c0

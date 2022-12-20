@@ -66,8 +66,17 @@ class Btree(sdb.Walker):
         if not node:
             return
 
+        #
+        # We check both members of the node because of the change introdcued in
+        # https://github.com/delphix/zfs/commit/c0bf952c846100750f526c2a32ebec17694a201b
+        #
+        try:
+            recurse = int(node.bth_first) == -1
+        except AttributeError:
+            recurse = node.bth_core
+
         count = node.bth_count
-        if node.bth_core:
+        if recurse:
             # alterate recursive descent on the children and generating core objects
             core = drgn.cast('struct zfs_btree_core *', node)
             for i in range(count):
