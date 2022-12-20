@@ -587,9 +587,9 @@ class Walk(Command):
         if input_type is not None:
             msg += f"no walker found for input of type {input_type}\n"
         msg += "The following types have walkers:\n"
-        msg += f"\t{'WALKER':-20s} {'TYPE':-20s}\n"
+        msg += f"\t{'WALKER':<20s} {'TYPE':<20s}\n"
         for type_, class_ in Walker.allWalkers.items():
-            msg += f"\t{class_.names[0]:-20s} {type_:-20s}\n"
+            msg += f"\t{class_.names[0]:<20s} {type_:<20s}\n"
         return msg
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
