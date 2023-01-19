@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Delphix
+# Copyright 2019, 2023 Delphix
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,11 +17,17 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
 
+import argparse
+
 from tests.integration.infra import generate_known_regression_output
 
 
 def main() -> None:
-    generate_known_regression_output()
+    parser = argparse.ArgumentParser(
+        description="Generate regression output for test-suite")
+    parser.add_argument('dump_name')
+    args = parser.parse_args()
+    generate_known_regression_output(args.dump_name)
 
 
 if __name__ == '__main__':

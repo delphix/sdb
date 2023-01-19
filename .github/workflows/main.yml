@@ -56,6 +56,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9]
+        dump: [dump-201912060006.tar.lzma]
     env:
       AWS_DEFAULT_REGION: 'us-west-2'
     steps:
@@ -66,7 +67,7 @@ jobs:
       - run: python3 -m pip install aws python-config pytest pytest-cov
       - run: ./.github/scripts/install-libkdumpfile.sh
       - run: ./.github/scripts/install-drgn.sh
-      - run: ./.github/scripts/download-dump-from-s3.sh dump-201912060006.tar.lzma
+      - run: ./.github/scripts/download-dump-from-s3.sh ${{ matrix.dump }}
       - run: pytest -v --cov sdb --cov-report xml tests
       - uses: codecov/codecov-action@v1
         with:

@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Delphix
+# Copyright 2019, 2023 Delphix
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,9 +19,10 @@
 # pylint: disable=line-too-long
 
 from typing import Any
+import os.path
 
 import pytest
-from tests.integration.infra import repl_invoke, dump_exists, slurp_output_file
+from tests.integration.infra import repl_invoke, get_crash_dump_path, slurp_output_file
 
 
 CMD_TABLE = [
@@ -65,10 +66,13 @@ CMD_TABLE = [
 
 
 @pytest.mark.skipif(  # type: ignore[misc]
-    not dump_exists(),
+    not get_crash_dump_path(),
     reason="couldn't find crash dump to run tests against")
 @pytest.mark.parametrize('cmd', CMD_TABLE)  # type: ignore[misc]
 def test_cmd_output_and_error_code(capsys: Any, cmd: str) -> None:
     assert repl_invoke(cmd) == 0
     captured = capsys.readouterr()
-    assert captured.out == slurp_output_file("zfs", cmd)
+    dump_path = get_crash_dump_path()
+    assert dump_path is not None
+    dump_name = os.path.basename(dump_path)
+    assert captured.out == slurp_output_file(dump_name, "zfs", cmd)
