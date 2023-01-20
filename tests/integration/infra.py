@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Delphix
+# Copyright 2019, 2023 Delphix
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 # pylint: disable=missing-module-docstring
 
+import glob
 import os
 import re
 import shutil
@@ -32,33 +33,137 @@ from sdb.internal.repl import REPL
 
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 DATA_DIR = f"{THIS_DIR}/data"
-DUMP_PATH = f"{DATA_DIR}/dump.201912060006"
-MODS_PATH = f"{DATA_DIR}/mods"
-VMLX_PATH = f"{DATA_DIR}/vmlinux-5.0.0-36-generic"
 TEST_OUTPUT_DIR = f"{DATA_DIR}/regression_output"
 
+# OS Crash Dump Related Path/Prefixes
+CRASH_PREFIX = f"{DATA_DIR}/dump.*"
+MODS_DIR = f"{DATA_DIR}/usr"
+ALTERNATIVE_MODS_DIR = f"{DATA_DIR}/mods"
+VMLINUX_PREFIX = f"{DATA_DIR}/vmlinux-*"
 
-def dump_exists() -> bool:
+# Userland Core Dump
+UCORE_PREFIX = f"{DATA_DIR}/core.*"
+LIBS_PATH = f"{DATA_DIR}/lib"
+LIBS64_PATH = f"{DATA_DIR}/lib64"
+LIBS_DEBUG_PATH = f"{DATA_DIR}/usr"
+EXEC_DIR = f"{DATA_DIR}/bin"
+ALTERNATIVE_EXEC_DIR = f"{DATA_DIR}/sbin"
+
+
+def get_path_from_prefix(prefix: str) -> Optional[str]:
     """
-    Used as the sole indicator of whether the integration
-    tests will run.
+    Helper for finding required files by dump type.
     """
-    return os.path.exists(DUMP_PATH) and os.path.exists(
-        MODS_PATH) and os.path.exists(VMLX_PATH)
+    res = glob.glob(prefix)
+    if len(res) == 1:
+        return res[0]
+    assert len(res) == 0
+    return None
+
+
+def get_crash_dump_path() -> Optional[str]:
+    """
+    Get crash dump path as string if it exists. None otherwise.
+
+    Note: Besides returning the discovered path, this function is also used as
+    a predicate by specific test modules from the test suite to see if they
+    should be ran.
+    """
+    return get_path_from_prefix(CRASH_PREFIX)
+
+
+def get_vmlinux_path() -> Optional[str]:
+    """
+    Get vmlinux path as string if it exists. None otherwise.
+    """
+    return get_path_from_prefix(VMLINUX_PREFIX)
+
+
+def get_modules_dir() -> Optional[str]:
+    """
+    Get modules directory path as string if it exists.
+    None otherwise.
+    """
+    path = get_path_from_prefix(MODS_DIR)
+    if not path:
+        return get_path_from_prefix(ALTERNATIVE_MODS_DIR)
+    return path
+
+
+def get_core_dump_path() -> Optional[str]:
+    """
+    Get core dump path as string if it exists. None otherwise.
+
+    Note: Besides returning the discovered path, this function is also used as
+    a predicate by specific test modules from the test suite to see if they
+    should be ran.
+    """
+    return get_path_from_prefix(UCORE_PREFIX)
+
+
+def get_libs_path() -> Optional[str]:
+    """
+    Get libraries path as string if it exists. None otherwise.
+    """
+    return get_path_from_prefix(LIBS_PATH)
+
+
+def get_libs64_path() -> Optional[str]:
+    """
+    Get 64-bit libraries path as string if it exists. None otherwise.
+    """
+    return get_path_from_prefix(LIBS64_PATH)
+
+
+def get_lib_debug_info_path() -> Optional[str]:
+    """
+    Get 64-bit libraries path as string if it exists. None otherwise.
+    """
+    return get_path_from_prefix(LIBS_DEBUG_PATH)
+
+
+def get_binary_dir() -> Optional[str]:
+    """
+    Get executable binary directory path as string if it exists.
+    None otherwise.
+    """
+    path = get_path_from_prefix(EXEC_DIR)
+    if not path:
+        return get_path_from_prefix(ALTERNATIVE_EXEC_DIR)
+    return path
 
 
 def setup_target() -> Optional[drgn.Program]:
     """
-    Create a drgn.Program instance and setup the SDB
-    context for all the integration tests. If there
-    is no crash dump to attach to this is going to
-    be an empty drgn.Program.
+    Create a drgn.Program instance and setup the SDB context for all the
+    integration tests. If there is no OS crash or userland core to attach to
+    this is going to be an empty drgn.Program and integration tests will be
+    skipped (e.g. only unit tests will run).
     """
     prog = drgn.Program()
-    if not dump_exists():
+
+    dump = get_crash_dump_path()
+    if dump:
+        prog.set_core_dump(dump)
+        assert get_vmlinux_path()
+        debug_info = (
+            p
+            for p in [get_vmlinux_path(), get_modules_dir()]
+            if p is not None)
+        load_debug_info(prog, list(debug_info))
         return prog
-    prog.set_core_dump(DUMP_PATH)
-    load_debug_info(prog, [VMLX_PATH, MODS_PATH])
+
+    dump = get_core_dump_path()
+    if dump:
+        prog.set_core_dump(dump)
+        debug_info = (p for p in [
+            get_binary_dir(),
+            get_libs_path(),
+            get_libs64_path(),
+            get_lib_debug_info_path()
+        ] if p is not None)
+        load_debug_info(prog, list(debug_info))
+
     return prog
 
 
@@ -91,14 +196,14 @@ def sdb_invoke(objs: Iterable[drgn.Object], line: str) -> Iterable[drgn.Object]:
     return list(sdb.invoke(TEST_PROGRAM, objs, line))
 
 
-def slurp_output_file(modname: str, cmd: str) -> str:
+def slurp_output_file(dump_name: str, modname: str, cmd: str) -> str:
     """
     Given a module name and a command, find the output file
     and return all of its contents as a string.
     """
     # The pylint below is a false positive
     # pylint: disable=unspecified-encoding
-    return Path(f"{TEST_OUTPUT_DIR}/{modname}/{cmd}").read_text()
+    return Path(f"{TEST_OUTPUT_DIR}/{dump_name}/{modname}/{cmd}").read_text()
 
 
 def generate_output_for_commands(cmds: List[str], dirpath: str) -> None:
@@ -120,7 +225,7 @@ def generate_output_for_commands(cmds: List[str], dirpath: str) -> None:
                 repl_invoke(cmd)
 
 
-def generate_output_for_test_module(modname: str) -> None:
+def generate_output_for_test_module(dump_name: str, modname: str) -> None:
     """
     Generates the regression output for all the commands of
     a test module given  module name. The assumption for this
@@ -132,7 +237,7 @@ def generate_output_for_test_module(modname: str) -> None:
     test_mod = import_module(f"tests.integration.test_{modname}_generic")
     generate_output_for_commands(
         test_mod.CMD_TABLE,  # type: ignore[attr-defined]
-        f"{TEST_OUTPUT_DIR}/{modname}")
+        f"{TEST_OUTPUT_DIR}/{dump_name}/{modname}")
     print(f"Generated regression test output for {modname}...")
 
 
@@ -150,10 +255,10 @@ def get_all_generic_test_modules() -> List[str]:
     return modnames
 
 
-def generate_known_regression_output() -> None:
+def generate_known_regression_output(dump_name: str) -> None:
     """
     Auto-generate the baseline regression output for all
     the detected test modules in this directory.
     """
     for modname in get_all_generic_test_modules():
-        generate_output_for_test_module(modname)
+        generate_output_for_test_module(dump_name, modname)
