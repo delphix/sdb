@@ -20,9 +20,8 @@ import argparse
 from typing import Iterable
 
 import drgn
-import sdb
-
 from drgn.helpers.linux.pid import find_pid, find_task
+import sdb
 
 
 class FindPid(sdb.Command):

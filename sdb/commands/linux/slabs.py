@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Delphix
+# Copyright 2019, 2023 Delphix
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import textwrap
 from typing import Any, Dict, Iterable, List, Tuple
 
 import drgn
+from drgn.helpers.linux.slab import slab_cache_for_each_allocated_object
 
 import sdb
 from sdb.commands.internal.fmt import size_nicenum
@@ -241,4 +242,4 @@ class SlubCacheWalker(sdb.Walker):
     input_type = "struct kmem_cache *"
 
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
-        yield from slub.for_each_object_in_cache(obj)
+        yield from slab_cache_for_each_allocated_object(obj, "void")

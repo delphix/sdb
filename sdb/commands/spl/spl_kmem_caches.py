@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Delphix
+# Copyright 2019, 2023 Delphix
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import textwrap
 from typing import Any, Dict, Iterable, List, Tuple
 
 import drgn
+from drgn.helpers.linux.slab import slab_cache_for_each_allocated_object
 
 import sdb
 from sdb.commands.internal.fmt import size_nicenum
 from sdb.commands.internal.table import Table
-from sdb.commands.linux.internal import slub_helpers as slub
 from sdb.commands.spl.internal import kmem_helpers as kmem
 
 
@@ -225,6 +225,7 @@ class SplKmemCacheWalker(sdb.Walker):
 
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         if kmem.backed_by_linux_cache(obj):
-            yield from slub.for_each_object_in_cache(obj.skc_linux_cache)
+            yield from slab_cache_for_each_allocated_object(
+                obj.skc_linux_cache, "void")
         else:
             yield from kmem.for_each_object_in_spl_cache(obj)
