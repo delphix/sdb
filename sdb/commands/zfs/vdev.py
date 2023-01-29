@@ -21,9 +21,9 @@ from typing import Iterable, List, Optional
 
 import drgn
 import sdb
-from sdb.commands.zfs.internal import enum_lookup
 from sdb.commands.zfs.metaslab import Metaslab
 from sdb.commands.zfs.histograms import ZFSHistogram
+from sdb.commands.zfs.internal import removeprefix
 
 
 class Vdev(sdb.Locator, sdb.PrettyPrinter):
@@ -105,8 +105,15 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
                 print(
                     "".ljust(indent),
                     hex(vdev).ljust(18),
-                    enum_lookup("vdev_state_t", vdev.vdev_state).ljust(7),
-                    enum_lookup("vdev_aux_t", vdev.vdev_stat.vs_aux).ljust(4),
+                    removeprefix(
+                        drgn.cast("vdev_state_t",
+                                  vdev.vdev_state).format_(type_name=False),
+                        'VDEV_STATE_').ljust(7),
+                    removeprefix(
+                        drgn.cast(
+                            "vdev_aux_t",
+                            vdev.vdev_stat.vs_aux).format_(type_name=False),
+                        'VDEV_AUX_').ljust(4),
                     "".ljust(level),
                     vdev.vdev_path.string_().decode("utf-8"),
                 )
@@ -115,8 +122,15 @@ class Vdev(sdb.Locator, sdb.PrettyPrinter):
                 print(
                     "".ljust(indent),
                     hex(vdev).ljust(18),
-                    enum_lookup("vdev_state_t", vdev.vdev_state).ljust(7),
-                    enum_lookup("vdev_aux_t", vdev.vdev_stat.vs_aux).ljust(4),
+                    removeprefix(
+                        drgn.cast("vdev_state_t",
+                                  vdev.vdev_state).format_(type_name=False),
+                        'VDEV_STATE_').ljust(7),
+                    removeprefix(
+                        drgn.cast(
+                            "vdev_aux_t",
+                            vdev.vdev_stat.vs_aux).format_(type_name=False),
+                        'VDEV_AUX_').ljust(4),
                     "".ljust(level),
                     vdev.vdev_ops.vdev_op_type.string_().decode("utf-8"),
                 )
