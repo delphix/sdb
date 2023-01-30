@@ -33,6 +33,10 @@ POS_CMDS = [
     "addr tcp_orphan_count | cpu_counter_sum",
     "addr tcp_sockets_allocated | cpu_counter_sum",
 
+    # crashed_thread
+    "crashed_thread",
+    "crashed_thread | stacks",
+
     # percpu
     'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu',
     'slabs | filter \'obj.name == "kmalloc-8"\' | member cpu_slab | percpu 0',
