@@ -1,0 +1,19 @@
+TASK_STRUCT        STATE             COUNT
+==========================================
+0xffffa08884831700 RUNNING               1
+                  __crash_kexec+0x9d
+                  __crash_kexec+0x9d
+                  panic+0x10e
+                  0xffffffff8b849f25+0x0
+                  __handle_sysrq+0x9f
+                  write_sysrq_trigger+0x34
+                  proc_reg_write+0x3e
+                  __vfs_write+0x1b
+                  vfs_write+0xb1
+                  ksys_write+0x5c
+                  __x64_sys_write+0x1a
+                  __x64_sys_write+0x1a
+                  __x64_sys_write+0x1a
+                  do_syscall_64+0x5a
+                  entry_SYSCALL_64+0x7c
+

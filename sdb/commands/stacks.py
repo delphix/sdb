@@ -400,3 +400,54 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
     def no_input(self) -> Iterable[drgn.Object]:
         self.validate_context()
         yield from filter(self.match_stack, for_each_task(sdb.get_prog()))
+
+
+class CrashedThread(sdb.Locator, sdb.PrettyPrinter):
+    """
+    Print the crashed thread. Only works for crash dumps and core dumps.
+
+    EXAMPLES
+        sdb> crashed_thread
+        TASK_STRUCT        STATE             COUNT
+        ==========================================
+        0xffff8f15d7333d00 RUNNING               1
+                          __crash_kexec+0x9d
+                          __crash_kexec+0x9d
+                          panic+0x11d
+                          0xffffffff9020b375+0x0
+                          __handle_sysrq.cold+0x48
+                          write_sysrq_trigger+0x28
+                          proc_reg_write+0x43
+                          __vfs_write+0x1b
+                          vfs_write+0xb9
+                          vfs_write+0xb9
+                          ksys_write+0x67
+                          __x64_sys_write+0x1a
+                          __x64_sys_write+0x1a
+                          __x64_sys_write+0x1a
+                          do_syscall_64+0x57
+                          entry_SYSCALL_64+0x94
+    """
+
+    names = ["crashed_thread", "panic_stack", "panic_thread"]
+    input_type = "struct task_struct *"
+    output_type = "struct task_struct *"
+
+    def validate_context(self) -> None:
+        if sdb.get_target_flags() & drgn.ProgramFlags.IS_LIVE:
+            raise sdb.CommandError(self.name,
+                                   "command only works for core/crash dumps")
+
+    def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
+        self.validate_context()
+        thread_obj = sdb.get_prog().crashed_thread().object
+        stacks_obj = Stacks()
+        for obj in objs:
+            if obj.value_() != thread_obj.value_():
+                raise sdb.CommandError(
+                    self.name, "can only pretty print the crashed thread")
+            stacks_obj.print_stacks([thread_obj])
+
+    def no_input(self) -> Iterable[drgn.Object]:
+        self.validate_context()
+        yield from [sdb.get_prog().crashed_thread().object]
