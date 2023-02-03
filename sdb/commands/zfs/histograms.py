@@ -121,7 +121,7 @@ class ZFSHistogram(sdb.Command):
             canonical_type.type).kind == drgn.TypeKind.INT
 
         max_count = 0
-        min_bucket = (len(hist) - 1)
+        min_bucket = len(hist) - 1
         max_bucket = 0
         for (bucket, value) in enumerate(hist):
             count = int(value)
