@@ -71,8 +71,10 @@ class Btree(sdb.Walker):
         # https://github.com/delphix/zfs/commit/c0bf952c846100750f526c2a32ebec17694a201b
         #
         try:
-            recurse = int(node.bth_first) == -1
+            bth_first = node.bth_first
+            recurse = int(bth_first) == -1
         except AttributeError:
+            bth_first = 0
             recurse = node.bth_core
 
         count = node.bth_count
@@ -88,7 +90,7 @@ class Btree(sdb.Walker):
             # generate each object in the leaf elements
             leaf = drgn.cast('struct zfs_btree_leaf *', node)
             for i in range(count):
-                yield self._val(leaf.btl_elems, i)
+                yield self._val(leaf.btl_elems, i + bth_first)
 
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         self.elem_size = obj.bt_elem_size
