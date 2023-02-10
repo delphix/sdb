@@ -88,7 +88,7 @@ class Btree(sdb.Walker):
             # generate each object in the leaf elements
             leaf = drgn.cast('struct zfs_btree_leaf *', node)
             for i in range(count):
-                yield self._val(leaf.btl_elems, i)
+                yield self._val(leaf.btl_elems, i + node.bth_first)
 
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         self.elem_size = obj.bt_elem_size
