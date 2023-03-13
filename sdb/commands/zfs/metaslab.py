@@ -32,6 +32,7 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
     names = ["metaslab"]
     input_type = "metaslab_t *"
     output_type = "metaslab_t *"
+    load_on = [sdb.Module("zfs"), sdb.Library("libzpool")]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

@@ -26,6 +26,7 @@ import sdb
 class PyFilter(sdb.Command):
 
     names = ["pyfilter"]
+    load_on = [sdb.All()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

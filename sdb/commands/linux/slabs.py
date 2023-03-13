@@ -37,6 +37,7 @@ from sdb.commands.linux.internal import slub_helpers as slub
 class Slabs(sdb.Locator, sdb.PrettyPrinter):
 
     names = ["slabs"]
+    load_on = [sdb.Kernel()]
 
     input_type = "struct kmem_cache *"
     output_type = "struct kmem_cache *"

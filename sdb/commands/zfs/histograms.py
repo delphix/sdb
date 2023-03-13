@@ -62,6 +62,7 @@ class ZFSHistogram(sdb.Command):
     """
 
     names = ["zfs_histogram", "zhist"]
+    load_on = [sdb.Module("zfs"), sdb.Library("libzpool")]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

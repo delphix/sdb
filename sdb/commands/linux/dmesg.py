@@ -25,6 +25,7 @@ import sdb
 class DMesg(sdb.Locator, sdb.PrettyPrinter):
 
     names = ["dmesg"]
+    load_on = [sdb.Kernel()]
 
     input_type = "struct printk_log *"
     output_type = "struct printk_log *"

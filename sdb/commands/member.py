@@ -119,6 +119,7 @@ class Member(sdb.SingleInputCommand):
     """
 
     names = ["member"]
+    load_on = [sdb.All()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

@@ -45,6 +45,7 @@ class FindPid(sdb.Command):
     """
 
     names = ["pid"]
+    load_on = [sdb.Kernel()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

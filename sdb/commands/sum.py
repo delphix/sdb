@@ -41,6 +41,7 @@ class SdbSum(sdb.Command):
     """
 
     names = ["sum"]
+    load_on = [sdb.All()]
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         result = 0

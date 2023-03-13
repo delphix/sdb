@@ -41,7 +41,7 @@ now as they have more important information on their context
 for their user (e.g. command name).
 """
 
-from typing import Any, Union
+from typing import Any, List, Tuple, Union
 
 import drgn
 
@@ -116,8 +116,11 @@ def type_canonicalize_name(type_name: str) -> str:
     """
     Return the "canonical name" of this type name.  See type_canonicalize().
     """
-    return type_canonical_name(prog.type(type_name))
-
+    # This is a workaround while we don't have module/library lookup in drgn.
+    try:
+        return type_canonical_name(prog.type(type_name))
+    except LookupError as e:
+        return type_name
 
 def type_canonicalize_size(t: Union[drgn.Type, str]) -> int:
     """
@@ -147,3 +150,25 @@ def type_equals(a: drgn.Type, b: drgn.Type) -> bool:
     check if each of their "struct bar"s are actually the same.
     """
     return type_canonical_name(a) == type_canonical_name(b)
+
+class All:
+    pass
+
+class Kernel:
+    pass
+
+class Userland:
+    pass
+
+class Module:
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+class Library:
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+Runtime = Union[All, Kernel, Userland, Module, Library]
+
+def get_runtimes() -> Tuple[bool, List[str]]:
+    return (get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL, [])

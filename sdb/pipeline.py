@@ -84,7 +84,7 @@ def execute_pipeline(first_input: Iterable[drgn.Object],
     yield from massage_input_and_call(pipeline[-1], this_input)
 
 
-def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
+def invoke(first_input: Iterable[drgn.Object],
            line: str) -> Iterable[drgn.Object]:
     """
     This function intends to integrate directly with the SDB REPL, such
@@ -92,7 +92,6 @@ def invoke(myprog: drgn.Program, first_input: Iterable[drgn.Object],
     function is responsible for converting that string into the
     appropriate pipeline of Command objects, and executing it.
     """
-    target.set_prog(myprog)
 
     #
     # Build the pipeline by constructing each of the commands we want to

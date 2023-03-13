@@ -31,6 +31,7 @@ class History(sdb.Command):
     # pylint: disable=too-few-public-methods
 
     names = ["history"]
+    load_on = [sdb.All()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

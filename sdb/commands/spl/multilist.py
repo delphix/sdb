@@ -26,6 +26,7 @@ from sdb.commands.spl.spl_list import SPLList
 class MultiList(sdb.Walker):
     names = ["multilist"]
     input_type = "multilist_t *"
+    load_on = [sdb.Module("zfs")]
 
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         for i in range(obj.ml_num_sublists):

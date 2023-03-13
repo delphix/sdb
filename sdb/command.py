@@ -24,11 +24,11 @@ registered commands during a session.
 import argparse
 import inspect
 import textwrap
-from typing import Any, Callable, Dict, Iterable, List, Optional, Type, TypeVar
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, TypeVar
 
 import drgn
 
-from sdb.target import type_canonicalize_name, type_canonical_name, type_canonicalize, get_prog
+from sdb.target import type_canonicalize_name, type_canonical_name, type_canonicalize, get_prog, get_runtimes, Runtime
 from sdb.error import CommandError, SymbolNotFoundError
 from sdb import target
 
@@ -37,22 +37,75 @@ from sdb import target
 # subclasses are initialized (the classes, not the objects),
 # so we must define it here, before we import those classes below.
 #
-all_commands: Dict[str, Type["Command"]] = {}
+all_commands: Set[Type["Command"]] = set({})
+registered_commands: Dict[str, Type["Command"]] = {}
 
+def add_command(class_: Type["Command"]) -> None:
+    all_commands.add(class_)
 
 def register_command(name: str, class_: Type["Command"]) -> None:
     """
     Register the specified command name and command class, such that the
     command will be available from the SDB REPL.
     """
-    all_commands[name] = class_
+    registered_commands[name] = class_
+    if issubclass(class_, Walker):
+        Walker.register_walker(class_)
+    if issubclass(class_, PrettyPrinter):
+        PrettyPrinter.register_printer(class_)
 
 
 def get_registered_commands() -> Dict[str, Type["Command"]]:
     """
     Return a dictionary of command names to command classes.
     """
-    return all_commands
+    return registered_commands
+
+def register_commands() -> None:
+    for cls in all_commands:
+        register = False
+        # We call this 'modules', but if kernel is false, it's libraries
+        (kernel, modules) = get_runtimes()
+        
+        for runtime in cls.load_on:
+            #
+            # If and when we upgrade to python 3.10 or above, use proper
+            # unions and structural pattern matching for runtimes.
+            #
+            if isinstance(runtime, target.All):
+                register = True
+                break
+            if isinstance(runtime, target.Kernel):
+                if kernel:
+                    register = True
+                    break
+            elif isinstance(runtime, target.Userland):
+                if not kernel:
+                    register = True
+                    break
+            elif isinstance(runtime, target.Module):
+                #
+                # Right now, the runtimes system only supports "kernel"
+                # and "userland". Once drgn supports finding the list of
+                # registered modules/libraries, we can match on specific
+                # libraries and modules. Until then, we register all
+                # Modules entries if we're in a kernel, and all Library
+                # ones if we're in a userland program.
+                #
+                if kernel:
+                    register = True
+                    break
+            else:
+                assert isinstance(runtime, target.Library)
+                if not kernel:
+                    register = True
+                    break
+
+        if not register:
+            continue
+        
+        for name in cls.names:
+            register_command(name, cls)
 
 
 class Command:
@@ -210,6 +263,11 @@ class Command:
     #
     names: List[str] = []
 
+    #
+    # load_on:
+    #    The runtimes that the command should be loaded in.
+    load_on: List[Runtime] = []
+
     input_type: Optional[str] = None
 
     def __init__(self,
@@ -265,8 +323,9 @@ class Command:
         # https://github.com/python/mypy/issues/4660
         #
         super().__init_subclass__(**kwargs)  # type: ignore[call-arg]
-        for name in cls.names:
-            register_command(name, cls)
+        if len(cls.names) == 0:
+            return
+        add_command(cls)
 
     def _call(self,
               objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
@@ -382,254 +441,6 @@ class SingleInputCommand(Command):
                 yield from result
 
 
-class Cast(Command):
-    """
-    Cast input objects to specified type
-
-    EXAMPLES
-
-        sdb> echo 0xffffdeadbeef | cast uintptr_t
-        (uintptr_t)281474417671919
-    """
-
-    names = ["cast"]
-
-    @classmethod
-    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super()._init_parser(name)
-        #
-        # We use REMAINDER here to allow the type to be specified
-        # without the user having to worry about escaping whitespace.
-        # The drawback of this is an error will not be automatically
-        # thrown if no type is provided. To workaround this, we check
-        # the parsed arguments, and explicitly throw an error if needed.
-        #
-        parser.add_argument("type", nargs=argparse.REMAINDER)
-        return parser
-
-    def __init__(self,
-                 args: Optional[List[str]] = None,
-                 name: str = "_") -> None:
-        super().__init__(args, name)
-        if not self.args.type:
-            self.parser.error("the following arguments are required: <type>")
-
-        tname = " ".join(self.args.type)
-        try:
-            self.type = target.get_type(tname)
-        except LookupError as err:
-            raise CommandError(self.name,
-                               f"could not find type '{tname}'") from err
-
-    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        for obj in objs:
-            try:
-                yield drgn.cast(self.type, obj)
-            except TypeError as err:
-                raise CommandError(self.name, str(err)) from err
-
-
-class Dereference(Command):
-    """
-    Dereference the given object (must be pointer).
-
-    EXAMPLES
-        Dereference the value of 'jiffies' given the address of it:
-
-            sdb> addr jiffies | deref
-            (volatile unsigned long)4905392949
-
-    """
-
-    names = ["deref"]
-
-    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        for obj in objs:
-            #
-            # We canonicalize the type just in case it is a typedef
-            # to a pointer (e.g. typedef char* char_p).
-            #
-            obj_type = type_canonicalize(obj.type_)
-            if obj_type.kind != drgn.TypeKind.POINTER:
-                raise CommandError(
-                    self.name,
-                    f"'{obj.type_.type_name()}' is not a valid pointer type")
-            if obj_type.type.type_name() == 'void':
-                raise CommandError(self.name,
-                                   "cannot dereference a void pointer")
-            yield drgn.Object(get_prog(),
-                              type=obj.type_.type,
-                              address=obj.value_())
-
-
-class Address(Command):
-    """
-    Return address of the given object
-
-    DESCRIPTION
-        The command accepts input from both the pipe and the SDB CLI.
-
-        For objects passed from the pipe, their address is returned
-        only if they are legitimate objects created from the target
-        program being examined. If the objects were created on the
-        fly with something like echo and thus don't have an actual
-        address in the address space of the program being examined,
-        this command just passes on their values as pointers.
-
-        The user can specify one or more inputs as arguments to the
-        command. That input can be either the name of a symbol in
-        the target (e.g. "jiffies" for vmlinux) or an address (at
-        which point this command acts like `echo`).
-
-    EXAMPLES
-        Return address of the "jiffies" sumbol:
-
-            sdb> addr jiffies
-            *(volatile unsigned long *)0xffffffff97205000 = 4901248625
-
-        Return address of "jiffies", "slab_caches", and also echo
-        0xffffdeadbeef.
-
-            sdb> addr jiffies slab_caches 0xffffdeadbeef
-            *(volatile unsigned long *)0xffffffff97205000 = 4901290268
-            *(struct list_head *)0xffffffff973014c0 = {
-                    .next = (struct list_head *)0xffff9d0ada3ca968,
-                    .prev = (struct list_head *)0xffff9d0af7002068,
-            }
-            (void *)0xffffdeadbeef
-
-        Return the addresses of all the root slab caches in the system:
-
-            sdb> slabs | address ! head
-            *(struct kmem_cache *)0xffff9d09d40e9500 = {
-                    .cpu_slab = (struct kmem_cache_cpu *)0x41d000035820,
-                    .flags = (slab_flags_t)1073872896,
-            ...
-    """
-
-    names = ["address", "addr"]
-
-    @classmethod
-    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
-        parser = super()._init_parser(name)
-        parser.add_argument("symbols", nargs="*", metavar="<symbol>")
-        return parser
-
-    @staticmethod
-    def is_hex(arg: str) -> bool:
-        # pylint: disable=missing-docstring
-        try:
-            int(arg, 16)
-            return True
-        except ValueError:
-            return False
-
-    @staticmethod
-    def resolve_for_address(arg: str) -> drgn.Object:
-        # pylint: disable=missing-docstring
-        if Address.is_hex(arg):
-            return target.create_object("void *", int(arg, 16))
-        return target.get_object(arg).address_of_()
-
-    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        for obj in objs:
-            if obj.address_ is None:
-                #
-                # This may not be very intuitive. How can we have
-                # an object that doesn't have an address? The answer
-                # is that this object was created from sdb (most
-                # probably through an echo command that is piped
-                # to us) and thus doesn't exist in the address space
-                # of our target. This is a weird and rare use-case
-                # but it keeps things simple for now. If we ever
-                # see this causing problems we should definitely
-                # rethink this as being the default behavior. An
-                # alternative for example could be that we throw
-                # an error that the object doesn't exist in the
-                # address space of the target.
-                #
-                yield obj
-            else:
-                yield obj.address_of_()
-
-        for symbol in self.args.symbols:
-            try:
-                yield Address.resolve_for_address(symbol)
-            except KeyError as err:
-                raise SymbolNotFoundError(self.name, symbol) from err
-
-
-class Walk(Command):
-    """
-    Dispatch the appropriate walker based on the type of input
-
-    DESCRIPTION
-        This command can be used to walk data structures when
-        a specific walker for them already exists. There are
-        two scenarios when this command is preferable to using
-        a specific walker:
-        [1] When objects of different types are passed at once
-            through a pipe, this walker can dispatch the
-            appropriate walker for each of them so the user
-            won't need to care about the underlying data
-            structure implementations.
-        [2] Commands that depend on a data structure being
-            traversed can use this command, to reduce the
-            lines of code changed when the underlying data
-            structure chages.
-
-        For a list of walkers, run 'walk' with no input.
-
-    EXAMPLES
-
-        sdb> addr spa_namespace_avl | walk
-        (void *)0xffff9d0adbe2c000
-        (void *)0xffff9d0a2dd28000
-        (void *)0xffff9d0ae5040000
-        (void *)0xffff9d0a2bdb0000
-    """
-
-    names = ["walk"]
-
-    @staticmethod
-    def _help_message(input_type: drgn.Type = None) -> str:
-        msg = ""
-        if input_type is not None:
-            msg += f"no walker found for input of type {input_type}\n"
-        msg += "The following types have walkers:\n"
-        msg += f"\t{'WALKER':<20s} {'TYPE':<20s}\n"
-        for type_, class_ in Walker.allWalkers.items():
-            msg += f"\t{class_.names[0]:<20s} {type_:<20s}\n"
-        return msg
-
-    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        baked = {
-            type_canonicalize_name(type_): class_
-            for type_, class_ in Walker.allWalkers.items()
-        }
-        has_input = False
-        for i in objs:
-            has_input = True
-
-            obj_type = type_canonicalize(i.type_)
-            # if type is foo_t change to foo_t *
-            if obj_type.kind != drgn.TypeKind.POINTER:
-                i = target.create_object(target.get_pointer_type(obj_type),
-                                         i.address_)
-
-            this_type_name = type_canonical_name(i.type_)
-            if this_type_name not in baked:
-                raise CommandError(self.name, Walk._help_message(i.type_))
-
-            yield from baked[this_type_name]().walk(i)
-
-        # If we got no input and we're the last thing in the pipeline, we're
-        # probably the first thing in the pipeline. Print out the available
-        # walkers.
-        if not has_input and self.islast:
-            print(Walk._help_message())
-
-
 class Walker(Command):
     """
     A walker is a command that is designed to iterate over data
@@ -639,10 +450,10 @@ class Walker(Command):
     allWalkers: Dict[str, Type["Walker"]] = {}
 
     # When a subclass is created, register it
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        super().__init_subclass__(**kwargs)
-        assert cls.input_type is not None
-        Walker.allWalkers[cls.input_type] = cls
+    @classmethod
+    def register_walker(cls, class_: Type["Walker"]) -> None:
+        assert class_.input_type is not None
+        Walker.allWalkers[class_.input_type] = class_
 
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         # pylint: disable=missing-docstring
@@ -677,10 +488,10 @@ class PrettyPrinter(Command):
     all_printers: Dict[str, Type["PrettyPrinter"]] = {}
 
     # When a subclass is created, register it
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        super().__init_subclass__(**kwargs)
-        assert cls.input_type is not None
-        PrettyPrinter.all_printers[cls.input_type] = cls
+    @classmethod
+    def register_printer(cls, class_: Type["PrettyPrinter"]) -> None:
+        assert class_.input_type is not None
+        PrettyPrinter.all_printers[class_.input_type] = class_
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         # pylint: disable=missing-docstring
@@ -794,6 +605,257 @@ class Locator(Command):
 T = TypeVar("T", bound=Locator)
 IH = Callable[[T, drgn.Object], Iterable[drgn.Object]]
 
+
+class Cast(Command):
+    """
+    Cast input objects to specified type
+
+    EXAMPLES
+
+        sdb> echo 0xffffdeadbeef | cast uintptr_t
+        (uintptr_t)281474417671919
+    """
+
+    names = ["cast"]
+    load_on = [target.All()]
+
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        #
+        # We use REMAINDER here to allow the type to be specified
+        # without the user having to worry about escaping whitespace.
+        # The drawback of this is an error will not be automatically
+        # thrown if no type is provided. To workaround this, we check
+        # the parsed arguments, and explicitly throw an error if needed.
+        #
+        parser.add_argument("type", nargs=argparse.REMAINDER)
+        return parser
+
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
+        super().__init__(args, name)
+        if not self.args.type:
+            self.parser.error("the following arguments are required: <type>")
+
+        tname = " ".join(self.args.type)
+        try:
+            self.type = target.get_type(tname)
+        except LookupError as err:
+            raise CommandError(self.name,
+                               f"could not find type '{tname}'") from err
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        for obj in objs:
+            try:
+                yield drgn.cast(self.type, obj)
+            except TypeError as err:
+                raise CommandError(self.name, str(err)) from err
+
+
+class Dereference(Command):
+    """
+    Dereference the given object (must be pointer).
+
+    EXAMPLES
+        Dereference the value of 'jiffies' given the address of it:
+
+            sdb> addr jiffies | deref
+            (volatile unsigned long)4905392949
+
+    """
+
+    names = ["deref"]
+    load_on = [target.All()]
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        for obj in objs:
+            #
+            # We canonicalize the type just in case it is a typedef
+            # to a pointer (e.g. typedef char* char_p).
+            #
+            obj_type = type_canonicalize(obj.type_)
+            if obj_type.kind != drgn.TypeKind.POINTER:
+                raise CommandError(
+                    self.name,
+                    f"'{obj.type_.type_name()}' is not a valid pointer type")
+            if obj_type.type.type_name() == 'void':
+                raise CommandError(self.name,
+                                   "cannot dereference a void pointer")
+            yield drgn.Object(get_prog(),
+                              type=obj.type_.type,
+                              address=obj.value_())
+
+
+class Address(Command):
+    """
+    Return address of the given object
+
+    DESCRIPTION
+        The command accepts input from both the pipe and the SDB CLI.
+
+        For objects passed from the pipe, their address is returned
+        only if they are legitimate objects created from the target
+        program being examined. If the objects were created on the
+        fly with something like echo and thus don't have an actual
+        address in the address space of the program being examined,
+        this command just passes on their values as pointers.
+
+        The user can specify one or more inputs as arguments to the
+        command. That input can be either the name of a symbol in
+        the target (e.g. "jiffies" for vmlinux) or an address (at
+        which point this command acts like `echo`).
+
+    EXAMPLES
+        Return address of the "jiffies" sumbol:
+
+            sdb> addr jiffies
+            *(volatile unsigned long *)0xffffffff97205000 = 4901248625
+
+        Return address of "jiffies", "slab_caches", and also echo
+        0xffffdeadbeef.
+
+            sdb> addr jiffies slab_caches 0xffffdeadbeef
+            *(volatile unsigned long *)0xffffffff97205000 = 4901290268
+            *(struct list_head *)0xffffffff973014c0 = {
+                    .next = (struct list_head *)0xffff9d0ada3ca968,
+                    .prev = (struct list_head *)0xffff9d0af7002068,
+            }
+            (void *)0xffffdeadbeef
+
+        Return the addresses of all the root slab caches in the system:
+
+            sdb> slabs | address ! head
+            *(struct kmem_cache *)0xffff9d09d40e9500 = {
+                    .cpu_slab = (struct kmem_cache_cpu *)0x41d000035820,
+                    .flags = (slab_flags_t)1073872896,
+            ...
+    """
+
+    names = ["address", "addr"]
+    load_on = [target.All()]
+
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        parser.add_argument("symbols", nargs="*", metavar="<symbol>")
+        return parser
+
+    @staticmethod
+    def is_hex(arg: str) -> bool:
+        # pylint: disable=missing-docstring
+        try:
+            int(arg, 16)
+            return True
+        except ValueError:
+            return False
+
+    @staticmethod
+    def resolve_for_address(arg: str) -> drgn.Object:
+        # pylint: disable=missing-docstring
+        if Address.is_hex(arg):
+            return target.create_object("void *", int(arg, 16))
+        return target.get_object(arg).address_of_()
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        for obj in objs:
+            if obj.address_ is None:
+                #
+                # This may not be very intuitive. How can we have
+                # an object that doesn't have an address? The answer
+                # is that this object was created from sdb (most
+                # probably through an echo command that is piped
+                # to us) and thus doesn't exist in the address space
+                # of our target. This is a weird and rare use-case
+                # but it keeps things simple for now. If we ever
+                # see this causing problems we should definitely
+                # rethink this as being the default behavior. An
+                # alternative for example could be that we throw
+                # an error that the object doesn't exist in the
+                # address space of the target.
+                #
+                yield obj
+            else:
+                yield obj.address_of_()
+
+        for symbol in self.args.symbols:
+            try:
+                yield Address.resolve_for_address(symbol)
+            except KeyError as err:
+                raise SymbolNotFoundError(self.name, symbol) from err
+
+
+class Walk(Command):
+    """
+    Dispatch the appropriate walker based on the type of input
+
+    DESCRIPTION
+        This command can be used to walk data structures when
+        a specific walker for them already exists. There are
+        two scenarios when this command is preferable to using
+        a specific walker:
+        [1] When objects of different types are passed at once
+            through a pipe, this walker can dispatch the
+            appropriate walker for each of them so the user
+            won't need to care about the underlying data
+            structure implementations.
+        [2] Commands that depend on a data structure being
+            traversed can use this command, to reduce the
+            lines of code changed when the underlying data
+            structure chages.
+
+        For a list of walkers, run 'walk' with no input.
+
+    EXAMPLES
+
+        sdb> addr spa_namespace_avl | walk
+        (void *)0xffff9d0adbe2c000
+        (void *)0xffff9d0a2dd28000
+        (void *)0xffff9d0ae5040000
+        (void *)0xffff9d0a2bdb0000
+    """
+
+    names = ["walk"]
+    load_on = [target.All()]
+
+    @staticmethod
+    def _help_message(input_type: drgn.Type = None) -> str:
+        msg = ""
+        if input_type is not None:
+            msg += f"no walker found for input of type {input_type}\n"
+        msg += "The following types have walkers:\n"
+        msg += f"\t{'WALKER':<20s} {'TYPE':<20s}\n"
+        for type_, class_ in Walker.allWalkers.items():
+            msg += f"\t{class_.names[0]:<20s} {type_:<20s}\n"
+        return msg
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+        baked = {
+            type_canonicalize_name(type_): class_
+            for type_, class_ in Walker.allWalkers.items()
+        }
+        has_input = False
+        for i in objs:
+            has_input = True
+
+            obj_type = type_canonicalize(i.type_)
+            # if type is foo_t change to foo_t *
+            if obj_type.kind != drgn.TypeKind.POINTER:
+                i = target.create_object(target.get_pointer_type(obj_type),
+                                         i.address_)
+
+            this_type_name = type_canonical_name(i.type_)
+            if this_type_name not in baked:
+                raise CommandError(self.name, Walk._help_message(i.type_))
+
+            yield from baked[this_type_name]().walk(i)
+
+        # If we got no input and we're the last thing in the pipeline, we're
+        # probably the first thing in the pipeline. Print out the available
+        # walkers.
+        if not has_input and self.islast:
+            print(Walk._help_message())
 
 def InputHandler(typename: str) -> Callable[[IH[T]], IH[T]]:
     """

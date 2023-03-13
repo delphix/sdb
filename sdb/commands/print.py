@@ -42,6 +42,7 @@ class Print(sdb.SingleInputCommand):
     """
 
     names = ["print"]
+    load_on = [sdb.All()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

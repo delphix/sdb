@@ -29,6 +29,7 @@ class ZfsDbgmsg(sdb.Locator, sdb.PrettyPrinter):
     names = ["zfs_dbgmsg"]
     input_type = "zfs_dbgmsg_t *"
     output_type = "zfs_dbgmsg_t *"
+    load_on = [sdb.Module("zfs"), sdb.Library("libzpool")]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
