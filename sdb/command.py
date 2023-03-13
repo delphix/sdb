@@ -287,6 +287,16 @@ class Command:
         for obj in objs:
             try:
                 obj.read_()
+            except TypeError as err:
+                obj_type = type_canonicalize(obj.type_)
+                if obj_type.kind == drgn.TypeKind.ARRAY and not obj_type.is_complete(
+                ) and not obj.absent_:
+                    #
+                    # This is a zero-length array, let it go through.
+                    #
+                    yield obj
+                    continue
+                raise err
             except drgn.FaultError as err:
                 if obj.address_ is None:
                     #
