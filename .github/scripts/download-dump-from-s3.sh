@@ -28,7 +28,7 @@ if [ ! -d $DATA_DIR ]; then
 fi
 
 echo "initiating download of $1 from S3 ..."
-/usr/local/bin/aws s3 cp --no-sign-request s3://sdb-regression-dumps/$1 .
+wget https://sdb-testing-bucket.s3.us-west-2.amazonaws.com/$1
 [ $? -eq 0 ] || exit 1
 
 if [[ $1 == *.lzma ]]; then
