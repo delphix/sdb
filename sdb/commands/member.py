@@ -272,7 +272,7 @@ class Member(sdb.SingleInputCommand):
         if base_kind == drgn.TypeKind.POINTER:
             return
         assert base_kind == drgn.TypeKind.ARRAY
-        if type_.length <= idx:
+        if type_.length is None or type_.length <= idx:
             warn_msg = f"index out of bounds for array of type '{type_}' (requested index: {idx})"
             print(f"warning: {self.name}: {warn_msg}")
 

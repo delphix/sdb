@@ -86,7 +86,14 @@ class Array(sdb.SingleInputCommand):
         nelems = 0
 
         obj_type = sdb.type_canonicalize(obj.type_)
-        if obj_type.kind == drgn.TypeKind.ARRAY:
+        if obj_type.kind == drgn.TypeKind.ARRAY and not obj_type.is_complete(
+        ) and not obj.absent_:
+            if self.args.nelems is None:
+                err_msg = "zero-length array: please specify number of elements"
+                raise sdb.CommandError(self.name, err_msg)
+            print("warning: operating on zero-length array")
+            nelems = self.args.nelems
+        elif obj_type.kind == drgn.TypeKind.ARRAY:
             array_elems = len(obj)
             if self.args.nelems is not None:
                 nelems = self.args.nelems
