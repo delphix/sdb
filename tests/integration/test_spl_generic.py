@@ -32,6 +32,8 @@ CMD_TABLE = [
 
     # multilist walker
     "addr arc_mru | member [0].arcs_list[1] | multilist | head",
+    "spa | member spa_normal_class.mc_metaslab_txg_list | multilist",
+    "spa | member spa_normal_class.mc_metaslab_txg_list | walk",
 
     # spl_cache walker
     'spl_kmem_caches | filter \'obj.skc_name == "ddt_cache"\' | walk',
@@ -48,6 +50,12 @@ CMD_TABLE = [
     "spl_kmem_caches -o name,entry_size -s entry_size",
     "spl_kmem_caches -s entry_size | head 4 | spl_kmem_caches",
     "spl_kmem_caches | pp",
+
+    # spl_list walker
+    "spa | member spa_config_list | spl_list",
+    "spa | member spa_config_list | walk",
+    "spa | member spa_evicting_os_list | spl_list",
+    "spa | member spa_evicting_os_list | walk",
 ]
 
 

@@ -610,6 +610,13 @@ class Walk(Command):
         has_input = False
         for i in objs:
             has_input = True
+
+            obj_type = type_canonicalize(i.type_)
+            # if type is foo_t change to foo_t *
+            if obj_type.kind != drgn.TypeKind.POINTER:
+                i = target.create_object(target.get_pointer_type(obj_type),
+                                         i.address_)
+
             this_type_name = type_canonical_name(i.type_)
             if this_type_name not in baked:
                 raise CommandError(self.name, Walk._help_message(i.type_))
