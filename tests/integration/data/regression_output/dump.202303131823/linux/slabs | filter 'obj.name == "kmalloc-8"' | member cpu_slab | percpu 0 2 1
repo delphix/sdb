@@ -1,0 +1,2 @@
+(struct kmem_cache_cpu *)0xffff9ac679634040
+sdb: percpu: available CPUs [0-1] - requested CPU 2

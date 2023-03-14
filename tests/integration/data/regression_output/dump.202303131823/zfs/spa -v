@@ -1,0 +1,18 @@
+ADDR               NAME
+------------------------------------------------------------
+0xffff9ac653860000 objpool
+      ADDR               STATE   AUX  DESCRIPTION
+      ------------------------------------------------------------
+      0xffff9ac5764e0000 HEALTHY NONE  root
+      0xffff9ac547074000 HEALTHY NONE    cloudburst-data-2
+0xffff9ac658924000 rpool
+      ADDR               STATE   AUX  DESCRIPTION
+      ------------------------------------------------------------
+      0xffff9ac659250000 HEALTHY NONE  root
+      0xffff9ac659254000 HEALTHY NONE    /dev/nvme0n1p1
+0xffff9ac546d38000 testpool
+      ADDR               STATE   AUX  DESCRIPTION
+      ------------------------------------------------------------
+      0xffff9ac5ac2ac000 HEALTHY NONE  root
+      0xffff9ac55ced0000 HEALTHY NONE    /dev/nvme1n1p1
+      0xffff9ac4b0574000 HEALTHY NONE    /dev/nvme2n1p1

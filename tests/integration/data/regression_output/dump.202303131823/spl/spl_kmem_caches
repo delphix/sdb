@@ -1,0 +1,83 @@
+name                       entry_size active_objs active_memory                           source total_memory util
+-------------------------- ---------- ----------- ------------- -------------------------------- ------------ ----
+zio_buf_comb_131072            135680        6384       826.1MB        zio_buf_comb_131072[SPL ]        1.1GB   71
+zfs_btree_leaf_cache             4096       53776       210.1MB       zfs_btree_leaf_cache[SLUB]      210.3MB   99
+zfs_znode_cache                  1104       54648        57.5MB            zfs_znode_cache[SLUB]       57.9MB   99
+dnode_t                          1000       59111        56.4MB                    dnode_t[SLUB]       56.4MB   99
+zio_buf_comb_16384              16384        2495        39.0MB         zio_buf_comb_16384[SLUB]       42.2MB   92
+dmu_buf_impl_t                    392       63285        23.7MB             dmu_buf_impl_t[SLUB]       35.9MB   65
+arc_buf_hdr_t_full                272       86629        22.5MB         arc_buf_hdr_t_full[SLUB]       32.2MB   69
+sa_cache                          248       54636        12.9MB                   sa_cache[SLUB]       13.0MB   99
+abd_t                             104       67508         6.7MB                      abd_t[SLUB]       10.5MB   63
+zio_buf_comb_512                  512       11080         5.4MB           zio_buf_comb_512[SLUB]        5.4MB   99
+zio_cache                        1264        1607         1.9MB                  zio_cache[SLUB]        5.1MB   38
+zio_buf_comb_114688            119296          16         1.8MB        zio_buf_comb_114688[SPL ]        2.7MB   66
+zio_buf_comb_81920              86528          16         1.3MB         zio_buf_comb_81920[SPL ]        2.0MB   66
+ddt_cache                       24888          48         1.1MB                  ddt_cache[SPL ]        1.3MB   85
+zio_buf_comb_98304             102912           8       804.0KB         zio_buf_comb_98304[SPL ]      804.0KB  100
+zio_buf_comb_40960              45568          16       712.0KB         zio_buf_comb_40960[SPL ]        1.0MB   66
+zio_buf_comb_65536              70144           8       548.0KB         zio_buf_comb_65536[SPL ]        1.1MB   50
+zio_buf_comb_57344              61952           9       544.5KB         zio_buf_comb_57344[SPL ]      968.0KB   56
+zio_buf_comb_1024                1024         544       544.0KB          zio_buf_comb_1024[SLUB]      912.0KB   59
+zio_buf_comb_20480              25088          16       392.0KB         zio_buf_comb_20480[SPL ]      588.0KB   66
+zio_buf_comb_49152              53760           7       367.5KB         zio_buf_comb_49152[SPL ]      420.0KB   87
+zio_buf_comb_24576              29184          10       285.0KB         zio_buf_comb_24576[SPL ]      456.0KB   62
+arc_buf_t                          32        8485       265.2KB                  arc_buf_t[SLUB]        1.3MB   20
+zio_buf_comb_28672              33280           7       227.5KB         zio_buf_comb_28672[SPL ]      260.0KB   87
+zio_buf_comb_32768              37376           4       146.0KB         zio_buf_comb_32768[SPL ]      292.0KB   50
+zio_link_cache                     48        1649        77.3KB             zio_link_cache[SLUB]      274.9KB   28
+zio_buf_comb_4096                4096          17        68.0KB          zio_buf_comb_4096[SLUB]      320.0KB   21
+zio_buf_comb_12288              12288           2        24.0KB         zio_buf_comb_12288[SLUB]      192.0KB   12
+zil_lwb_cache                     368          33        11.9KB              zil_lwb_cache[SLUB]       71.2KB   16
+zio_buf_comb_1536                1536           4         6.0KB          zio_buf_comb_1536[SLUB]      346.5KB    1
+zio_buf_comb_2560                2560           2         5.0KB          zio_buf_comb_2560[SLUB]      210.0KB    2
+zio_buf_comb_2048                2048           1         2.0KB          zio_buf_comb_2048[SLUB]      320.0KB    0
+zio_buf_comb_917504            922112           0          0.0B        zio_buf_comb_917504[SPL ]         0.0B    0
+zio_buf_comb_8388608          8394069           0          0.0B       zio_buf_comb_8388608[SPL ]         0.0B    0
+zio_buf_comb_8192                8192           0          0.0B          zio_buf_comb_8192[SLUB]      288.0KB    0
+zio_buf_comb_786432            791040           0          0.0B        zio_buf_comb_786432[SPL ]         0.0B    0
+zio_buf_comb_7340032          7345152           0          0.0B       zio_buf_comb_7340032[SPL ]         0.0B    0
+zio_buf_comb_7168                8192           0          0.0B          zio_buf_comb_7168[SLUB]      256.0KB    0
+zio_buf_comb_655360            659968           0          0.0B        zio_buf_comb_655360[SPL ]         0.0B    0
+zio_buf_comb_6291456          6296371           0          0.0B       zio_buf_comb_6291456[SPL ]         0.0B    0
+zio_buf_comb_6144                8192           0          0.0B          zio_buf_comb_6144[SLUB]      288.0KB    0
+zio_buf_comb_5242880          5247658           0          0.0B       zio_buf_comb_5242880[SPL ]         0.0B    0
+zio_buf_comb_524288            528896           0          0.0B        zio_buf_comb_524288[SPL ]         0.0B    0
+zio_buf_comb_5120                8192           0          0.0B          zio_buf_comb_5120[SLUB]      256.0KB    0
+zio_buf_comb_458752            463360           0          0.0B        zio_buf_comb_458752[SPL ]         0.0B    0
+zio_buf_comb_4194304          4198985           0          0.0B       zio_buf_comb_4194304[SPL ]         0.0B    0
+zio_buf_comb_393216            397824           0          0.0B        zio_buf_comb_393216[SPL ]         0.0B    0
+zio_buf_comb_3670016          3674624           0          0.0B       zio_buf_comb_3670016[SPL ]         0.0B    0
+zio_buf_comb_3584                3584           0          0.0B          zio_buf_comb_3584[SLUB]      252.0KB    0
+zio_buf_comb_327680            332288           0          0.0B        zio_buf_comb_327680[SPL ]         0.0B    0
+zio_buf_comb_3145728          3150336           0          0.0B       zio_buf_comb_3145728[SPL ]         0.0B    0
+zio_buf_comb_3072                3072           0          0.0B          zio_buf_comb_3072[SLUB]      510.0KB    0
+zio_buf_comb_2621440          2626048           0          0.0B       zio_buf_comb_2621440[SPL ]         0.0B    0
+zio_buf_comb_262144            266752           0          0.0B        zio_buf_comb_262144[SPL ]         0.0B    0
+zio_buf_comb_229376            233984           0          0.0B        zio_buf_comb_229376[SPL ]         0.0B    0
+zio_buf_comb_2097152          2101760           0          0.0B       zio_buf_comb_2097152[SPL ]         0.0B    0
+zio_buf_comb_196608            201216           0          0.0B        zio_buf_comb_196608[SPL ]         0.0B    0
+zio_buf_comb_1835008          1839616           0          0.0B       zio_buf_comb_1835008[SPL ]         0.0B    0
+zio_buf_comb_16777216        16785408           0          0.0B      zio_buf_comb_16777216[SPL ]         0.0B    0
+zio_buf_comb_163840            168448           0          0.0B        zio_buf_comb_163840[SPL ]         0.0B    0
+zio_buf_comb_1572864          1577472           0          0.0B       zio_buf_comb_1572864[SPL ]         0.0B    0
+zio_buf_comb_14680064        14686208           0          0.0B      zio_buf_comb_14680064[SPL ]         0.0B    0
+zio_buf_comb_14336              16384           0          0.0B         zio_buf_comb_14336[SLUB]      320.0KB    0
+zio_buf_comb_1310720          1315328           0          0.0B       zio_buf_comb_1310720[SPL ]         0.0B    0
+zio_buf_comb_12582912        12589056           0          0.0B      zio_buf_comb_12582912[SPL ]         0.0B    0
+zio_buf_comb_10485760        10491221           0          0.0B      zio_buf_comb_10485760[SPL ]         0.0B    0
+zio_buf_comb_1048576          1053184           0          0.0B       zio_buf_comb_1048576[SPL ]         0.0B    0
+zio_buf_comb_10240              12288           0          0.0B         zio_buf_comb_10240[SLUB]      192.0KB    0
+zil_zcw_cache                     152           0          0.0B              zil_zcw_cache[SLUB]       50.2KB    0
+zfs_znode_hold_cache               88           0          0.0B       zfs_znode_hold_cache[SLUB]        7.9KB    0
+vdev_object_store_io_cache         32           0          0.0B vdev_object_store_io_cache[SLUB]      144.0KB    0
+spl_zlib_workspace_cache       268152           0          0.0B   spl_zlib_workspace_cache[SPL ]         0.0B    0
+sio_cache_2                       168           0          0.0B                sio_cache_2[SLUB]         0.0B    0
+sio_cache_1                       152           0          0.0B                sio_cache_1[SLUB]         0.0B    0
+sio_cache_0                       136           0          0.0B                sio_cache_0[SLUB]         0.0B    0
+metaslab_alloc_trace_cache         72           0          0.0B metaslab_alloc_trace_cache[SLUB]         0.0B    0
+lz4_cache                       16384           0          0.0B                  lz4_cache[SLUB]       64.0KB    0
+kcf_context_cache                  64           0          0.0B          kcf_context_cache[SLUB]         0.0B    0
+ddt_entry_cache                   448           0          0.0B            ddt_entry_cache[SLUB]         0.0B    0
+arc_buf_hdr_t_l2only               96           0          0.0B       arc_buf_hdr_t_l2only[SLUB]         0.0B    0
+arc_buf_hdr_t_full_crypt          336           0          0.0B   arc_buf_hdr_t_full_crypt[SLUB]         0.0B    0

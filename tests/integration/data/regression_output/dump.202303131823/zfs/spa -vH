@@ -1,0 +1,91 @@
+ADDR               NAME
+------------------------------------------------------------
+0xffff9ac653860000 objpool
+     ** No histogram data available **
+      ADDR               STATE   AUX  DESCRIPTION
+      ------------------------------------------------------------
+      0xffff9ac5764e0000 HEALTHY NONE  root
+      0xffff9ac547074000 HEALTHY NONE    cloudburst-data-2
+          ** No histogram data available **
+0xffff9ac658924000 rpool
+     ** No histogram data available **
+      ADDR               STATE   AUX  DESCRIPTION
+      ------------------------------------------------------------
+      0xffff9ac659250000 HEALTHY NONE  root
+      0xffff9ac659254000 HEALTHY NONE    /dev/nvme0n1p1
+          ** No histogram data available **
+0xffff9ac546d38000 testpool
+     seg-size   count
+     --------   -----
+       512.0B:    443 *
+        1.0KB:   1236 **
+        2.0KB:   7143 ************
+        4.0KB:  14314 *************************
+        8.0KB:  23141 ****************************************
+       16.0KB:  13671 ************************
+       32.0KB:   5485 *********
+       64.0KB:   1733 ***
+      128.0KB:    567 *
+      256.0KB:    214 
+      512.0KB:    120 
+        1.0MB:     62 
+        2.0MB:     61 
+        4.0MB:     79 
+        8.0MB:     13 
+       16.0MB:      9 
+       32.0MB:     12 
+       64.0MB:     11 
+      128.0MB:     22 
+      256.0MB:     15 
+     Approx. Median: 108.2MB
+      ADDR               STATE   AUX  DESCRIPTION
+      ------------------------------------------------------------
+      0xffff9ac5ac2ac000 HEALTHY NONE  root
+      0xffff9ac55ced0000 HEALTHY NONE    /dev/nvme1n1p1
+          seg-size   count
+          --------   -----
+            512.0B:    364 *
+             1.0KB:    926 **
+             2.0KB:   4754 ***********
+             4.0KB:   9352 ***********************
+             8.0KB:  16580 ****************************************
+            16.0KB:   9018 **********************
+            32.0KB:   2952 *******
+            64.0KB:    641 **
+           128.0KB:     82 
+           256.0KB:     10 
+           512.0KB:     16 
+             1.0MB:     15 
+             2.0MB:     27 
+             4.0MB:      8 
+             8.0MB:      5 
+            16.0MB:      3 
+            32.0MB:      5 
+            64.0MB:      5 
+           128.0MB:     10 
+           256.0MB:      8 
+          Approx. Median: 118.7MB
+      0xffff9ac4b0574000 HEALTHY NONE    /dev/nvme2n1p1
+          seg-size   count
+          --------   -----
+            512.0B:     79 
+             1.0KB:    310 **
+             2.0KB:   2389 ***************
+             4.0KB:   4962 ******************************
+             8.0KB:   6561 ****************************************
+            16.0KB:   4653 ****************************
+            32.0KB:   2533 ***************
+            64.0KB:   1092 *******
+           128.0KB:    485 ***
+           256.0KB:    204 *
+           512.0KB:    104 *
+             1.0MB:     47 
+             2.0MB:     34 
+             4.0MB:     71 
+             8.0MB:      8 
+            16.0MB:      6 
+            32.0MB:      7 
+            64.0MB:      6 
+           128.0MB:     12 
+           256.0MB:      7 
+          Approx. Median: 99.5MB

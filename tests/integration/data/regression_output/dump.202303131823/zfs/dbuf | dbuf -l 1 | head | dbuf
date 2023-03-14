@@ -1,0 +1,11 @@
+                addr   object  lvl    blkid holds os
+  0xffff9ac58e5f30d8      128    1       74    39 testpool/testfs
+  0xffff9ac463209260        3    1       21    12 objpool/testfs
+  0xffff9ac4b4a1c188        3    1       17     6 objpool/testfs
+  0xffff9ac5c652e310      128    1       14    20 testpool/testfs
+  0xffff9ac60fe66dc8        2    1       34    11 objpool/testfs
+  0xffff9ac5e0c40c40        0    1        0     3 objpool/testfs
+  0xffff9ac65c515d18        0    1        5    54 rpool/ROOT/delphix.i4TlGPg/root
+  0xffff9ac5b8f0ec40      128    1       52    23 testpool/testfs
+  0xffff9ac65ec9f3e8     2019    1        0     2 rpool/ROOT/delphix.i4TlGPg/data
+  0xffff9ac4c66ffa08      128    1        7    19 testpool/testfs

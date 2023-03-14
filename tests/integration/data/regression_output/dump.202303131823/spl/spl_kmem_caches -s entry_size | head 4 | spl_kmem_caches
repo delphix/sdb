@@ -1,0 +1,6 @@
+name                  entry_size active_objs active_memory                      source total_memory util
+--------------------- ---------- ----------- ------------- --------------------------- ------------ ----
+zio_buf_comb_16777216   16785408           0          0.0B zio_buf_comb_16777216[SPL ]         0.0B    0
+zio_buf_comb_14680064   14686208           0          0.0B zio_buf_comb_14680064[SPL ]         0.0B    0
+zio_buf_comb_12582912   12589056           0          0.0B zio_buf_comb_12582912[SPL ]         0.0B    0
+zio_buf_comb_10485760   10491221           0          0.0B zio_buf_comb_10485760[SPL ]         0.0B    0

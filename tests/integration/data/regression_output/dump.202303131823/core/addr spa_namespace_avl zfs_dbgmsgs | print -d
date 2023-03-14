@@ -1,0 +1,75 @@
+*(avl_tree_t *)(spa_namespace_avl+0x0 = 0xffffffffc08934a0) = {
+	.avl_root = (struct avl_node *)0xffff9ac658924108,
+	.avl_compar = (int (*)(const void *, const void *))spa_name_compare+0x0 = 0xffffffffc06673f0,
+	.avl_offset = (size_t)264,
+	.avl_numnodes = (ulong_t)3,
+}
+*(procfs_list_t *)(zfs_dbgmsgs+0x0 = 0xffffffffc0926540) = {
+	.pl_private = (void *)0x0,
+	.pl_lock = (kmutex_t){
+		.m_mutex = (struct mutex){
+			.owner = (atomic_long_t){
+				.counter = (s64)0,
+			},
+			.wait_lock = (spinlock_t){
+				.rlock = (struct raw_spinlock){
+					.raw_lock = (arch_spinlock_t){
+						.val = (atomic_t){
+							.counter = (int)0,
+						},
+						.locked = (u8)0,
+						.pending = (u8)0,
+						.locked_pending = (u16)0,
+						.tail = (u16)0,
+					},
+				},
+			},
+			.osq = (struct optimistic_spin_queue){
+				.tail = (atomic_t){
+					.counter = (int)0,
+				},
+			},
+			.wait_list = (struct list_head){
+				.next = (struct list_head *)zfs_dbgmsgs+0x18 = 0xffffffffc0926558,
+				.prev = (struct list_head *)zfs_dbgmsgs+0x18 = 0xffffffffc0926558,
+			},
+		},
+		.m_lock = (spinlock_t){
+			.rlock = (struct raw_spinlock){
+				.raw_lock = (arch_spinlock_t){
+					.val = (atomic_t){
+						.counter = (int)0,
+					},
+					.locked = (u8)0,
+					.pending = (u8)0,
+					.locked_pending = (u16)0,
+					.tail = (u16)0,
+				},
+			},
+		},
+		.m_owner = (kthread_t *)0x0,
+	},
+	.pl_list = (list_t){
+		.list_size = (size_t)24,
+		.list_offset = (size_t)0,
+		.list_head = (list_node_t){
+			.next = (struct list_head *)0xffff9ac65913c680,
+			.prev = (struct list_head *)0xffff9ac6009f8280,
+		},
+	},
+	.pl_next_id = (uint64_t)1505,
+	.pl_show = (int (*)(struct seq_file *, void *))zfs_dbgmsg_show+0x0 = 0xffffffffc06f24b0,
+	.pl_show_header = (int (*)(struct seq_file *))zfs_dbgmsg_show_header+0x0 = 0xffffffffc06f2480,
+	.pl_clear = (int (*)(procfs_list_t *))zfs_dbgmsg_clear+0x0 = 0xffffffffc06f2670,
+	.pl_node_offset = (size_t)0,
+	.pl_kstat_entry = (kstat_proc_entry_t){
+		.kpe_name = (char [255])"dbgmsg",
+		.kpe_module = (char [255])"zfs",
+		.kpe_owner = (kstat_module_t *)0xffff9ac65eed4c00,
+		.kpe_list = (struct list_head){
+			.next = (struct list_head *)0xffff9ac65ede43b0,
+			.prev = (struct list_head *)0xffff9ac65ede57b0,
+		},
+		.kpe_proc = (struct proc_dir_entry *)0xffff9ac65ee273c0,
+	},
+}

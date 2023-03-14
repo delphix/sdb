@@ -1,0 +1,19 @@
+TASK_STRUCT        STATE             COUNT
+==========================================
+0xffff9ac5bb82db80 UNINTERRUPTIBLE       1
+                  __schedule+0x2de
+                  __schedule+0x2de
+                  schedule+0x42
+                  schedule_timeout+0x8a
+                  io_schedule_timeout+0x1e
+                  __cv_timedwait_common+0x15e
+                  __cv_timedwait_io+0x19
+                  zio_wait+0x116
+                  dsl_pool_sync+0xbb
+                  spa_sync_iterate_to_convergence+0xf1
+                  spa_sync+0x31c
+                  txg_sync_thread+0x22d
+                  thread_generic_wrapper+0x83
+                  kthread+0x104
+                  ret_from_fork+0x1f
+

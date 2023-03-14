@@ -52,10 +52,10 @@ elif [[ $1 == *.tar.gz ]]; then
 	decompressed_dir=${1%.tar.gz}
 
 	echo "moving contents to tests/integration/data ..."
-	mv $decompressed_dir/* $DATA_DIR
+	mv *$decompressed_dir/* $DATA_DIR
 	[ $? -eq 0 ] || exit 1
 
-	rmdir $decompressed_dir
+	rmdir *$decompressed_dir
 	[ $? -eq 0 ] || exit 1
 else
 	echo "unknown dump profile"

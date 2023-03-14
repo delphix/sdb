@@ -56,7 +56,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.9]
-        dump: [dump-201912060006.tar.lzma]
+        dump: [dump-201912060006.tar.lzma, dump.202303131823.tar.gz]
     env:
       AWS_DEFAULT_REGION: 'us-west-2'
     steps:

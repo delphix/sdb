@@ -1,0 +1,2 @@
+sdb: slabs: invalid input: 'bogus' is not in field set (name, entry_size, active_objs, active_memory,
+total_memory, util)
