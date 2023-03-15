@@ -193,7 +193,9 @@ def sdb_invoke(objs: Iterable[drgn.Object], line: str) -> Iterable[drgn.Object]:
     state of objects that is not part of the output in stdout.
     """
     assert TEST_PROGRAM
-    return list(sdb.invoke(TEST_PROGRAM, objs, line))
+    sdb.target.set_prog(TEST_PROGRAM)
+    sdb.register_commands()
+    return list(sdb.invoke(objs, line))
 
 
 def slurp_output_file(dump_name: str, modname: str, cmd: str) -> str:

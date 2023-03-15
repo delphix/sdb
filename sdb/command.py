@@ -28,7 +28,8 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, Typ
 
 import drgn
 
-from sdb.target import type_canonicalize_name, type_canonical_name, type_canonicalize, get_prog, get_runtimes, Runtime
+from sdb.target import (type_canonicalize_name, type_canonical_name,
+                        type_canonicalize, get_prog, get_runtimes, Runtime)
 from sdb.error import CommandError, SymbolNotFoundError
 from sdb import target
 
@@ -40,8 +41,14 @@ from sdb import target
 all_commands: Set[Type["Command"]] = set({})
 registered_commands: Dict[str, Type["Command"]] = {}
 
+
 def add_command(class_: Type["Command"]) -> None:
+    """
+    Add the provided command to the set of all commands, which will be
+    processed by the register_commands function.
+    """
     all_commands.add(class_)
+
 
 def register_command(name: str, class_: Type["Command"]) -> None:
     """
@@ -61,12 +68,17 @@ def get_registered_commands() -> Dict[str, Type["Command"]]:
     """
     return registered_commands
 
+
+# pylint: disable=too-many-branches
 def register_commands() -> None:
+    """
+    Iterate over the set of all commands and register the ones appropriate for the
+    current runtime.
+    """
     for cls in all_commands:
         register = False
-        # We call this 'modules', but if kernel is false, it's libraries
-        (kernel, modules) = get_runtimes()
-        
+        (kernel, _) = get_runtimes()
+
         for runtime in cls.load_on:
             #
             # If and when we upgrade to python 3.10 or above, use proper
@@ -103,7 +115,7 @@ def register_commands() -> None:
 
         if not register:
             continue
-        
+
         for name in cls.names:
             register_command(name, cls)
 
@@ -452,6 +464,9 @@ class Walker(Command):
     # When a subclass is created, register it
     @classmethod
     def register_walker(cls, class_: Type["Walker"]) -> None:
+        """
+        Add the provided walker to the map of registered walkers.
+        """
         assert class_.input_type is not None
         Walker.allWalkers[class_.input_type] = class_
 
@@ -490,6 +505,9 @@ class PrettyPrinter(Command):
     # When a subclass is created, register it
     @classmethod
     def register_printer(cls, class_: Type["PrettyPrinter"]) -> None:
+        """
+        Add the provided printer to the map of registered printers.
+        """
         assert class_.input_type is not None
         PrettyPrinter.all_printers[class_.input_type] = class_
 
@@ -856,6 +874,7 @@ class Walk(Command):
         # walkers.
         if not has_input and self.islast:
             print(Walk._help_message())
+
 
 def InputHandler(typename: str) -> Callable[[IH[T]], IH[T]]:
     """

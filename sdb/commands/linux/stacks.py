@@ -218,7 +218,8 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
     def resolve_state(tstate: str) -> str:
         tstate = tstate.upper()
         if tstate in KernelStacks.TASK_STATE_SHORTCUTS:
-            return KernelStacks.TASK_STATES[KernelStacks.TASK_STATE_SHORTCUTS[tstate]]
+            return KernelStacks.TASK_STATES[
+                KernelStacks.TASK_STATE_SHORTCUTS[tstate]]
         return tstate
 
     @staticmethod
@@ -315,7 +316,8 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
                     f" (acceptable states: {valid_states})")
 
         if self.args.module:
-            if KernelStacks.find_module_memory_segment(self.args.module)[0] == -1:
+            if KernelStacks.find_module_memory_segment(
+                    self.args.module)[0] == -1:
                 raise sdb.CommandError(
                     self.name,
                     f"module '{self.args.module}' doesn't exist or isn't currently loaded"

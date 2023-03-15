@@ -36,7 +36,8 @@ from sdb.target import (create_object, get_object, get_prog, get_type,
                         get_pointer_type, get_target_flags, get_symbol, is_null,
                         type_canonical_name, type_canonicalize,
                         type_canonicalize_name, type_canonicalize_size,
-                        type_equals, Runtime, All, Kernel, Userland, Module, Library)
+                        type_equals, Runtime, All, Kernel, Userland, Module,
+                        Library)
 from sdb.command import (Address, Cast, Command, InputHandler, Locator,
                          PrettyPrinter, Walk, Walker, SingleInputCommand,
                          get_registered_commands, register_commands)

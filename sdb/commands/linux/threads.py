@@ -90,7 +90,9 @@ class KernelThreads(sdb.Locator, sdb.PrettyPrinter):
         fields = list(KernelThreads.FIELDS.keys())
         table = Table(fields, None, {"task": str})
         for obj in objs:
-            row_dict = {field: KernelThreads.FIELDS[field](obj) for field in fields}
+            row_dict = {
+                field: KernelThreads.FIELDS[field](obj) for field in fields
+            }
             table.add_row(row_dict["task"], row_dict)
         table.print_()
 
