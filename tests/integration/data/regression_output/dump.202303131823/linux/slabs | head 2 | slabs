@@ -1,0 +1,4 @@
+name                       entry_size active_objs active_memory total_memory util
+-------------------------- ---------- ----------- ------------- ------------ ----
+vdev_object_store_io_cache         32        4608       144.0KB      144.0KB  100
+ext4_groupinfo_4k                 144          84        11.8KB       11.8KB  100

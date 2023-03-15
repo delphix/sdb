@@ -17,11 +17,21 @@
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-function-docstring
 
-from typing import Any
+import datetime
+import re
+from typing import Any, List, Tuple
 import os.path
 
 import pytest
 from tests.integration.infra import repl_invoke, get_crash_dump_path, slurp_output_file
+
+POS_CMDS_201912060006 = [
+    # array
+    "zfs_dbgmsg | head 1 | member zdm_msg | array",
+
+    # member - generic
+    "addr spa_namespace_avl | member avl_root.avl_pcb avl_size",
+]
 
 POS_CMDS = [
     # addr
@@ -31,7 +41,6 @@ POS_CMDS = [
 
     # array
     "spa | member spa_zio_taskq[0][0].stqs_taskq | array 2",
-    "zfs_dbgmsg | head 1 | member zdm_msg | array",
     "zfs_dbgmsg | head 1 | member zdm_msg | array 2",
     "zfs_dbgmsg | head 1 | member zdm_msg | array -1",
     "zfs_dbgmsg | head 1 | member zdm_msg | array 0",
@@ -80,7 +89,6 @@ POS_CMDS = [
     "addr spa_namespace_avl | member avl_root->avl_child[0]->avl_child",
     "addr spa_namespace_avl | member avl_root.avl_child[0].avl_child",
     "spa | member spa_ubsync.ub_rootbp.blk_dva[0].dva_word",
-    "addr spa_namespace_avl | member avl_root.avl_pcb avl_size",
     "spa | head 1 | member spa_zio_taskq[0][0].stqs_taskq",
     "spa | head 1 | member spa_zio_taskq[0][0].stqs_taskq[0]",
     # member - forcing printing beyond the bounds of the array (pointer)
@@ -206,13 +214,42 @@ NEG_CMDS = [
     "spa | deref | sum",
 ]
 
-CMD_TABLE = POS_CMDS + NEG_CMDS
+CMD_TABLE = POS_CMDS + NEG_CMDS + POS_CMDS_201912060006
+
+POS_CMDS_HISTORY = [('201912060006', POS_CMDS_201912060006)]
+
+
+def crash_get_cmds() -> Tuple[List[str], List[str]]:
+    """
+    Returns a tuple with the right list of commands to be tested
+    based on the crash dump's date. The first element of the tuple
+    is the list of commands we expect to succeed and the second
+    element the list we expect to fail.
+    """
+    dump_path = get_crash_dump_path()
+    assert dump_path is not None
+
+    dump_name = os.path.basename(dump_path)
+    m = re.match(r"dump.(\d+)", dump_name)
+    assert m is not None
+
+    dt_str = m.group(1)
+    dt = datetime.datetime.strptime(dt_str, '%Y%m%d%H%M')
+    pos_cmds = POS_CMDS
+    neg_cmds = NEG_CMDS
+    for date_str, cmds in POS_CMDS_HISTORY:
+        date = datetime.datetime.strptime(date_str, '%Y%m%d%H%M')
+        if date < dt:
+            neg_cmds.extend(cmds)
+        else:
+            pos_cmds.extend(cmds)
+    return pos_cmds, neg_cmds
 
 
 @pytest.mark.skipif(  # type: ignore[misc]
     not get_crash_dump_path(),
     reason="couldn't find crash dump to run tests against")
-@pytest.mark.parametrize('cmd', POS_CMDS)  # type: ignore[misc]
+@pytest.mark.parametrize('cmd', crash_get_cmds()[0])  # type: ignore[misc]
 def test_cmd_output_and_error_code_0(capsys: Any, cmd: str) -> None:
     assert repl_invoke(cmd) == 0
     captured = capsys.readouterr()
@@ -225,7 +262,7 @@ def test_cmd_output_and_error_code_0(capsys: Any, cmd: str) -> None:
 @pytest.mark.skipif(  # type: ignore[misc]
     not get_crash_dump_path(),
     reason="couldn't find crash dump to run tests against")
-@pytest.mark.parametrize('cmd', NEG_CMDS)  # type: ignore[misc]
+@pytest.mark.parametrize('cmd', crash_get_cmds()[1])  # type: ignore[misc]
 def test_cmd_output_and_error_code_1(capsys: Any, cmd: str) -> None:
     assert repl_invoke(cmd) == 1
     captured = capsys.readouterr()

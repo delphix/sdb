@@ -1,0 +1,39 @@
+TASK_STRUCT        STATE             COUNT
+==========================================
+0xffff9ac6589f8000 INTERRUPTIBLE        12
+                  __schedule+0x2de
+                  __schedule+0x2de
+                  schedule+0x42
+                  cv_wait_common+0x11e
+                  __cv_wait_idle+0x50
+                  zthr_procedure+0x45
+                  thread_generic_wrapper+0x83
+                  kthread+0x104
+                  ret_from_fork+0x1f
+
+0xffff9ac65f359e80 INTERRUPTIBLE         1
+                  __schedule+0x2de
+                  __schedule+0x2de
+                  schedule+0x42
+                  schedule_hrtimeout_range_clock+0x97
+                  schedule_hrtimeout_range+0x13
+                  __cv_timedwait_hires+0x119
+                  cv_timedwait_hires_common+0x56
+                  cv_timedwait_idle_hires+0x66
+                  zthr_procedure+0x96
+                  thread_generic_wrapper+0x83
+                  kthread+0x104
+                  ret_from_fork+0x1f
+
+0xffff9ac6607b8000 UNINTERRUPTIBLE       1
+                  __schedule+0x2de
+                  __schedule+0x2de
+                  schedule+0x42
+                  schedule_timeout+0x8a
+                  schedule_timeout_uninterruptible+0x1f
+                  arc_reap_cb+0x26
+                  zthr_procedure+0x130
+                  thread_generic_wrapper+0x83
+                  kthread+0x104
+                  ret_from_fork+0x1f
+

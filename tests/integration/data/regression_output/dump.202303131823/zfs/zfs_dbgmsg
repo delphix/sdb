@@ -1,0 +1,1504 @@
+spa.c:6386:spa_tryimport(): spa_tryimport: importing rpool
+spa_misc.c:417:spa_load_note(): spa_load($import, config trusted): LOADING
+vdev.c:162:vdev_dbgmsg(): disk vdev '/dev/nvme0n1p1': best uberblock found for spa $import. txg 624
+spa_misc.c:417:spa_load_note(): spa_load($import, config untrusted): using uberblock with txg=624
+vdev.c:2491:vdev_copy_path_impl(): vdev_copy_path: vdev 17845062194485856068: path changed from '/dev/mapper/loop0p1' to '/dev/nvme0n1p1'
+vdev.c:1496:vdev_metaslab_init(): vdev_metaslab_init: setting vdev_ms_count: 139
+spa.c:8506:spa_async_request(): spa=$import async request task=2048
+spa_misc.c:417:spa_load_note(): spa_load($import, config trusted): LOADED
+spa_misc.c:417:spa_load_note(): spa_load($import, config trusted): UNLOADING
+spa.c:6238:spa_import(): spa_import: importing rpool
+spa_misc.c:417:spa_load_note(): spa_load(rpool, config trusted): LOADING
+vdev.c:162:vdev_dbgmsg(): disk vdev '/dev/nvme0n1p1': best uberblock found for spa rpool. txg 624
+spa_misc.c:417:spa_load_note(): spa_load(rpool, config untrusted): using uberblock with txg=624
+vdev.c:2491:vdev_copy_path_impl(): vdev_copy_path: vdev 17845062194485856068: path changed from '/dev/mapper/loop0p1' to '/dev/nvme0n1p1'
+vdev.c:1496:vdev_metaslab_init(): vdev_metaslab_init: setting vdev_ms_count: 139
+spa_misc.c:417:spa_load_note(): spa_load(rpool, config trusted): read 0 log space maps (0 total blocks - blksz = 131072 bytes) in 0 ms
+mmp.c:239:mmp_thread_start(): MMP thread started pool 'rpool' gethrtime 6297126881
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 625, spa rpool, vdev_id 0, ms_id 34, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 6297 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 625, spa rpool, vdev_id 0, ms_id 35, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 6297 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 625, spa rpool, vdev_id 0, ms_id 36, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 6385 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 625, spa rpool, vdev_id 0, ms_id 37, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 6385 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 625, spa rpool, vdev_id 0, ms_id 38, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 6385 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 625, spa rpool, vdev_id 0, ms_id 39, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 6385 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 625, spa rpool, vdev_id 0, ms_id 40, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 6385 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 625, spa rpool, vdev_id 0, ms_id 41, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 6613 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 625, spa rpool, vdev_id 0, ms_id 42, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 6613 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+spa.c:8506:spa_async_request(): spa=rpool async request task=1
+spa.c:8506:spa_async_request(): spa=rpool async request task=2048
+spa_misc.c:417:spa_load_note(): spa_load(rpool, config trusted): LOADED
+spa_history.c:311:spa_history_log_sync(): txg 626 open pool version 28; software version ab8da03-dirty; uts localhost.localdomain 5.4.0-1097-dx2023030807-1b2b35b91-aws #105 SMP Wed Mar 8 07:04:20 UTC 2023 x86_64
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 626, spa rpool, vdev_id 0, ms_id 15, smp_length 1480, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 2048, unloaded time 7014 ms, loading_time 0 ms, ms_max_size 536756224, max size error 536756224, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 626, spa rpool, vdev_id 0, ms_id 43, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 7014 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 626, spa rpool, vdev_id 0, ms_id 44, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 7014 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 626, spa rpool, vdev_id 0, ms_id 45, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 7014 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 626, spa rpool, vdev_id 0, ms_id 46, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 7014 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 626, spa rpool, vdev_id 0, ms_id 47, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 7014 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 626, spa rpool, vdev_id 0, ms_id 48, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 7014 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 626, spa rpool, vdev_id 0, ms_id 49, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 7014 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 626, spa rpool, vdev_id 0, ms_id 50, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 7014 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 627, spa rpool, vdev_id 0, ms_id 13, smp_length 2440, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 7014 ms, loading_time 51 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 1000000020000000
+spa.c:8506:spa_async_request(): spa=rpool async request task=32
+spa_history.c:311:spa_history_log_sync(): txg 628 import pool version 28; software version ab8da03-dirty; uts localhost.localdomain 5.4.0-1097-dx2023030807-1b2b35b91-aws #105 SMP Wed Mar 8 07:04:20 UTC 2023 x86_64
+spa_history.c:298:spa_history_log_sync(): command: zpool import -N rpool
+spa_history.c:311:spa_history_log_sync(): txg 637 set version=5000
+spa_history.c:311:spa_history_log_sync(): txg 638 set feature@async_destroy=enabled
+spa_history.c:298:spa_history_log_sync(): command: zpool set feature@async_destroy=enabled rpool
+spa_history.c:311:spa_history_log_sync(): txg 639 set feature@lz4_compress=enabled
+spa_history.c:298:spa_history_log_sync(): command: zpool set feature@lz4_compress=enabled rpool
+spa_history.c:311:spa_history_log_sync(): txg 640 set feature@large_blocks=enabled
+spa_history.c:298:spa_history_log_sync(): command: zpool set feature@large_blocks=enabled rpool
+spa_history.c:302:spa_history_log_sync(): txg 643 create rpool/update (id 162)  
+spa_history.c:302:spa_history_log_sync(): txg 644 set rpool/update (id 162) quota=32212254720
+spa_history.c:302:spa_history_log_sync(): txg 645 set rpool/update (id 162) mountpoint=/var/dlpx-update
+spa_history.c:302:spa_history_log_sync(): txg 645 set rpool/update (id 162) compression=10
+spa_history.c:334:spa_history_log_sync(): ioctl create
+spa_history.c:298:spa_history_log_sync(): command: zfs create -p -o mountpoint=/var/dlpx-update -o compression=gzip -o quota=30g rpool/update
+spa_history.c:302:spa_history_log_sync(): txg 646 create rpool/upgrade-logs (id 15)  
+spa_history.c:302:spa_history_log_sync(): txg 647 set rpool/upgrade-logs (id 15) mountpoint=/var/tmp/delphix-upgrade
+spa_history.c:302:spa_history_log_sync(): txg 647 set rpool/upgrade-logs (id 15) compression=10
+spa_history.c:334:spa_history_log_sync(): ioctl create
+spa_history.c:298:spa_history_log_sync(): command: zfs create -p -o mountpoint=/var/tmp/delphix-upgrade -o compression=gzip rpool/upgrade-logs
+spa_history.c:302:spa_history_log_sync(): txg 650 set rpool/ROOT/delphix.i4TlGPg/root (id 88) acltype=1
+spa_history.c:298:spa_history_log_sync(): command: zfs set acltype=posixacl rpool/ROOT/delphix.i4TlGPg/root
+spa_history.c:302:spa_history_log_sync(): txg 651 create rpool/public (id 22)  
+spa_history.c:302:spa_history_log_sync(): txg 652 set rpool/public (id 22) sharenfs=off
+spa_history.c:302:spa_history_log_sync(): txg 652 set rpool/public (id 22) acltype=0
+spa_history.c:302:spa_history_log_sync(): txg 652 set rpool/public (id 22) mountpoint=/public
+spa_history.c:302:spa_history_log_sync(): txg 652 set rpool/public (id 22) devices=0
+spa_history.c:302:spa_history_log_sync(): txg 652 set rpool/public (id 22) exec=0
+spa_history.c:302:spa_history_log_sync(): txg 652 set rpool/public (id 22) setuid=0
+spa_history.c:334:spa_history_log_sync(): ioctl create
+spa_history.c:298:spa_history_log_sync(): command: zfs create -p -o sharenfs=off -o acltype=off -o mountpoint=/public -o devices=off -o exec=off -o setuid=off rpool/public
+spa_history.c:302:spa_history_log_sync(): txg 657 create rpool/docker (id 168)  
+spa_history.c:334:spa_history_log_sync(): ioctl create
+spa_history.c:298:spa_history_log_sync(): command: zfs create -V 10G -s rpool/docker
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 689, spa rpool, vdev_id 0, ms_id 16, smp_length 3608, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 1536, unloaded time 248303 ms, loading_time 0 ms, ms_max_size 536591360, max size error 536591360, old_weight 1000000020000000, new_weight 1000000020000000
+vdev.c:1496:vdev_metaslab_init(): vdev_metaslab_init: setting vdev_ms_count: 15
+spa_history.c:311:spa_history_log_sync(): txg 4 create pool version 5000; software version ab8da03-dirty; uts ip-10-110-250-64 5.4.0-1097-dx2023030807-1b2b35b91-aws #105 SMP Wed Mar 8 07:04:20 UTC 2023 x86_64
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@async_destroy=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@empty_bpobj=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@lz4_compress=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@multi_vdev_crash_dump=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@spacemap_histogram=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@enabled_txg=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@hole_birth=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@extensible_dataset=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@embedded_data=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@bookmarks=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@filesystem_limits=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@large_blocks=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@large_dnode=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@sha512=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@skein=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@edonr=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@userobj_accounting=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@encryption=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@project_quota=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@device_removal=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@obsolete_counts=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@zpool_checkpoint=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@spacemap_v2=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@allocation_classes=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@resilver_defer=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@bookmark_v2=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@redaction_bookmarks=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@redacted_datasets=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@bookmark_written=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@log_spacemap=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@livelist=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@device_rebuild=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@zstd_compress=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@draid=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@zilsaxattr=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@head_errlog=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@blake3=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@versioned_objects=enabled
+mmp.c:239:mmp_thread_start(): MMP thread started pool 'testpool' gethrtime 402624791428
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 0, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402625 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 1, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402625 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 2, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402625 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 3, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402625 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 4, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402625 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 5, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402625 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 6, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402625 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 7, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402625 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 8, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402631 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 1000000020000000, new_weight 740000000000001
+spa_history.c:311:spa_history_log_sync(): txg 4 recalculate SPA_FEATURE_BOOKMARK_V2 refcount old=0 new=0
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 9, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402665 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 10, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402665 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 11, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402665 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 12, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402665 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 13, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402665 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa testpool, vdev_id 0, ms_id 14, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 402665 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+spa_history.c:298:spa_history_log_sync(): command: zpool create testpool nvme1n1
+spa_history.c:334:spa_history_log_sync(): ioctl reopen
+spa_history.c:302:spa_history_log_sync(): txg 9 create testpool/testfs (id 83)  
+spa_history.c:334:spa_history_log_sync(): ioctl create
+spa_history.c:298:spa_history_log_sync(): command: zfs create testpool/testfs
+vdev.c:1496:vdev_metaslab_init(): vdev_metaslab_init: setting vdev_ms_count: 15
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 64, spa testpool, vdev_id 1, ms_id 0, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 678549 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 64, spa testpool, vdev_id 1, ms_id 1, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 678549 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 64, spa testpool, vdev_id 1, ms_id 2, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 678549 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 64, spa testpool, vdev_id 1, ms_id 3, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 678549 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 64, spa testpool, vdev_id 1, ms_id 4, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 678549 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 64, spa testpool, vdev_id 1, ms_id 5, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 678549 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 64, spa testpool, vdev_id 1, ms_id 6, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 678549 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 64, spa testpool, vdev_id 1, ms_id 7, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 678549 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 64, spa testpool, vdev_id 1, ms_id 8, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 678549 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 64, spa testpool, vdev_id 1, ms_id 9, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 678549 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+spa_history.c:298:spa_history_log_sync(): command: zpool add testpool nvme2n1
+spa_history.c:334:spa_history_log_sync(): ioctl reopen
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 65, spa testpool, vdev_id 1, ms_id 10, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 683757 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 65, spa testpool, vdev_id 1, ms_id 11, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 683757 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 65, spa testpool, vdev_id 1, ms_id 12, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 683757 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+vdev_object_store.c:2285:vdev_object_store_init(): vdev_object_store_init, protocol=s3 endpoint=https://s3-us-west-2.amazonaws.com region=us-west-2 profile=(null)
+vdev_object_store.c:330:zfs_object_store_open(): zfs_object_store_open, socket connection ready, ffff9ac65c83f400
+vdev_object_store.c:2035:vdev_object_store_socket_open(): zfs_object_store_open: Selected 1.1.0 in negotiation
+vdev_object_store.c:910:agent_create_pool(): agent_create_pool(guid=17876798723393741576 name=objpool bucket=cloudburst-data-2)
+vdev_object_store.c:1684:agent_nvlist_response(): got create pool err=Other msg=Couldn't find AWS credentials in environment, credentials file, or IAM role.
+vdev_object_store.c:2410:vdev_object_store_open(): agent_create_pool failed with 13
+vdev_object_store.c:1120:object_store_stop_agent(): stop_agent() destroy=0
+vdev_object_store.c:1812:agent_nvlist_response(): got close pool
+vdev_object_store.c:2165:vdev_object_store_receive_thread(): agent thread exited
+spa_misc.c:417:spa_load_note(): spa_load(objpool, config trusted): UNLOADING
+vdev_object_store.c:2338:vdev_object_store_fini(): vdev_object_store_fini
+vdev_object_store.c:2285:vdev_object_store_init(): vdev_object_store_init, protocol=s3 endpoint=https://s3-us-west-2.amazonaws.com region=us-west-2 profile=(null)
+vdev_object_store.c:330:zfs_object_store_open(): zfs_object_store_open, socket connection ready, ffff9ac65c83e3c0
+vdev_object_store.c:2035:vdev_object_store_socket_open(): zfs_object_store_open: Selected 1.1.0 in negotiation
+vdev_object_store.c:910:agent_create_pool(): agent_create_pool(guid=7507814595754292567 name=objpool bucket=cloudburst-data-2)
+vdev_object_store.c:1684:agent_nvlist_response(): got create pool err=Other msg=Couldn't find AWS credentials in environment, credentials file, or IAM role.
+vdev_object_store.c:2410:vdev_object_store_open(): agent_create_pool failed with 13
+vdev_object_store.c:1120:object_store_stop_agent(): stop_agent() destroy=0
+vdev_object_store.c:1812:agent_nvlist_response(): got close pool
+vdev_object_store.c:2165:vdev_object_store_receive_thread(): agent thread exited
+spa_misc.c:417:spa_load_note(): spa_load(objpool, config trusted): UNLOADING
+vdev_object_store.c:2338:vdev_object_store_fini(): vdev_object_store_fini
+metaslab.c:2586:metaslab_unload(): metaslab_unload: txg 795, spa rpool, vdev_id 0, ms_id 50, weight 1000000020000000, selected txg 688 (604117 ms ago), alloc_txg 0, loaded 827563 ms ago, max_size 536870912
+vdev_object_store.c:2285:vdev_object_store_init(): vdev_object_store_init, protocol=s3 endpoint=https://s3-us-west-2.amazonaws.com region=us-west-2 profile=(null)
+vdev_object_store.c:330:zfs_object_store_open(): zfs_object_store_open, socket connection ready, ffff9ac65c83fa80
+vdev_object_store.c:2035:vdev_object_store_socket_open(): zfs_object_store_open: Selected 1.1.0 in negotiation
+vdev_object_store.c:910:agent_create_pool(): agent_create_pool(guid=14188352787665702174 name=objpool bucket=cloudburst-data-2)
+vdev_object_store.c:970:agent_open_pool(): agent_open_pool(guid=14188352787665702174 bucket=cloudburst-data-2)
+vdev_object_store.c:1806:agent_nvlist_response(): got pool open done len=4294941381 block=0
+vdev.c:2774:vdev_metaslab_set_size(): vdev_metaslab_set_size: 59
+vdev.c:1496:vdev_metaslab_init(): vdev_metaslab_init: setting vdev_ms_count: 1
+spa_history.c:311:spa_history_log_sync(): txg 4 create pool version 5000; software version ab8da03-dirty; uts ip-10-110-250-64 5.4.0-1097-dx2023030807-1b2b35b91-aws #105 SMP Wed Mar 8 07:04:20 UTC 2023 x86_64
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@async_destroy=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@empty_bpobj=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@lz4_compress=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@multi_vdev_crash_dump=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@spacemap_histogram=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@enabled_txg=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@hole_birth=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@extensible_dataset=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@embedded_data=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@bookmarks=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@filesystem_limits=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@large_blocks=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@large_dnode=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@sha512=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@skein=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@edonr=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@userobj_accounting=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@encryption=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@project_quota=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@device_removal=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@obsolete_counts=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@zpool_checkpoint=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@spacemap_v2=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@allocation_classes=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@resilver_defer=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@bookmark_v2=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@redaction_bookmarks=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@redacted_datasets=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@bookmark_written=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@log_spacemap=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@livelist=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@device_rebuild=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@zstd_compress=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@draid=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@zilsaxattr=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@head_errlog=enabled
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@blake3=enabled
+vdev_object_store.c:1061:agent_set_feature(): agent_set_feature: feature com.delphix:versioned_objects
+spa_history.c:311:spa_history_log_sync(): txg 4 set feature@versioned_objects=enabled
+mmp.c:239:mmp_thread_start(): MMP thread started pool 'objpool' gethrtime 884589927797
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(4)
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 4, spa objpool, vdev_id 0, ms_id 0, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 884590 ms, loading_time 0 ms, ms_max_size 576460752303423488, max size error 576460752303423488, old_weight 1800000000000000, new_weight a00000000080000
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 11
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 12
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 25
+spa_history.c:311:spa_history_log_sync(): txg 4 recalculate SPA_FEATURE_BOOKMARK_V2 refcount old=0 new=0
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 34
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 9 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(4), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(5)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 42
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 47
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 50
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 16 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(5), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(6)
+spa_history.c:298:spa_history_log_sync(): command: zpool create -o cachefile=/etc/zfs/zpool.cache.test -o object-endpoint=https://s3-us-west-2.amazonaws.com -o object-region=us-west-2 objpool s3 cloudburst-data-2
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 54
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 4 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(6), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(7)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(7), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(8)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(8), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(9)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(9), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(10)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(10), 1 passes
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 108, spa testpool, vdev_id 1, ms_id 13, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 903925 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(11)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(11), 1 passes
+metaslab.c:2472:metaslab_load_impl(): metaslab_load: txg 112, spa testpool, vdev_id 1, ms_id 14, smp_length 0, unflushed_allocs 0, unflushed_frees 0, freed 0, defer 0 + 0, unloaded time 906751 ms, loading_time 0 ms, ms_max_size 536870912, max size error 536870912, old_weight 740000000000001, new_weight 740000000000001
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(12)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(12), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(13)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(13), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(14)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(14), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(15)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(15), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(16)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(16), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(17)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(17), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(18)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(18), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(19)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(19), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(20)
+spa_history.c:302:spa_history_log_sync(): txg 20 create objpool/zvol1 (id 135)  
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 61
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 70
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 9 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(20), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(21)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 73
+spa_history.c:334:spa_history_log_sync(): ioctl create
+spa_history.c:298:spa_history_log_sync(): command: zfs create -s -V 20g objpool/zvol1
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 77
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 7 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(21), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(22)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 80
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 83
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 6 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(22), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(23)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(23), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(24)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(24), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(25)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(25), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(26)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(26), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(27)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(27), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(28)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(28), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(29)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(29), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(30)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(30), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(31)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(31), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(32)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(32), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(33)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(33), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(34)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(34), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(35)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(35), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(36)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(36), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(37)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(37), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(38)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(38), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(39)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(39), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(40)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(40), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(41)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(41), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(42)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(42), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(43)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(43), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(44)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(44), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(45)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(45), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(46)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(46), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(47)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(47), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(48)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(48), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(49)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(49), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(50)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(50), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(51)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(51), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(52)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(52), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(53)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(53), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(54)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(54), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(55)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(55), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(56)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(56), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(57)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(57), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(58)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(58), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(59)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(59), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(60)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(60), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(61)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(61), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(62)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(62), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(63)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(63), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(64)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(64), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(65)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(65), 1 passes
+metaslab.c:3693:metaslab_condense(): condensing: txg 585, msp[1] ffff9ac48c321000, vdev id 1, spa testpool, smp size 585080, segments 4709, forcing condense=FALSE
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(66)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(66), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(67)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(67), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(68)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(68), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(69)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(69), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(70)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(70), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(71)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(71), 1 passes
+metaslab.c:3693:metaslab_condense(): condensing: txg 632, msp[9] ffff9ac5a26fe000, vdev id 0, spa testpool, smp size 525544, segments 4347, forcing condense=FALSE
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(72)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(72), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(73)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(73), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(74)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(74), 1 passes
+metaslab.c:3693:metaslab_condense(): condensing: txg 660, msp[12] ffff9ac5a26fc000, vdev id 0, spa testpool, smp size 560256, segments 4522, forcing condense=FALSE
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(75)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(75), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(76)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(76), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(77)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(77), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(78)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(78), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(79)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(79), 1 passes
+metaslab.c:3693:metaslab_condense(): condensing: txg 693, msp[7] ffff9ac64bc0a000, vdev id 1, spa testpool, smp size 550560, segments 4191, forcing condense=FALSE
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(80)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(80), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(81)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(81), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(82)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(82), 1 passes
+metaslab.c:3693:metaslab_condense(): condensing: txg 720, msp[1] ffff9ac48c321000, vdev id 1, spa testpool, smp size 541936, segments 4754, forcing condense=FALSE
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(83)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(83), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(84)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(84), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(85)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(85), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(86)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(86), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(87)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(87), 1 passes
+metaslab.c:3693:metaslab_condense(): condensing: txg 755, msp[9] ffff9ac5a26fe000, vdev id 0, spa testpool, smp size 541200, segments 5084, forcing condense=FALSE
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(88)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(88), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(89)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(89), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(90)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(90), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(91)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(91), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(92)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(92), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(93)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(93), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(94)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(94), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(95)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(95), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(96)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(96), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(97)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(97), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(98)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(98), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(99)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(99), 1 passes
+metaslab.c:3693:metaslab_condense(): condensing: txg 847, msp[1] ffff9ac48c321000, vdev id 1, spa testpool, smp size 536728, segments 4555, forcing condense=FALSE
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(100)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(100), 1 passes
+metaslab.c:3693:metaslab_condense(): condensing: txg 856, msp[7] ffff9ac64bc0a000, vdev id 1, spa testpool, smp size 579688, segments 3951, forcing condense=FALSE
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(101)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(101), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(102)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(102), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(103)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(103), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(104)
+spa_history.c:302:spa_history_log_sync(): txg 104 create objpool/testfs (id 142)  
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 95
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 96
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 103
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 8 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(104), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(105)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 113
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 114
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 117
+spa_history.c:334:spa_history_log_sync(): ioctl create
+spa_history.c:298:spa_history_log_sync(): command: zfs create objpool/testfs
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 121
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 18 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(105), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(106)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 128
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 131
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 134
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 13 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(106), 2 passes
+metaslab.c:3693:metaslab_condense(): condensing: txg 891, msp[9] ffff9ac5a26fe000, vdev id 0, spa testpool, smp size 577224, segments 4501, forcing condense=FALSE
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(107)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 142
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 143
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 147
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 150
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 16 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(107), 2 passes
+metaslab.c:3693:metaslab_condense(): condensing: txg 902, msp[2] ffff9ac54619a000, vdev id 0, spa testpool, smp size 551808, segments 3242, forcing condense=FALSE
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(108)
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(108), 1 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(109)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 1328
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 1329
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 1333
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 1336
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 15 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(109), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(110)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 4625
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 4626
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 4630
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 4633
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 136 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(110), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(111)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 8411
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 8412
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 8416
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 8419
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 435 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(111), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(112)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 12096
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 12097
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 12101
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 12104
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 449 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(112), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(113)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 13282
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 13283
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 13287
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 13290
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 295 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(113), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(114)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 15845
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 15846
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 15850
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 15853
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 553 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(114), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(115)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 17032
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 17033
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 17037
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 17040
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 322 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(115), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(116)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 18218
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 18219
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 18223
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 18226
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 377 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(116), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(117)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 19552
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 19553
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 19557
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 19560
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 373 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(117), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(118)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 22335
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 22336
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 22340
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 22343
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 817 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(118), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(119)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 24883
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 24884
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 24888
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 24891
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 811 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(119), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(120)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 26069
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 26070
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 26074
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 26077
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 372 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(120), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(121)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 28359
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 28360
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 28364
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 28367
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 555 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(121), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(122)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 33058
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 33059
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 33063
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 33066
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1418 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(122), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(123)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 34658
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 34659
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 34663
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 34666
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 746 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(123), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(124)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 38490
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 38491
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 38495
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 38498
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1218 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(124), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(125)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 40498
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 40499
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 40503
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 40506
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 850 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(125), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(126)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 43354
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 43355
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 43359
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 43362
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1222 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(126), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(127)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 46117
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 46118
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 46122
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 46125
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1238 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(127), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(128)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 48022
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 48023
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 48027
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 48030
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1060 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(128), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(129)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 51659
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 51660
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 51664
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 51667
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1783 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(129), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(130)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 52846
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 52847
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 52851
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 52854
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 674 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(130), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(131)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 55110
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 55111
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 55115
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 55118
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1184 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(131), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(132)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 58224
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 58225
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 58229
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 58232
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1625 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(132), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(133)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 59410
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 59411
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 59415
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 59418
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 699 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(133), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(134)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 61646
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 61647
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 61651
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 61654
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1228 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(134), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(135)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 64021
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 64022
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 64026
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 64029
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1360 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(135), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(136)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 66724
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 66725
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 66729
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 66732
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1517 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(136), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(137)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 70653
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 70654
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 70658
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 70661
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 2329 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(137), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(138)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 72421
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 72422
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 72426
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 72429
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1052 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(138), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(139)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 74834
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 74835
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 74839
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 74842
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1466 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(139), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(140)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 78877
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 78878
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 78882
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 78885
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 2493 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(140), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(141)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 80262
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 80263
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 80267
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 80270
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 945 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(141), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(142)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 81448
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 81449
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 81453
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 81456
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 810 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(142), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(143)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 83214
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 83215
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 83219
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 83222
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1206 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(143), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(144)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 84401
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 84402
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 84406
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 84409
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 810 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(144), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(145)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 86782
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 86783
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 86787
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 86790
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1673 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(145), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(146)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 88385
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 88386
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 88390
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 88393
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1089 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(146), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(147)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 89571
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 89572
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 89576
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 89579
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 867 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(147), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(148)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 91699
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 91700
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 91704
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 91707
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1547 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(148), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(149)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 94207
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 94208
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 94212
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 94215
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1800 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(149), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(150)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 95540
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 95541
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 95545
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 95548
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1048 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(150), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(151)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 98086
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 98087
+metaslab.c:3693:metaslab_condense(): condensing: txg 1002, msp[1] ffff9ac48c321000, vdev id 1, spa testpool, smp size 533648, segments 4053, forcing condense=FALSE
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 98091
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 98094
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1845 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(151), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(152)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 99273
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 99274
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 99278
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 99281
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 893 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(152), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(153)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 101288
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 101289
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 101293
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 101296
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1509 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(153), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(154)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 103768
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 103769
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 103773
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 103776
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1839 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(154), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(155)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 105187
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 105188
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 105192
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 105195
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1106 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(155), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(156)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 108188
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 108189
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 108193
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 108196
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 2295 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(156), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(157)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 110589
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 110590
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 110594
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 110597
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1894 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(157), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(158)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 111775
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 111776
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 111780
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 111783
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 960 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(158), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(159)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 114166
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 114167
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 114171
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 114174
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1893 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(159), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(160)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 115517
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 115518
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 115522
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 115525
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1074 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(160), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(161)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 116703
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 116704
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 116708
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 116711
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 953 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(161), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(162)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 118311
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 118312
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 118316
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 118319
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1267 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(162), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(163)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 119659
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 119660
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 119664
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 119667
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1072 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(163), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(164)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 120845
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 120846
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 120850
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 120853
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 967 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(164), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(165)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 124998
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 124999
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 125003
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 125006
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 3317 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(165), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(166)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 126184
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 126185
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 126189
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 126192
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1026 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(166), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(167)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 127370
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 127371
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 127375
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 127378
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 981 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(167), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(168)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 128556
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 128557
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 128561
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 128564
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1012 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(168), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(169)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 129942
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 129943
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 129947
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 129950
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1166 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(169), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(170)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 133065
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 133066
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 133070
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 133073
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 2575 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(170), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(171)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 134984
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 134985
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 134989
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 134992
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1609 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(171), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(172)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 136170
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 136171
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 136175
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 136178
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1007 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(172), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(173)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 137359
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 137360
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 137364
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 137367
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 991 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(173), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(174)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 138797
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 138798
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 138802
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 138805
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1209 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(174), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(175)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 139983
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 139984
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 139988
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 139991
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 995 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(175), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(176)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 141242
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 141243
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 141247
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 141250
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1064 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(176), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(177)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 142441
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 142442
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 142446
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 142449
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 995 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(177), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(178)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 143627
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 143628
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 143632
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 143635
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 998 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(178), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(179)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 144813
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 144814
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 144818
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 144821
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 995 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(179), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(180)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 145999
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 146000
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 146004
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 146007
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1009 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(180), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(181)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 147186
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 147187
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 147191
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 147194
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 981 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(181), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(182)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 148433
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 148434
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 148438
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 148441
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1067 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(182), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(183)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 149619
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 149620
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 149624
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 149627
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1013 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(183), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(184)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 150805
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 150806
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 150810
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 150813
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1034 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(184), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(185)
+metaslab.c:3693:metaslab_condense(): condensing: txg 1082, msp[9] ffff9ac5a26fe000, vdev id 0, spa testpool, smp size 566672, segments 4186, forcing condense=FALSE
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 153534
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 153535
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 153539
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 153542
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 2314 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(185), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(186)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 154720
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 154721
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 154725
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 154728
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1033 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(186), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(187)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 155906
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 155907
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 155911
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 155914
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1027 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(187), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(188)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 157544
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 157545
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 157549
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 157552
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1408 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(188), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(189)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 158730
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 158731
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 158735
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 158738
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1038 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(189), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(190)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 159916
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 159917
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 159921
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 159924
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1020 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(190), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(191)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 161102
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 161103
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 161107
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 161110
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1048 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(191), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(192)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 162288
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 162289
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 162293
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 162296
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1029 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(192), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(193)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 163474
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 163475
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 163479
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 163482
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1037 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(193), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(194)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 164660
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 164661
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 164665
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 164668
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1055 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(194), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(195)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 165846
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 165847
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 165851
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 165854
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1044 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(195), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(196)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 167036
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 167037
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 167041
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 167044
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1034 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(196), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(197)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 168222
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 168223
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 168227
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 168230
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1048 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(197), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(198)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 169408
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 169409
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 169413
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 169416
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1039 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(198), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(199)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 170594
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 170595
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 170599
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 170602
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1044 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(199), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(200)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 171780
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 171781
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 171785
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 171788
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1045 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(200), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(201)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 173606
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 173607
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 173611
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 173614
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1583 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(201), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(202)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 174794
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 174795
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 174799
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 174802
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1051 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(202), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(203)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 176301
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 176302
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 176306
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 176309
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1313 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(203), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(204)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 177487
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 177488
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 177492
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 177495
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1044 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(204), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(205)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 178674
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 178675
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 178679
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 178682
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1063 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(205), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(206)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 179861
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 179862
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 179866
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 179869
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1044 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(206), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(207)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 181047
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 181048
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 181052
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 181055
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1046 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(207), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(208)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 182233
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 182234
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 182238
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 182241
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1068 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(208), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(209)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 183421
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 183422
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 183426
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 183429
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1034 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(209), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(210)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 184607
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 184608
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 184612
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 184615
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1049 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(210), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(211)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 186130
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 186131
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 186135
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 186138
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1361 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(211), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(212)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 187316
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 187317
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 187321
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 187324
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1060 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(212), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(213)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 188678
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 188679
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 188683
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 188686
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1197 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(213), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(214)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 189864
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 189865
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 189869
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 189872
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1068 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(214), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(215)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 191188
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 191189
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 191193
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 191196
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1197 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(215), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(216)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 192374
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 192375
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 192379
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 192382
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1045 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(216), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(217)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 193560
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 193561
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 193565
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 193568
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1080 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(217), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(218)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 194748
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 194749
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 194753
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 194756
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1074 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(218), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(219)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 195934
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 195935
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 195939
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 195942
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1077 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(219), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(220)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 197121
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 197122
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 197126
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 197129
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1073 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(220), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(221)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 198308
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 198309
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 198313
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 198316
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1070 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(221), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(222)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 199494
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 199495
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 199499
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 199502
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1084 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(222), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(223)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 200680
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 200681
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 200685
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 200688
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1059 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(223), 2 passes
+metaslab.c:3693:metaslab_condense(): condensing: txg 1181, msp[8] ffff9ac5a26ff000, vdev id 0, spa testpool, smp size 578088, segments 4244, forcing condense=FALSE
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(224)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 201866
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 201867
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 201871
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 201874
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1071 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(224), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(225)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 203052
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 203053
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 203057
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 203060
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1073 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(225), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(226)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 204238
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 204239
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 204243
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 204246
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1065 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(226), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(227)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 205424
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 205425
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 205429
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 205432
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1086 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(227), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(228)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 207156
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 207157
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 207161
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 207164
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1559 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(228), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(229)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 208342
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 208343
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 208347
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 208350
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1084 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(229), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(230)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 209528
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 209529
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 209533
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 209536
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1078 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(230), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(231)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 210830
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 210831
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 210835
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 210838
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1199 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(231), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(232)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 212016
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 212017
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 212021
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 212024
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1093 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(232), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(233)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 213714
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 213715
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 213719
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 213722
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1530 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(233), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(234)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 215084
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 215085
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 215089
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 215092
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1266 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(234), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(235)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 216270
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 216271
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 216275
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 216278
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1091 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(235), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(236)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 218100
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 218101
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 218105
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 218108
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1699 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(236), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(237)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 219791
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 219792
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 219796
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 219799
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1546 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(237), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(238)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 220977
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 220978
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 220982
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 220985
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1096 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(238), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(239)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 223733
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 223734
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 223738
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 223741
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 2550 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(239), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(240)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 224919
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 224920
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 224924
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 224927
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1106 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(240), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(241)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 226105
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 226106
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 226110
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 226113
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1111 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(241), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(242)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 227625
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 227626
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 227630
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 227633
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1428 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(242), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(243)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 228811
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 228812
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 228816
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 228819
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1122 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(243), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(244)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 229997
+metaslab.c:3693:metaslab_condense(): condensing: txg 1204, msp[1] ffff9ac48c321000, vdev id 1, spa testpool, smp size 539896, segments 2896, forcing condense=FALSE
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 229998
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 230002
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 230005
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1084 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(244), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(245)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 232328
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 232329
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 232333
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 232336
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 2182 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(245), 2 passes
+vdev_removal.c:519:vdev_remove_initiate_sync(): starting removal thread for vdev 1 (ffff9ac4b0574000) in txg 1208 im_obj=1313
+spa_history.c:311:spa_history_log_sync(): txg 1208 vdev remove started testpool vdev 1 /dev/nvme2n1p1
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 11714 segments for metaslab 0
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(246)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 233514
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 233515
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 233519
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 233522
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1114 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(246), 2 passes
+vdev_indirect_mapping.c:492:vdev_indirect_mapping_add_entries(): txg 1209: wrote 29 entries to indirect mapping obj 1313; max offset=0x3cca00
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(247)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 236940
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 236941
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 236945
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 236948
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 3219 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(247), 2 passes
+vdev_indirect_mapping.c:492:vdev_indirect_mapping_add_entries(): txg 1210: wrote 658 entries to indirect mapping obj 1313; max offset=0x77eec00
+spa_history.c:298:spa_history_log_sync(): command: zpool remove testpool nvme2n1
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 2181 segments for metaslab 1
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(248)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 238126
+vdev_indirect_mapping.c:492:vdev_indirect_mapping_add_entries(): txg 1211: wrote 591 entries to indirect mapping obj 1313; max offset=0xeb32000
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 238127
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 238131
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 238134
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1139 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(248), 2 passes
+vdev_object_store.c:990:agent_begin_txg(): agent_begin_txg(249)
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 239581
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 3 segments for metaslab 2
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 5 segments for metaslab 3
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 6 segments for metaslab 4
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 7 segments for metaslab 5
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 3 segments for metaslab 6
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 239582
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 4 segments for metaslab 7
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 239586
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 5 segments for metaslab 8
+vdev_object_store.c:1046:agent_flush_writes(): agent_flush: blockid 239589
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 1 segments for metaslab 9
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 5 segments for metaslab 10
+vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1351 blocks
+vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(249), 2 passes
+vdev_removal.c:1675:spa_vdev_remove_thread(): copying 155 segments for metaslab 11
