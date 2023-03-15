@@ -241,6 +241,7 @@ class SlubCacheWalker(sdb.Walker):
 
     names = ["slub_cache"]
     input_type = "struct kmem_cache *"
+    load_on = [sdb.Kernel()]
 
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         yield from slab_cache_for_each_allocated_object(obj, "void")

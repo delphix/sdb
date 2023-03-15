@@ -95,6 +95,7 @@ class LxPerCpuCounterSum(sdb.SingleInputCommand):
 
     names = ["cpu_counter_sum"]
     input_type = "struct percpu_counter *"
+    load_on = [sdb.Kernel()]
 
     def _call_one(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         try:

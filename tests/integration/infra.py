@@ -178,6 +178,8 @@ def repl_invoke(cmd: str) -> int:
     the SDB repl.
     """
     assert TEST_PROGRAM
+    sdb.target.set_prog(TEST_PROGRAM)
+    sdb.register_commands()
     return TEST_REPL.eval_cmd(cmd)
 
 
