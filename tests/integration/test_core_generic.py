@@ -148,6 +148,9 @@ NEG_CMDS = [
     # addr
     "addr bogus",
 
+    # deref a function
+    "addr fget | deref",
+
     # array needs number of elements for pointer arrays
     "spa | member spa_zio_taskq[0][0].stqs_taskq | array",
     # array passed non-pointer type
