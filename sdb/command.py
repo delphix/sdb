@@ -296,6 +296,13 @@ class Command:
                     #
                     yield obj
                     continue
+                if obj_type.kind == drgn.TypeKind.FUNCTION:
+                    cerr = CommandError(self.name,
+                                        "cannot dereference function pointer")
+                    if fatal:
+                        raise cerr from err
+                    print(cerr.text)
+                    continue
                 raise err
             except drgn.FaultError as err:
                 if obj.address_ is None:
