@@ -455,3 +455,129 @@ class KernelCrashedThread(sdb.Locator, sdb.PrettyPrinter):
     def no_input(self) -> Iterable[drgn.Object]:
         self.validate_context()
         yield from [sdb.get_prog().crashed_thread().object]
+
+class ArgStack(sdb.Locator, sdb.PrettyPrinter):
+    """
+    Print a stack with arguments.
+
+    EXAMPLES
+    sdb> echo 0xffff96609b7d4680 | stack_args
+    (struct task_struct *)0xffff96609b7d4680
+    #0  struct rq *context_switch(struct rq *rq, struct task_struct *prev, struct task_struct *next, struct rq_flags *rf)
+          rf = (struct rq_flags *)<absent>
+          next = (struct task_struct *)<absent>
+          prev = (struct task_struct *)<absent>
+          rq = (struct rq *)<absent>
+    #1  void __schedule(bool preempt)
+          preempt = (bool)<absent>
+          prev = (struct task_struct *)0xffff96609b7d4680
+          next = (struct task_struct *)<absent>
+          switch_count = (unsigned long *)<absent>
+          rf = (struct rq_flags){ 0, {}, 4 }
+          rq = (struct rq *)<absent>
+          cpu = (int)<absent>
+    #2  void schedule()
+          tsk = (struct task_struct *)<absent>
+    ...
+    """
+
+    names = ["stack_args"]
+    input_type = "struct task_struct *"
+    output_type = "struct task_struct *"
+    load_on = [sdb.Kernel()]
+
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
+        super().__init__(args, name)
+
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        parser.add_argument(
+            "-r",
+            "--registers",
+            action="store_true",
+            help="print register values in output")
+        parser.add_argument(
+            "-f",
+            "--frame",
+            help="print detailed info for locals in a specific FRAME")
+        return parser
+
+    def validate_context(self) -> None:
+        if sdb.get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL == 0:
+            raise sdb.CommandError(self.name,
+                                   "command only works for linux kernel")
+
+    def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
+        # self.validate_context()
+        for thread in objs:
+            # if thread.type_ != self.input_type:
+                #raise sdb.CommandError(
+                #    self.name, "can only print args for stacks")
+
+            if self.args.frame:
+                frame = sdb.get_prog().stack_trace(thread)[int(self.args.frame)]
+                print(frame)
+                print()
+                for local in frame.locals():
+                    local_info = f"{local} = {(frame[local])}"
+                    print(local_info)
+                if self.args.registers:
+                    print()
+                    print(frame.registers())
+                continue
+
+            print(thread.format_(dereference=False))
+
+            frame_number = 0
+            for frame in sdb.get_prog().stack_trace(thread):
+                frame_info = f"#{frame_number}  "
+                frame_number += 1
+
+                name = frame.name
+                if name is None:
+                    try:
+                        name = frame.symbol().name
+                    except LookupError:
+                        name = hex(frame.pc)
+                    frame_info += f"{name}" 
+                else:
+                    func = sdb.get_prog().function(name)
+                    func_type = func.type_
+                    func_ret = func_type.type
+                    if func_ret.kind == drgn.TypeKind.POINTER:
+                        frame_info += f"{func_ret}{name}("
+                    elif func_ret.kind == drgn.TypeKind.TYPEDEF:
+                        frame_info += f"{func_ret.name} {name}("
+                    else:
+                        frame_info += f"{func_ret} {name}("
+                    first = True
+                    for parm in func_type.parameters:
+                        if not first:
+                            frame_info += f", "
+                        parm_type = parm.type
+                        if parm_type.kind == drgn.TypeKind.POINTER:
+                            frame_info += f"{parm_type}{parm.name}"
+                        elif parm_type.kind == drgn.TypeKind.TYPEDEF:
+                            frame_info += f"{parm_type.name} {parm.name}"
+                        elif parm_type.kind == drgn.TypeKind.ENUM:
+                            frame_info += f"{parm_type.tag} {parm.name}"
+                        else:
+                            frame_info += f"{parm_type} {parm.name}"
+                        first = False
+                    frame_info += f")"
+                    # The above is a lot of formatting work, we could just use:
+                    # frame_info += f"{name} {sdb.get_prog().function(name)}"
+                print(frame_info)
+
+                local_symbols = frame.locals()
+                for local in local_symbols:
+                    local_info = f"{'':6s}{local} = {(frame[local].format_(dereference=False, member_type_names=False, member_names=False, members_same_line=True))}"
+                    print(local_info)
+            print("\n")
+
+    def no_input(self) -> Iterable[drgn.Object]:
+        # self.validate_context()
+        yield from for_each_task(sdb.get_prog())
