@@ -26,6 +26,7 @@ class ARCStats(sdb.Locator, sdb.PrettyPrinter):
     names = ["arc"]
     input_type = "arc_stats_t *"
     output_type = "arc_stats_t *"
+    load_on = [sdb.Module("zfs"), sdb.Library("libzpool")]
 
     @staticmethod
     def print_stats(obj: drgn.Object) -> None:

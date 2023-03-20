@@ -58,6 +58,7 @@ class Zio(sdb.Locator, sdb.PrettyPrinter):
     names = ["zio"]
     input_type = "zio_t *"
     output_type = "zio_t *"
+    load_on = [sdb.Module("zfs"), sdb.Library("libzpool")]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

@@ -38,6 +38,7 @@ class FGet(sdb.SingleInputCommand):
 
     names = ["fget"]
     input_type = "struct task_struct *"
+    load_on = [sdb.Kernel()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

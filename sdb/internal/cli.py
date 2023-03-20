@@ -214,6 +214,8 @@ def main() -> None:
     except PermissionError as err:
         print("sdb: " + str(err))
         return
+    sdb.target.set_prog(prog)
+    sdb.register_commands()
 
     repl = REPL(prog, list(sdb.get_registered_commands().keys()))
     repl.enable_history(os.getenv('SDB_HISTORY_FILE', '~/.sdb_history'))

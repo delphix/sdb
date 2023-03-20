@@ -25,6 +25,7 @@ import sdb
 class SPLList(sdb.Walker):
     names = ["spl_list"]
     input_type = "list_t *"
+    load_on = [sdb.Module("spl")]
 
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         offset = int(obj.list_offset)

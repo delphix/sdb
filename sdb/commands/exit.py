@@ -26,6 +26,7 @@ class Exit(sdb.Command):
     "Exit the application"
 
     names = ["exit", "quit"]
+    load_on = [sdb.All()]
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         raise SystemExit

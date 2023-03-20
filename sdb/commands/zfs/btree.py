@@ -51,6 +51,7 @@ class Btree(sdb.Walker):
 
     names = ["zfs_btree"]
     input_type = "zfs_btree_t *"
+    load_on = [sdb.Module("zfs"), sdb.Library("libzpool")]
 
     def __init__(self,
                  args: Optional[List[str]] = None,

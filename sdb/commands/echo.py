@@ -29,6 +29,7 @@ class Echo(sdb.Command):
     """
 
     names = ["echo", "cc"]
+    load_on = [sdb.All()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

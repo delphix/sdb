@@ -36,14 +36,16 @@ from sdb.target import (create_object, get_object, get_prog, get_type,
                         get_pointer_type, get_target_flags, get_symbol, is_null,
                         type_canonical_name, type_canonicalize,
                         type_canonicalize_name, type_canonicalize_size,
-                        type_equals)
+                        type_equals, Runtime, All, Kernel, Userland, Module,
+                        Library)
 from sdb.command import (Address, Cast, Command, InputHandler, Locator,
                          PrettyPrinter, Walk, Walker, SingleInputCommand,
-                         get_registered_commands)
+                         get_registered_commands, register_commands)
 from sdb.pipeline import execute_pipeline, get_first_type, invoke
 
 __all__ = [
     'Address',
+    'All',
     'Cast',
     'Command',
     'CommandArgumentsError',
@@ -53,11 +55,16 @@ __all__ = [
     'CommandNotFoundError',
     'Error',
     'InputHandler',
+    'Kernel',
+    'Library',
     'Locator',
+    'Module',
     'ParserError',
     'PrettyPrinter',
+    'Runtime',
     'SingleInputCommand',
     'SymbolNotFoundError',
+    'Userland',
     'Walk',
     'Walker',
     'create_object',
@@ -72,6 +79,7 @@ __all__ = [
     'get_symbol',
     'get_target_flags',
     'get_type',
+    'register_commands',
     'type_canonical_name',
     'type_canonicalize',
     'type_canonicalize_name',

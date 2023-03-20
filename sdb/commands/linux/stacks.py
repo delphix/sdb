@@ -27,7 +27,7 @@ from drgn.helpers.linux.pid import for_each_task
 import sdb
 
 
-class Stacks(sdb.Locator, sdb.PrettyPrinter):
+class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
     """
     Print the stack traces for active threads (task_struct)
 
@@ -142,6 +142,7 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
     names = ["stacks", "stack"]
     input_type = "struct task_struct *"
     output_type = "struct task_struct *"
+    load_on = [sdb.Kernel()]
 
     def __init__(self,
                  args: Optional[List[str]] = None,
@@ -173,7 +174,7 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
             "-t",
             "--tstate",
             help="only print threads which are in TSTATE thread state")
-        parser.epilog = f'TSTATE := [{", ".join(Stacks.TASK_STATES.values()):s}]'
+        parser.epilog = f'TSTATE := [{", ".join(KernelStacks.TASK_STATES.values()):s}]'
         return parser
 
     #
@@ -211,13 +212,14 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
             return "IDLE"
 
         exit_state = task.exit_state.value_()
-        return Stacks.TASK_STATES[(state | exit_state) & 0x7f]
+        return KernelStacks.TASK_STATES[(state | exit_state) & 0x7f]
 
     @staticmethod
     def resolve_state(tstate: str) -> str:
         tstate = tstate.upper()
-        if tstate in Stacks.TASK_STATE_SHORTCUTS:
-            return Stacks.TASK_STATES[Stacks.TASK_STATE_SHORTCUTS[tstate]]
+        if tstate in KernelStacks.TASK_STATE_SHORTCUTS:
+            return KernelStacks.TASK_STATES[
+                KernelStacks.TASK_STATE_SHORTCUTS[tstate]]
         return tstate
 
     @staticmethod
@@ -305,8 +307,8 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
             self.func_end = self.func_start + sym.size
 
         if self.args.tstate:
-            self.match_state = Stacks.resolve_state(self.args.tstate)
-            task_states = Stacks.TASK_STATES.values()
+            self.match_state = KernelStacks.resolve_state(self.args.tstate)
+            task_states = KernelStacks.TASK_STATES.values()
             if self.match_state not in task_states:
                 valid_states = ", ".join(task_states)
                 raise sdb.CommandError(
@@ -314,18 +316,19 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
                     f" (acceptable states: {valid_states})")
 
         if self.args.module:
-            if Stacks.find_module_memory_segment(self.args.module)[0] == -1:
+            if KernelStacks.find_module_memory_segment(
+                    self.args.module)[0] == -1:
                 raise sdb.CommandError(
                     self.name,
                     f"module '{self.args.module}' doesn't exist or isn't currently loaded"
                 )
-            self.mod_start, mod_size = Stacks.find_module_memory_segment(
+            self.mod_start, mod_size = KernelStacks.find_module_memory_segment(
                 self.args.module)
             assert self.mod_start != -1
             self.mod_end = self.mod_start + mod_size
 
     def match_stack(self, task: drgn.Object) -> bool:
-        if self.args.tstate and self.match_state != Stacks.task_struct_get_state(
+        if self.args.tstate and self.match_state != KernelStacks.task_struct_get_state(
                 task):
             return False
 
@@ -333,7 +336,7 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
             return True
 
         mod_match, func_match = not self.args.module, not self.args.function
-        for frame_pc in Stacks.get_frame_pcs(task):
+        for frame_pc in KernelStacks.get_frame_pcs(task):
             if not mod_match and self.mod_start <= frame_pc < self.mod_end:
                 mod_match = True
 
@@ -363,14 +366,14 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
         stack_aggr: Dict[Tuple[str, Tuple[int, ...]],
                          List[drgn.Object]] = defaultdict(list)
         for task in objs:
-            stack_key = (Stacks.task_struct_get_state(task),
-                         tuple(Stacks.get_frame_pcs(task)))
+            stack_key = (KernelStacks.task_struct_get_state(task),
+                         tuple(KernelStacks.get_frame_pcs(task)))
             stack_aggr[stack_key].append(task)
         return sorted(stack_aggr.items(), key=lambda x: len(x[1]), reverse=True)
 
     def print_stacks(self, objs: Iterable[drgn.Object]) -> None:
         self.print_header()
-        for stack_key, tasks in Stacks.aggregate_stacks(objs):
+        for stack_key, tasks in KernelStacks.aggregate_stacks(objs):
             stacktrace_info = ""
             task_state = stack_key[0]
 
@@ -402,7 +405,7 @@ class Stacks(sdb.Locator, sdb.PrettyPrinter):
         yield from filter(self.match_stack, for_each_task(sdb.get_prog()))
 
 
-class CrashedThread(sdb.Locator, sdb.PrettyPrinter):
+class KernelCrashedThread(sdb.Locator, sdb.PrettyPrinter):
     """
     Print the crashed thread. Only works for crash dumps and core dumps.
 
@@ -432,6 +435,7 @@ class CrashedThread(sdb.Locator, sdb.PrettyPrinter):
     names = ["crashed_thread", "panic_stack", "panic_thread"]
     input_type = "struct task_struct *"
     output_type = "struct task_struct *"
+    load_on = [sdb.Kernel()]
 
     def validate_context(self) -> None:
         if sdb.get_target_flags() & drgn.ProgramFlags.IS_LIVE:
@@ -441,7 +445,7 @@ class CrashedThread(sdb.Locator, sdb.PrettyPrinter):
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         self.validate_context()
         thread_obj = sdb.get_prog().crashed_thread().object
-        stacks_obj = Stacks()
+        stacks_obj = KernelStacks()
         for obj in objs:
             if obj.value_() != thread_obj.value_():
                 raise sdb.CommandError(

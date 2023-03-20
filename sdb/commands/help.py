@@ -27,6 +27,7 @@ class Help(sdb.Command):
     """ Displays help for the specified command for ex: help addr """
 
     names = ["help", "man"]
+    load_on = [sdb.All()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

@@ -36,6 +36,7 @@ class Tail(sdb.Command):
     """
 
     names = ["tail"]
+    load_on = [sdb.All()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

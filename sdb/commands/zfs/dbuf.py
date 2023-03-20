@@ -29,6 +29,7 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
     names = ["dbuf"]
     input_type = "dmu_buf_impl_t *"
     output_type = "dmu_buf_impl_t *"
+    load_on = [sdb.Module("zfs"), sdb.Library("libzpool")]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

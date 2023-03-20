@@ -48,6 +48,7 @@ class Filter(sdb.SingleInputCommand):
     # pylint: disable=eval-used
 
     names = ["filter"]
+    load_on = [sdb.All()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

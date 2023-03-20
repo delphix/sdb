@@ -25,7 +25,7 @@ from drgn.helpers.linux.mm import cmdline
 
 import sdb
 from sdb.commands.internal.table import Table
-from sdb.commands.stacks import Stacks
+from sdb.commands.linux.stacks import KernelStacks
 
 
 def _cmdline(obj: drgn.Object) -> str:
@@ -50,7 +50,7 @@ def _cmdline(obj: drgn.Object) -> str:
         return ""
 
 
-class Threads(sdb.Locator, sdb.PrettyPrinter):
+class KernelThreads(sdb.Locator, sdb.PrettyPrinter):
     """
     Locate and print information about threads (task_stuct)
 
@@ -75,10 +75,11 @@ class Threads(sdb.Locator, sdb.PrettyPrinter):
     names = ["threads", "thread"]
     input_type = "struct task_struct *"
     output_type = "struct task_struct *"
+    load_on = [sdb.Kernel()]
 
     FIELDS: Dict[str, Callable[[drgn.Object], Union[str, int]]] = {
         "task": lambda obj: hex(obj.value_()),
-        "state": lambda obj: str(Stacks.task_struct_get_state(obj)),
+        "state": lambda obj: str(KernelStacks.task_struct_get_state(obj)),
         "pid": lambda obj: int(obj.pid),
         "prio": lambda obj: int(obj.prio),
         "comm": lambda obj: str(obj.comm.string_().decode("utf-8")),
@@ -86,10 +87,12 @@ class Threads(sdb.Locator, sdb.PrettyPrinter):
     }
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
-        fields = list(Threads.FIELDS.keys())
+        fields = list(KernelThreads.FIELDS.keys())
         table = Table(fields, None, {"task": str})
         for obj in objs:
-            row_dict = {field: Threads.FIELDS[field](obj) for field in fields}
+            row_dict = {
+                field: KernelThreads.FIELDS[field](obj) for field in fields
+            }
             table.add_row(row_dict["task"], row_dict)
         table.print_()
 

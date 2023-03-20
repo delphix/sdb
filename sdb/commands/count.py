@@ -51,6 +51,7 @@ class Count(sdb.Command):
     """
 
     names = ["count", "cnt", "wc"]
+    load_on = [sdb.All()]
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         yield sdb.create_object('unsigned long long', sum(1 for _ in objs))

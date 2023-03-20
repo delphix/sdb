@@ -32,6 +32,7 @@ class Type(sdb.SingleInputCommand):
     """
 
     names = ["type"]
+    load_on = [sdb.All()]
 
     def _call_one(self, obj: drgn.Object) -> None:
         print(obj.type_)

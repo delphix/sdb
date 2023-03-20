@@ -41,7 +41,7 @@ now as they have more important information on their context
 for their user (e.g. command name).
 """
 
-from typing import Any, Union
+from typing import Any, List, Tuple, Union
 
 import drgn
 
@@ -116,7 +116,14 @@ def type_canonicalize_name(type_name: str) -> str:
     """
     Return the "canonical name" of this type name.  See type_canonicalize().
     """
-    return type_canonical_name(prog.type(type_name))
+    #
+    # This is a workaround while we don't have module/library lookup in drgn.
+    # See https://github.com/delphix/cloud-init/issues/74 for details.
+    #
+    try:
+        return type_canonical_name(prog.type(type_name))
+    except LookupError:
+        return type_name
 
 
 def type_canonicalize_size(t: Union[drgn.Type, str]) -> int:
@@ -147,3 +154,60 @@ def type_equals(a: drgn.Type, b: drgn.Type) -> bool:
     check if each of their "struct bar"s are actually the same.
     """
     return type_canonical_name(a) == type_canonical_name(b)
+
+
+#pylint: disable=too-few-public-methods
+class All:
+    """
+    Commands that specify this runtime should always be loaded; these commands
+    are universally applicable to all debugging scenarios.
+    """
+
+
+#pylint: disable=too-few-public-methods
+class Kernel:
+    """
+    Commands that specify this runtime should be loaded any time a kernel
+    is being analyzed.
+    """
+
+
+#pylint: disable=too-few-public-methods
+class Userland:
+    """
+    Commands that specify this runtime should be loaded any time a userland
+    program is being analyzed.
+    """
+
+
+#pylint: disable=too-few-public-methods
+class Module:
+    """
+    Commands that specify this runtime should be loaded whenever the kernel
+    module with the provided name is loaded.
+    """
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
+#pylint: disable=too-few-public-methods
+class Library:
+    """
+    Commands that specify this runtime should be loaded whenever the library
+    with the provided name is loaded.
+    """
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
+Runtime = Union[All, Kernel, Userland, Module, Library]
+
+
+def get_runtimes() -> Tuple[bool, List[str]]:
+    """
+    Returns whether we are in kernel or user mode, and the list of loaded
+    modules or libraries.
+    """
+    return (get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL, [])

@@ -211,4 +211,6 @@ def invoke(prog: drgn.Program, objs: Iterable[drgn.Object],
     Dispatch to sdb.invoke, but also drain the generator it returns, so
     the tests can more easily access the returned objects.
     """
-    return list(sdb.invoke(prog, objs, line))
+    sdb.target.set_prog(prog)
+    sdb.register_commands()
+    return list(sdb.invoke(objs, line))

@@ -104,7 +104,7 @@ class REPL:
         """
         # pylint: disable=broad-except
         try:
-            for obj in invoke(self.target, [], input_):
+            for obj in invoke([], input_):
                 print(obj.format_(dereference=False))
         except CommandArgumentsError:
             #

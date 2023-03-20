@@ -63,6 +63,7 @@ class LxList(sdb.Command):
     """
 
     names = ["linux_list", "lxlist"]
+    load_on = [sdb.Kernel()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
@@ -106,6 +107,7 @@ class LxHList(sdb.Command):
     """
 
     names = ["linux_hlist", "lxhlist"]
+    load_on = [sdb.Kernel()]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

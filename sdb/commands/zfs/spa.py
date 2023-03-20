@@ -30,6 +30,7 @@ class Spa(sdb.Locator, sdb.PrettyPrinter):
     names = ["spa"]
     input_type = "spa_t *"
     output_type = "spa_t *"
+    load_on = [sdb.Module("zfs"), sdb.Library("libzpool")]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:

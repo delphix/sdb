@@ -47,6 +47,7 @@ class WhatIs(sdb.Command):
     """
 
     names = ["whatis"]
+    load_on = [sdb.Kernel()]
 
     @staticmethod
     def print_cache(cache: drgn.Object, addr: str) -> None:

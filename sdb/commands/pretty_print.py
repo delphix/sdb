@@ -25,6 +25,7 @@ import sdb
 class PrettyPrint(sdb.Command):
 
     names = ["pretty_print", "pp"]
+    load_on = [sdb.All()]
 
     def _call(self, objs: Iterable[drgn.Object]) -> None:
         baked = {

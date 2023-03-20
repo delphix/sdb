@@ -27,6 +27,7 @@ from sdb.command import Cast
 class RangeTree(sdb.PrettyPrinter):
     names = ['range_tree']
     input_type = 'range_tree_t *'
+    load_on = [sdb.Module("zfs"), sdb.Library("libzpool")]
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
 
@@ -70,6 +71,7 @@ class RangeSeg(sdb.Locator):
     depending on what kind of range_tree_t this is.
     """
     names = ['range_seg']
+    load_on = [sdb.Module("zfs"), sdb.Library("libzpool")]
 
     @sdb.InputHandler('range_tree_t *')
     def from_range_tree(self, rt: drgn.Object) -> Iterable[drgn.Object]:
