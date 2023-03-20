@@ -35,7 +35,7 @@ class SplKmemCaches(sdb.Locator, sdb.PrettyPrinter):
 
     input_type = "spl_kmem_cache_t *"
     output_type = "spl_kmem_cache_t *"
-    load_on = [sdb.Module("zfs")]
+    load_on = [sdb.Module("spl")]
 
     @classmethod
     def _init_parser(cls, name: str) -> argparse.ArgumentParser:
@@ -223,7 +223,7 @@ class SplKmemCacheWalker(sdb.Walker):
 
     names = ["spl_cache"]
     input_type = "spl_kmem_cache_t *"
-    load_on = [sdb.Module("zfs")]
+    load_on = [sdb.Module("spl")]
 
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
         if kmem.backed_by_linux_cache(obj):

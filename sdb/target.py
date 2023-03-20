@@ -116,7 +116,10 @@ def type_canonicalize_name(type_name: str) -> str:
     """
     Return the "canonical name" of this type name.  See type_canonicalize().
     """
+    #
     # This is a workaround while we don't have module/library lookup in drgn.
+    # See https://github.com/delphix/cloud-init/issues/74 for details.
+    #
     try:
         return type_canonical_name(prog.type(type_name))
     except LookupError:

@@ -27,7 +27,7 @@ class Avl(sdb.Walker):
 
     names = ["avl"]
     input_type = "avl_tree_t *"
-    load_on = [sdb.Module("zfs")]
+    load_on = [sdb.Module("spl")]
 
     def _helper(self, node: drgn.Object, offset: int) -> Iterable[drgn.Object]:
         if sdb.is_null(node):
