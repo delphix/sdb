@@ -45,42 +45,64 @@ class UserStacks(sdb.Locator, sdb.PrettyPrinter):
         The command returns all thread IDs that matched the
         filter.
 
+        The command will not produce output on running userland processes,
+        because the process is not stopped while being analyzed.
+
     EXAMPLES
         Print the call stacks for all threads
 
             sdb> stacks
-            TASK_STRUCT        STATE             COUNT
-            ==========================================
-            0xffff9521bb3c3b80 IDLE                394
-                              __schedule+0x24e
-                              schedule+0x2c
-                              worker_thread+0xba
-                              kthread+0x121
-                              ret_from_fork+0x35
-
-            0xffff9521bb3cbb80 INTERRUPTIBLE       384
-                              __schedule+0x24e
-                              schedule+0x2c
-                              smpboot_thread_fn+0x166
-                              kthread+0x121
-                              ret_from_fork+0x35
+            TID         COUNT
+            ==========================================================
+            ...
+            125023          1
+                              0x7f2fd24c1170+0x0
+                              spa_open_common+0x1ac
+                              dsl_sync_task_common+0x65
+                              dsl_sync_task_sig+0x13
+                              zcp_eval+0x70f
+                              dsl_destroy_snapshots_nvl+0x12b
+                              dsl_destroy_snapshot+0x3f
+                              ztest_objset_destroy_cb+0xb7
+                              dmu_objset_find_impl+0x481
+                              dmu_objset_find+0x56
+                              ztest_dmu_objset_create_destroy+0xad
+                              ztest_execute+0x6c
+                              ztest_thread+0xd9
+                              zk_thread_wrapper+0x1c
+                              0x7f2fd24b6609+0x0
+            ...
+            125037          1
+                              0x7f2fd22ff00b+0x0
+                              0x557766d8aeed+0x0
+                              ztest_dsl_dataset_promote_busy+0x9e
+                              ztest_execute+0x6c
+                              ztest_thread+0xd9
+                              zk_thread_wrapper+0x1c
+                              0x7f2fd24b6609+0x0
             ...
 
         Print stacks containing the l2arc_feed_thread function
 
-            sdb> stacks -c l2arc_feed_thread
-            TASK_STRUCT        STATE             COUNT
-            ==========================================
-            0xffff9521b3f43b80 INTERRUPTIBLE         1
-                              __schedule+0x24e
-                              schedule+0x2c
-                              schedule_timeout+0x15d
-                              __cv_timedwait_common+0xdf
-                              __cv_timedwait_sig+0x16
-                              l2arc_feed_thread+0x66
-                              thread_generic_wrapper+0x74
-                              kthread+0x121
-                              ret_from_fork+0x35
+            sdb> stacks -c zcp_eval
+            TID         COUNT
+            ==========================================================
+            125023          1
+                              0x7f2fd24c1170+0x0
+                              spa_open_common+0x1ac
+                              dsl_sync_task_common+0x65
+                              dsl_sync_task_sig+0x13
+                              zcp_eval+0x70f
+                              dsl_destroy_snapshots_nvl+0x12b
+                              dsl_destroy_snapshot+0x3f
+                              ztest_objset_destroy_cb+0xb7
+                              dmu_objset_find_impl+0x481
+                              dmu_objset_find+0x56
+                              ztest_dmu_objset_create_destroy+0xad
+                              ztest_execute+0x6c
+                              ztest_thread+0xd9
+                              zk_thread_wrapper+0x1c
+                              0x7f2fd24b6609+0x0
 
 
     """
@@ -128,12 +150,9 @@ class UserStacks(sdb.Locator, sdb.PrettyPrinter):
             # masking other "ValueError" exceptions that are not due
             # to unwinding the stack of a running task.
             #
-            # We can't check the state of the task here, and verify
-            # it's in the "R" state, since that state can change in
-            # between the point where the "ValueError" exception was
-            # originally raised, and here where we'd verify the
-            # state of the task; i.e. it could have concurrently
-            # transitioned from running to some other state.
+            # This also means that debugging a running userland process will
+            # be largely ineffective, since we don't use ptrace to stop the
+            # process the way other debuggers like gdb do.
             #
             pass
         return frame_pcs
@@ -228,25 +247,16 @@ class UserCrashedThread(sdb.Locator, sdb.PrettyPrinter):
 
     EXAMPLES
         sdb> crashed_thread
-        TASK_STRUCT        STATE             COUNT
-        ==========================================
-        0xffff8f15d7333d00 RUNNING               1
-                          __crash_kexec+0x9d
-                          __crash_kexec+0x9d
-                          panic+0x11d
-                          0xffffffff9020b375+0x0
-                          __handle_sysrq.cold+0x48
-                          write_sysrq_trigger+0x28
-                          proc_reg_write+0x43
-                          __vfs_write+0x1b
-                          vfs_write+0xb9
-                          vfs_write+0xb9
-                          ksys_write+0x67
-                          __x64_sys_write+0x1a
-                          __x64_sys_write+0x1a
-                          __x64_sys_write+0x1a
-                          do_syscall_64+0x57
-                          entry_SYSCALL_64+0x94
+        TID         COUNT
+        ==========================================================
+        125037          1
+                          0x7f2fd22ff00b+0x0
+                          0x557766d8aeed+0x0
+                          ztest_dsl_dataset_promote_busy+0x9e
+                          ztest_execute+0x6c
+                          ztest_thread+0xd9
+                          zk_thread_wrapper+0x1c
+                          0x7f2fd24b6609+0x0
     """
 
     names = ["crashed_thread", "panic_stack", "panic_thread"]
