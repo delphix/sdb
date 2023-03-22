@@ -22,14 +22,24 @@
 
 DATA_DIR="tests/integration/data"
 
-echo "checking folder structure ..."
-if [ ! -d $DATA_DIR ]; then
+if [ $# -eq 0 ]; then
+	echo "error: no crash dump archive argument supplied"
 	exit 1
 fi
 
-echo "initiating download of $1 from S3 ..."
-wget https://sdb-testing-bucket.s3.us-west-2.amazonaws.com/$1
-[ $? -eq 0 ] || exit 1
+echo "checking folder structure ..."
+if [ ! -d $DATA_DIR ]; then
+	echo "error: please cd to the root of the git repo"
+	exit 1
+fi
+
+if [ -f "$1" ]; then
+	echo "Found $1 locally, skip download ..."
+else
+	echo "downloading of $1 from S3 ..."
+	wget https://sdb-testing-bucket.s3.us-west-2.amazonaws.com/$1
+	[ $? -eq 0 ] || exit 1
+fi
 
 if [[ $1 == *.lzma ]]; then
 	# Profile A

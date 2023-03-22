@@ -110,3 +110,7 @@ tests/integration/data/mods/
 
 # vim
 *.swp
+
+# zipped folders - usually crash dumps
+*.lzma
+*.tar.gz

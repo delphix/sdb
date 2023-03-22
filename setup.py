@@ -27,5 +27,5 @@ setup(
     author_email='serapheim@delphix.com',
     description='The Slick/Simple Debugger',
     license='Apache-2.0',
-    url='https://github.com/sdimitro/sdb',
+    url='https://github.com/delphix/sdb',
 )
