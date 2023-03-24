@@ -481,7 +481,7 @@ class ArgStack(sdb.Locator, sdb.PrettyPrinter):
     ...
     """
 
-    names = ["stack_args"]
+    names = ["stack_args", "locals"]
     input_type = "struct task_struct *"
     output_type = "struct task_struct *"
     load_on = [sdb.Kernel()]
@@ -513,17 +513,23 @@ class ArgStack(sdb.Locator, sdb.PrettyPrinter):
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         # self.validate_context()
         for thread in objs:
-            # if thread.type_ != self.input_type:
-                #raise sdb.CommandError(
-                #    self.name, "can only print args for stacks")
-
             if self.args.frame:
-                frame = sdb.get_prog().stack_trace(thread)[int(self.args.frame)]
+                try:
+                    frame_id = int(self.args.frame)
+                except ValueError:
+                    raise sdb.CommandError(self.name,
+                        f"frame id ({self.args.frame}) must be an integer value")
+
+                trace = sdb.get_prog().stack_trace(thread)
+                try:
+                    frame = trace[frame_id]
+                except IndexError:
+                    print(f"frame #{frame_id} is not present in stack {hex(thread.value_())}")
+                    continue
                 print(frame)
                 print()
                 for local in frame.locals():
-                    local_info = f"{local} = {(frame[local])}"
-                    print(local_info)
+                    print(f"{local} = {(frame[local])}")
                 if self.args.registers:
                     print()
                     print(frame.registers())
@@ -574,8 +580,7 @@ class ArgStack(sdb.Locator, sdb.PrettyPrinter):
 
                 local_symbols = frame.locals()
                 for local in local_symbols:
-                    local_info = f"{'':6s}{local} = {(frame[local].format_(dereference=False, member_type_names=False, member_names=False, members_same_line=True))}"
-                    print(local_info)
+                    print(f"{'':6s}{local} = {(frame[local].format_(dereference=False, member_type_names=False, member_names=False, members_same_line=True))}")
             print("\n")
 
     def no_input(self) -> Iterable[drgn.Object]:
