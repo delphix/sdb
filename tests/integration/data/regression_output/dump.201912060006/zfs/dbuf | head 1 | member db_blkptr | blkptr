@@ -1,0 +1,4 @@
+DVA[0]=<0:0x2cefd5e00:0x20000>
+[L0 ZFS plain file] fletcher4 uncompressed layer=0 unencrypted LE contiguous unique single
+size=0x20000L/0x20000P birth=1624L/1624P fill=1
+cksum=0x3feb86d3fa14:0xff98411222361a1:0x7cd8eb3816d141e1:0x2d65ae38a67197c7

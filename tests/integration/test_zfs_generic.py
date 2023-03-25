@@ -29,6 +29,10 @@ CMD_TABLE = [
     # arc
     "arc",
 
+    # blkptr
+    "spa | head 1 | deref |member spa_uberblock | member ub_rootbp | blkptr",
+    "dbuf | head 1 | member db_blkptr | blkptr",
+
     # dbuf
     "dbuf",
     "dbuf -l 1",
