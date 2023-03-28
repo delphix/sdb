@@ -1,0 +1,4 @@
+DVA[0]=<0:0x74fca00:0x200>
+[L0 DMU objset] fletcher4 lz4 layer=0 unencrypted LE contiguous unique single
+size=0x1000L/0x200P birth=249L/249P fill=50
+cksum=0x96a85512f:0x3e46df820da:0xd0f5886a63c8:0x1da5a7cdcc4e69
