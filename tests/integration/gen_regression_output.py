@@ -18,16 +18,22 @@
 # pylint: disable=missing-function-docstring
 
 import argparse
+import cProfile
 
-from tests.integration.infra import generate_known_regression_output
+from tests.integration.infra import generate_regression_output
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generate regression output for test-suite")
-    parser.add_argument('dump_name')
+    parser.add_argument('--profile',
+                        action='store_true',
+                        help='run with cProfile to identify bottlenecks')
     args = parser.parse_args()
-    generate_known_regression_output(args.dump_name)
+    if args.profile:
+        cProfile.run('generate_regression_output()')
+    else:
+        generate_regression_output()
 
 
 if __name__ == '__main__':

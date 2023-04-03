@@ -1,1 +1,3 @@
 sdb: member: incorrect index: 'a' is not a number
+@#$ EXIT CODE $#@
+1

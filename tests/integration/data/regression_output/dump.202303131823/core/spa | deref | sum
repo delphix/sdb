@@ -1,1 +1,3 @@
 sdb: sum: 'struct spa' is not an integer type
+@#$ EXIT CODE $#@
+1

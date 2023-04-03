@@ -81,3 +81,5 @@ kcf_context_cache                  64           0          0.0B          kcf_con
 zio_link_cache                     48        1649        77.3KB             zio_link_cache[SLUB]      274.9KB   28
 vdev_object_store_io_cache         32           0          0.0B vdev_object_store_io_cache[SLUB]      144.0KB    0
 arc_buf_t                          32        8485       265.2KB                  arc_buf_t[SLUB]        1.3MB   20
+@#$ EXIT CODE $#@
+0

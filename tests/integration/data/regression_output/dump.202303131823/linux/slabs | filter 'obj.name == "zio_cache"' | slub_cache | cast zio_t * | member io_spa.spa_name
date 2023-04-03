@@ -1605,3 +1605,5 @@
 (char [256])"testpool"
 (char [256])"testpool"
 (char [256])"testpool"
+@#$ EXIT CODE $#@
+0

@@ -20,3 +20,5 @@ seg-size   count
  128.0MB:      0 
  256.0MB:      1 *
 Approx. Median: 192.0MB
+@#$ EXIT CODE $#@
+0

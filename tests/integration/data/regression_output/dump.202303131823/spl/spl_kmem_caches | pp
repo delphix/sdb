@@ -81,3 +81,5 @@ kcf_context_cache                  64           0          0.0B          kcf_con
 ddt_entry_cache                   448           0          0.0B            ddt_entry_cache[SLUB]         0.0B    0
 arc_buf_hdr_t_l2only               96           0          0.0B       arc_buf_hdr_t_l2only[SLUB]         0.0B    0
 arc_buf_hdr_t_full_crypt          336           0          0.0B   arc_buf_hdr_t_full_crypt[SLUB]         0.0B    0
+@#$ EXIT CODE $#@
+0

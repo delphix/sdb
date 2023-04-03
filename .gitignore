@@ -114,3 +114,6 @@ tests/integration/data/mods/
 # zipped folders - usually crash dumps
 *.lzma
 *.tar.gz
+
+# crash dump directory
+tests/integration/data/dumps/

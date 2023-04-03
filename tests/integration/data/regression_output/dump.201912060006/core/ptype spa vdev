@@ -335,3 +335,5 @@ struct vdev {
 	zfs_ratelimit_t vdev_delay_rl;
 	zfs_ratelimit_t vdev_checksum_rl;
 }
+@#$ EXIT CODE $#@
+0

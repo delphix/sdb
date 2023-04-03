@@ -138,3 +138,5 @@
 0xffffa08956637400 zil_zcw_cache                        KMC_NOMAGAZINE|KMC_SLAB         152        152         0                0                0     0            0          0.0B        7.7KB      0           0             0            zil_zcw_cache[SLUB]    0
 0xffffa08956637200 sio_cache_0                          KMC_NOMAGAZINE|KMC_SLAB         136        136         0                0                0     0            0          0.0B         0.0B      0           0             0              sio_cache_0[SLUB]    0
 0xffffa08956636e00 arc_buf_hdr_t_l2only                 KMC_NOMAGAZINE|KMC_SLAB          96         96         0                0                0     0            0          0.0B        3.9KB      0           0             0     arc_buf_hdr_t_l2only[SLUB]    0
+@#$ EXIT CODE $#@
+0

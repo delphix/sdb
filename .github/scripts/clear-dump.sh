@@ -7,17 +7,7 @@ if [ ! -d $DATA_DIR ]; then
 	exit 1
 fi
 
-echo "removing current crash dump if any ..."
-rm -f $DATA_DIR/dump.*
-
-echo "removing any extracted vmlinux ..."
-rm -f $DATA_DIR/vmlinux*
-
-echo "removing any extracted modules ..."
-rm -rf $DATA_DIR/mods
-rm -rf $DATA_DIR/usr
-
-echo "removing any savedump scripts ..."
-rm -rf $DATA_DIR/run-*.sh
+echo "removing all crash/core dumps ..."
+rm -rf $DATA_DIR/dumps
 
 echo "Done"

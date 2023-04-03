@@ -194,3 +194,5 @@ ADDR               NAME
            0xffff9ac5ae5ad000   12      0x180000000    508MB    7%      4KB
            0xffff9ac5ae5af000   13      0x1a0000000    413MB   14%     28KB
            0xffff9ac5ae5ae000   14      0x1c0000000    484MB   18%      4KB
+@#$ EXIT CODE $#@
+0

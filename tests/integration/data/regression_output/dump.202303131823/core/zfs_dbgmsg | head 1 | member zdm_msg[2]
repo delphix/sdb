@@ -1,2 +1,4 @@
 warning: member: index out of bounds for array of type 'char []' (requested index: 2)
 (char)97
+@#$ EXIT CODE $#@
+0

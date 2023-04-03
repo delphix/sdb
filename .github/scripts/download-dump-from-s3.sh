@@ -41,31 +41,33 @@ else
 	[ $? -eq 0 ] || exit 1
 fi
 
-if [[ $1 == *.lzma ]]; then
+if [[ $1 == *.tar.lzma ]]; then
 	# Profile A
+	dump_name=${1%.tar.lzma}
 
 	echo "decompressing dump ..."
 	tar -x --lzma -f $1
 
-	echo "moving contents to tests/integration/data ..."
-	mv dump-data/* $DATA_DIR
+	echo "moving contents to tests/integration/data/dumps/${dump_name} ..."
+	mkdir -p $DATA_DIR/dumps/${dump_name}
+	mv dump-data/* $DATA_DIR/dumps/${dump_name}
 	[ $? -eq 0 ] || exit 1
 
 	rmdir dump-data
 	[ $? -eq 0 ] || exit 1
 elif [[ $1 == *.tar.gz ]]; then
 	# Profile B
+	dump_name=${1%.tar.gz}
 
 	echo "decompressing dump ..."
 	tar xzf $1
 
-	decompressed_dir=${1%.tar.gz}
-
-	echo "moving contents to tests/integration/data ..."
-	mv *$decompressed_dir/* $DATA_DIR
+	echo "moving contents to tests/integration/data/dumps/${dump_name} ..."
+	mkdir -p $DATA_DIR/dumps/${dump_name}
+	mv *${dump_name}/* $DATA_DIR/dumps/${dump_name}
 	[ $? -eq 0 ] || exit 1
 
-	rmdir *$decompressed_dir
+	rmdir *${dump_name}
 	[ $? -eq 0 ] || exit 1
 else
 	echo "unknown dump profile"

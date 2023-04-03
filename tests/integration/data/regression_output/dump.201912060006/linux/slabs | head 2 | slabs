@@ -2,3 +2,5 @@ name             entry_size active_objs active_memory total_memory util
 ---------------- ---------- ----------- ------------- ------------ ----
 AF_VSOCK               1216          26        30.9KB       30.9KB  100
 t10_pr_reg_cache        704           0          0.0B         0.0B    0
+@#$ EXIT CODE $#@
+0

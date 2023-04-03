@@ -1,1 +1,3 @@
 sdb: filter: invalid input: left hand side of expression is missing
+@#$ EXIT CODE $#@
+1

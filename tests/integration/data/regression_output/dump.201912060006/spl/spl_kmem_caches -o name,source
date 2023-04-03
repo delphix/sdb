@@ -138,3 +138,5 @@ zio_data_buf_8388608         zio_data_buf_8388608[SPL ]
 zio_data_buf_917504           zio_data_buf_917504[SPL ]
 zio_data_buf_98304             zio_data_buf_98304[SPL ]
 zio_link_cache                     zio_link_cache[SLUB]
+@#$ EXIT CODE $#@
+0

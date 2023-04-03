@@ -2464,3 +2464,5 @@ sdb: _: invalid memory access: could not read memory from kdump: Cannot get page
     [0x288200000 0x2bf358800) (length 0x37158800)
     [0x21e200000 0x2bf358a00) (length 0xa1158a00)
     [0x296a00000 0x2bf358a00) (length 0x28958a00)
+@#$ EXIT CODE $#@
+0

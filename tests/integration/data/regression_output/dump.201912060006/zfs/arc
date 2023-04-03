@@ -96,3 +96,5 @@ arcstat_demand_hit_prescient_prefetch = 0
 arcstat_need_free                = 0
 arcstat_sys_free                 = 122268224
 arcstat_raw_size                 = 0
+@#$ EXIT CODE $#@
+0

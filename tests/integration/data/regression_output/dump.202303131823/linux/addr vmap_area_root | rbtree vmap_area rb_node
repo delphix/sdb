@@ -2788,3 +2788,5 @@
 (struct vmap_area *)0xffff9ac6452cecc0
 (struct vmap_area *)0xffff9ac6452ce340
 (struct vmap_area *)0xffff9ac64c760b80
+@#$ EXIT CODE $#@
+0

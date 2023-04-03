@@ -1,1 +1,3 @@
 sdb: lxhlist: 'struct task_struct' has no member 'bogus_member'
+@#$ EXIT CODE $#@
+1

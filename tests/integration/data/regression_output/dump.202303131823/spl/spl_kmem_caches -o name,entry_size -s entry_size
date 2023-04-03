@@ -81,3 +81,5 @@ kcf_context_cache                  64
 zio_link_cache                     48
 vdev_object_store_io_cache         32
 arc_buf_t                          32
+@#$ EXIT CODE $#@
+0

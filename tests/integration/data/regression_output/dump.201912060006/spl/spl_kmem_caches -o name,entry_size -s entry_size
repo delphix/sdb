@@ -138,3 +138,5 @@ arc_buf_t                        80
 zio_link_cache                   48
 abd_t                            40
 mod_hash_entries                 24
+@#$ EXIT CODE $#@
+0

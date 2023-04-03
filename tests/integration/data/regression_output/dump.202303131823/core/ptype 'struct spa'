@@ -200,3 +200,5 @@ struct spa {
 	zfs_refcount_t spa_refcount;
 	taskq_t *spa_upgrade_taskq;
 }
+@#$ EXIT CODE $#@
+0

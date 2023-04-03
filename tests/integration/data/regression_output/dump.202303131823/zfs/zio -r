@@ -1677,3 +1677,5 @@
 0xffff9ac65d8aa290             NULL  CHECKSUM_VERIFY  0xffff9ac6085b9e80            -
  0xffff9ac61baf4520            READ  VDEV_IO_START    -                             -
   0xffff9ac5b4cd6ca0           READ  VDEV_IO_START    -                          91ms
+@#$ EXIT CODE $#@
+0

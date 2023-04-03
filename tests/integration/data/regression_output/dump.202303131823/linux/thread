@@ -1131,3 +1131,5 @@ task               state           pid   prio comm            cmdline
 0xffff9ac6607f9e80 INTERRUPTIBLE   10101 100  z_cl_int               
 0xffff9ac6607fbd00 IDLE            77    100  blkcg_punt_bio         
 0xffff9ac6607fdb80 IDLE            80    100  edac-poller            
+@#$ EXIT CODE $#@
+0

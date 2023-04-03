@@ -19,10 +19,9 @@
 # pylint: disable=line-too-long
 
 from typing import Any
-import os.path
 
 import pytest
-from tests.integration.infra import repl_invoke, get_crash_dump_path, slurp_output_file
+from tests.integration.infra import get_crash_dump_dir_paths, get_all_reference_crash_dumps, RefDump
 
 
 CMD_TABLE = [
@@ -74,13 +73,11 @@ CMD_TABLE = [
 
 
 @pytest.mark.skipif(  # type: ignore[misc]
-    not get_crash_dump_path(),
-    reason="couldn't find crash dump to run tests against")
+    len(get_crash_dump_dir_paths()) == 0,
+    reason="couldn't find any crash/core dumps to run tests against")
+@pytest.mark.parametrize('rdump',
+                         get_all_reference_crash_dumps())  # type: ignore[misc]
 @pytest.mark.parametrize('cmd', CMD_TABLE)  # type: ignore[misc]
-def test_cmd_output_and_error_code(capsys: Any, cmd: str) -> None:
-    assert repl_invoke(cmd) == 0
-    captured = capsys.readouterr()
-    dump_path = get_crash_dump_path()
-    assert dump_path is not None
-    dump_name = os.path.basename(dump_path)
-    assert captured.out == slurp_output_file(dump_name, "zfs", cmd)
+def test_cmd_output_and_error_code(capsys: Any, rdump: RefDump,
+                                   cmd: str) -> None:
+    rdump.verify_cmd_output_and_code(capsys, "zfs", cmd)

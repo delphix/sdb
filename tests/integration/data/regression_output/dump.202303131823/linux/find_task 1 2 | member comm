@@ -1,2 +1,4 @@
 (char [16])"systemd"
 (char [16])"kthreadd"
+@#$ EXIT CODE $#@
+0

@@ -4,3 +4,5 @@
 (taskq_t *)0x656c6269736976
 (taskq_t *)0xffff9ac47de67400
 (taskq_t *)0xffff9ac47de67a00
+@#$ EXIT CODE $#@
+0

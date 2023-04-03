@@ -708,3 +708,5 @@
 (char [16])"rcu_par_gp"
 (char [16])"rcu_gp"
 (char [16])"kthreadd"
+@#$ EXIT CODE $#@
+0

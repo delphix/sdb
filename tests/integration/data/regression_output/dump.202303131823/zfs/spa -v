@@ -16,3 +16,5 @@ ADDR               NAME
       0xffff9ac5ac2ac000 HEALTHY NONE  root
       0xffff9ac55ced0000 HEALTHY NONE    /dev/nvme1n1p1
       0xffff9ac4b0574000 HEALTHY NONE    /dev/nvme2n1p1
+@#$ EXIT CODE $#@
+0

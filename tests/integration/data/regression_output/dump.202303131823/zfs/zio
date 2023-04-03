@@ -29,3 +29,5 @@
 0xffff9ac658ca1da0             NULL  OPEN             -                             -
 0xffff9ac658ca3650             NULL  OPEN             -                             -
 0xffff9ac65d8aa290             NULL  CHECKSUM_VERIFY  0xffff9ac6085b9e80            -
+@#$ EXIT CODE $#@
+0

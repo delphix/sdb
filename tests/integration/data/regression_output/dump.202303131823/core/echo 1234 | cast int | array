@@ -1,1 +1,3 @@
 sdb: array: 'int' is not an array nor a pointer type
+@#$ EXIT CODE $#@
+1

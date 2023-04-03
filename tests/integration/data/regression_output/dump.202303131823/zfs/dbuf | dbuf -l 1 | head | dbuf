@@ -9,3 +9,5 @@
   0xffff9ac5b8f0ec40      128    1       52    23 testpool/testfs
   0xffff9ac65ec9f3e8     2019    1        0     2 rpool/ROOT/delphix.i4TlGPg/data
   0xffff9ac4c66ffa08      128    1        7    19 testpool/testfs
+@#$ EXIT CODE $#@
+0

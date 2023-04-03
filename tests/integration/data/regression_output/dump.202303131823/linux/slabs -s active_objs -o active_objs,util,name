@@ -176,3 +176,5 @@ active_objs util name
           0    0 ddt_entry_cache           
           0    0 arc_buf_hdr_t_l2only      
           0    0 arc_buf_hdr_t_full_crypt  
+@#$ EXIT CODE $#@
+0

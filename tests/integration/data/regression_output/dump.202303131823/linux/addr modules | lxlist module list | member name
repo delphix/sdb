@@ -65,3 +65,5 @@
 (char [56])"ena"
 (char [56])"i2c_piix4"
 (char [56])"i2c_core"
+@#$ EXIT CODE $#@
+0

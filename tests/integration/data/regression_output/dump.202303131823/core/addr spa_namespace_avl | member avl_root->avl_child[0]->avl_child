@@ -1,1 +1,3 @@
 (struct avl_node *[2]){}
+@#$ EXIT CODE $#@
+0

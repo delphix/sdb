@@ -1,1 +1,3 @@
 sdb: member: invalid memory access: addresss 0x12c4
+@#$ EXIT CODE $#@
+0

@@ -1,1 +1,3 @@
 sdb: array: zero-length array: please specify number of elements
+@#$ EXIT CODE $#@
+1

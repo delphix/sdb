@@ -20,6 +20,7 @@ like the entry point, command line interface, etc...
 
 import argparse
 import os
+import re
 import sys
 
 from typing import List
@@ -126,7 +127,8 @@ def parse_arguments() -> argparse.Namespace:
     return args
 
 
-def load_debug_info(prog: drgn.Program, dpaths: List[str]) -> None:
+def load_debug_info(prog: drgn.Program, dpaths: List[str], quiet: bool,
+                    no_filter: bool) -> None:
     """
     Iterates over all the paths provided (`dpaths`) and attempts
     to load any debug information it finds. If the path provided
@@ -140,9 +142,28 @@ def load_debug_info(prog: drgn.Program, dpaths: List[str]) -> None:
             kos = []
             for (ppath, __, files) in os.walk(path):
                 for i in files:
-                    if i.endswith(".ko"):
+                    if i.endswith(".ko") or i.endswith(".debug") or re.match(
+                            r".+\.so(\.\d)?", i) or no_filter:
+                        # matches:
+                        #     kernel modules - .ko suffix
+                        #     userland debug files - .debug suffix
+                        #     userland shared objects - .so suffix
                         kos.append(os.sep.join([ppath, i]))
-            prog.load_debug_info(kos)
+            try:
+                prog.load_debug_info(kos)
+            except drgn.MissingDebugInfoError as debug_info_err:
+                #
+                # If we encounter such an error it means that we can't
+                # find the debug info for one or more kernel modules.
+                # That's fine because the user may not need those, so
+                # print a warning and proceed.
+                #
+                # Again because of the aforementioned short-coming of drgn
+                # we quiet any errors when loading the *default debug info*
+                # if we are looking at a crash/core dump.
+                #
+                if not quiet:
+                    print("sdb: " + str(debug_info_err), file=sys.stderr)
         else:
             print("sdb: " + path + " is not a regular file or directory")
 
@@ -191,7 +212,7 @@ def setup_target(args: argparse.Namespace) -> drgn.Program:
 
     if args.symbol_search:
         try:
-            load_debug_info(prog, args.symbol_search)
+            load_debug_info(prog, args.symbol_search, args.quiet, False)
         except (
                 drgn.MissingDebugInfoError,
                 OSError,

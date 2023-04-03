@@ -1,1 +1,3 @@
 sdb: ptype: input '2abc' is not a valid type name
+@#$ EXIT CODE $#@
+1
