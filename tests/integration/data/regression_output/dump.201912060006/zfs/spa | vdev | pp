@@ -15,3 +15,5 @@
  0xffffa088ce7d0000 HEALTHY NONE    /tmp/dks3
  0xffffa08952efc000 HEALTHY NONE  root
  0xffffa08953300000 HEALTHY NONE    /dev/sda1
+@#$ EXIT CODE $#@
+0

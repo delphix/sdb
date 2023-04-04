@@ -1,1 +1,3 @@
 sdb: stacks: symbol 'bogus' does not exist
+@#$ EXIT CODE $#@
+1

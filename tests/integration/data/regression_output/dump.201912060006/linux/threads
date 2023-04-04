@@ -573,3 +573,5 @@ task               state         pid  prio comm            cmdline
 0xffffa08966bd2e00 INTERRUPTIBLE 30   139  khugepaged             
 0xffffa08966bd4500 IDLE          34   100  tpm_dev_wq             
 0xffffa08966bd5c00 IDLE          33   100  kblockd                
+@#$ EXIT CODE $#@
+0

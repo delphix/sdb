@@ -1,2 +1,4 @@
 warning: member: index out of bounds for array of type 'struct avl_node *[2]' (requested index: 3)
 (struct avl_node *)0xffff9ac64ca9a360
+@#$ EXIT CODE $#@
+0

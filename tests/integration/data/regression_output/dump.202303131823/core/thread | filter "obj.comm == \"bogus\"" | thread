@@ -1,2 +1,4 @@
 task state pid prio comm cmdline
 ---- ----- --- ---- ---- -------
+@#$ EXIT CODE $#@
+0

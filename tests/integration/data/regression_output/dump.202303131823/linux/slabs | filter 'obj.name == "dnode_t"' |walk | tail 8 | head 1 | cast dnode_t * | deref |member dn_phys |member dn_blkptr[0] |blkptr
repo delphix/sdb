@@ -2,3 +2,5 @@ DVA[0]=<0:0xe01bd200:0x2e00>
 [L0 ZFS plain file] fletcher4 lzjb layer=0 unencrypted LE contiguous unique single
 size=0x8e00L/0x2e00P birth=25L/25P fill=1
 cksum=0x2b4705c4d19:0xe6eacc837fede:0x3376b31cb9e47ade:0x6759b6b5446e1229
+@#$ EXIT CODE $#@
+0

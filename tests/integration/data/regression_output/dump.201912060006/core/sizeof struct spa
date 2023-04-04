@@ -1,1 +1,3 @@
 sdb: sizeof: skip keyword 'struct' or quote your type "struct <typename>"
+@#$ EXIT CODE $#@
+1

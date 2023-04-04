@@ -1961,3 +1961,5 @@ TASK_STRUCT        STATE
                   kthread+0x104
                   ret_from_fork+0x1f
 
+@#$ EXIT CODE $#@
+0

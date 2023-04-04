@@ -1,1 +1,3 @@
 sdb: slabs: 'bogus' is not a valid field
+@#$ EXIT CODE $#@
+1

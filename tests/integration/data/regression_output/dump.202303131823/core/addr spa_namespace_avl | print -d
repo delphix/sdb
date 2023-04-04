@@ -4,3 +4,5 @@
 	.avl_offset = (size_t)264,
 	.avl_numnodes = (ulong_t)3,
 }
+@#$ EXIT CODE $#@
+0

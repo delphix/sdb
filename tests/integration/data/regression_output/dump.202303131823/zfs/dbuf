@@ -8469,3 +8469,5 @@
   0xffff9ac55ba7c620        0    0       88    29 rpool/ROOT/delphix.i4TlGPg/data
   0xffff9ac5b0d06f50      128    1       83    41 testpool/testfs
   0xffff9ac55c898ab8      128    1       17    19 testpool/testfs
+@#$ EXIT CODE $#@
+0

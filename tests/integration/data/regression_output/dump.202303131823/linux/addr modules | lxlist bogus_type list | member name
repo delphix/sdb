@@ -1,1 +1,3 @@
 sdb: lxlist: couldn't find typedef, struct, enum, nor union named 'bogus_type'
+@#$ EXIT CODE $#@
+1

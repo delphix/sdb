@@ -74,3 +74,5 @@
 		.kpe_proc = (struct proc_dir_entry *)0xffffa089659cbf00,
 	},
 }
+@#$ EXIT CODE $#@
+0

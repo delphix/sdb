@@ -1,1 +1,3 @@
 sdb: stacks: module 'bogus' doesn't exist or isn't currently loaded
+@#$ EXIT CODE $#@
+1

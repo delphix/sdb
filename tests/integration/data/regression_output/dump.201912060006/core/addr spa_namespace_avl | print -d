@@ -5,3 +5,5 @@
 	.avl_numnodes = (ulong_t)3,
 	.avl_size = (size_t)9176,
 }
+@#$ EXIT CODE $#@
+0

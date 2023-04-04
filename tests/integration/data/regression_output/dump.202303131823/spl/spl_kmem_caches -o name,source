@@ -81,3 +81,5 @@ zio_buf_comb_917504               zio_buf_comb_917504[SPL ]
 zio_buf_comb_98304                 zio_buf_comb_98304[SPL ]
 zio_cache                                   zio_cache[SLUB]
 zio_link_cache                         zio_link_cache[SLUB]
+@#$ EXIT CODE $#@
+0

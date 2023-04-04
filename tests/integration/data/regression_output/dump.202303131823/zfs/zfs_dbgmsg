@@ -1502,3 +1502,5 @@ vdev_removal.c:1675:spa_vdev_remove_thread(): copying 5 segments for metaslab 10
 vdev_object_store.c:783:agent_free_blocks_impl(): agent_free_blocks freed 1351 blocks
 vdev_object_store.c:1031:agent_end_txg(): agent_end_txg(249), 2 passes
 vdev_removal.c:1675:spa_vdev_remove_thread(): copying 155 segments for metaslab 11
+@#$ EXIT CODE $#@
+0

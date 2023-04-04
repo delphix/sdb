@@ -1,1 +1,3 @@
 sdb: stacks: 'bogus' is not a valid task state (acceptable states: RUNNING, INTERRUPTIBLE, UNINTERRUPTIBLE, STOPPED, TRACED, DEAD, ZOMBIE, PARKED, IDLE)
+@#$ EXIT CODE $#@
+1

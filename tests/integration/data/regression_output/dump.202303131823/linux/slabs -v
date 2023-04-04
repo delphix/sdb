@@ -176,3 +176,5 @@
 0xffff9ac65af281c0 ddt_entry_cache                    448        448               18     0          0.0B         0.0B      0           0             0    0
 0xffff9ac6590fea80 sio_cache_2                        168        168               24     0          0.0B         0.0B      0           0             0    0
 0xffff9ac64d67a000 nfs_direct_cache                   224        224               18     0          0.0B         0.0B      0           0             0    0
+@#$ EXIT CODE $#@
+0

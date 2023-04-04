@@ -930,3 +930,5 @@ ADDR               NAME
                  64.0MB:      0 
                 128.0MB:      1 
                Approx. Median: 3.6MB
+@#$ EXIT CODE $#@
+0

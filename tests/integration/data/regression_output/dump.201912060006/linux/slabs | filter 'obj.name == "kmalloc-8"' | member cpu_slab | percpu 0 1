@@ -1,2 +1,4 @@
 (struct kmem_cache_cpu *)0xffffa0897fc27040
 (struct kmem_cache_cpu *)0xffffa0897fd27040
+@#$ EXIT CODE $#@
+0

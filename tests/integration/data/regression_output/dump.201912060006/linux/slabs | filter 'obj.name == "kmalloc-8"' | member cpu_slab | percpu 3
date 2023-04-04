@@ -1,1 +1,3 @@
 sdb: percpu: available CPUs [0-1] - requested CPU 3
+@#$ EXIT CODE $#@
+1

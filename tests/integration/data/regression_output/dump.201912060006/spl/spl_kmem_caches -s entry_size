@@ -138,3 +138,5 @@ arc_buf_t                        80        4046       316.1KB                arc
 zio_link_cache                   48           0          0.0B           zio_link_cache[SLUB]      127.5KB    0
 abd_t                            40       31047         1.2MB                    abd_t[SLUB]        1.2MB   96
 mod_hash_entries                 24          35        840.0B         mod_hash_entries[SLUB]        4.0KB   20
+@#$ EXIT CODE $#@
+0

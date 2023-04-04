@@ -1,1 +1,3 @@
 sdb: deref: cannot dereference a void pointer
+@#$ EXIT CODE $#@
+1

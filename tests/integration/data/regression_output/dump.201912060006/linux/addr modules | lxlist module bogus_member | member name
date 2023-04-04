@@ -1,1 +1,3 @@
 sdb: lxlist: 'struct module' has no member 'bogus_member'
+@#$ EXIT CODE $#@
+1

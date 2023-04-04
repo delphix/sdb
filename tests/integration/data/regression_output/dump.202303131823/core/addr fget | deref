@@ -1,1 +1,3 @@
 sdb: deref: cannot dereference function pointer
+@#$ EXIT CODE $#@
+1

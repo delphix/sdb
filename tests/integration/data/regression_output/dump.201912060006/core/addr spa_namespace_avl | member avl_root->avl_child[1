@@ -1,1 +1,3 @@
 sdb: member: incomplete array expression: please use something of the format 'array_name[index]'
+@#$ EXIT CODE $#@
+1

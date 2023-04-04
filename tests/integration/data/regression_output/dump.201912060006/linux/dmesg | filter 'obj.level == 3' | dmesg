@@ -4,3 +4,5 @@
 [    4.363435]: sd 2:0:2:0: [sdc] Assuming drive cache: write throughSUBSYSTEM=scsi
 [    4.366085]: sd 2:0:3:0: [sdd] Assuming drive cache: write throughSUBSYSTEM=scsi
 [   48.368009]: db_root: cannot open: /etc/target
+@#$ EXIT CODE $#@
+0

@@ -1,1 +1,3 @@
 sdb: filter: invalid input: comparison operator is missing
+@#$ EXIT CODE $#@
+1

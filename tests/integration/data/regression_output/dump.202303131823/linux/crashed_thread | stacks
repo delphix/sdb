@@ -18,3 +18,5 @@ TASK_STRUCT        STATE             COUNT
                   do_syscall_64+0x57
                   entry_SYSCALL_64+0x94
 
+@#$ EXIT CODE $#@
+0

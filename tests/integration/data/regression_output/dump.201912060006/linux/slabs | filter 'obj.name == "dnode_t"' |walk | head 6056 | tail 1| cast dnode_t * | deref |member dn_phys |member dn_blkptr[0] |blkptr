@@ -4,3 +4,5 @@ DVA[2]=<0:0x50002c00:0x800>
 [L0 SPA space map] fletcher4 lz4 layer=0 unencrypted LE contiguous unique triple
 size=0x20000L/0x400P birth=10L/10P fill=1
 cksum=0x8c1caab0a6:0x45de629e8318:0x13bfbe391d06f8:0x41fc70c3e1d38f2
+@#$ EXIT CODE $#@
+0

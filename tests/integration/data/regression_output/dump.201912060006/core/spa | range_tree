@@ -1,1 +1,3 @@
 sdb: range_tree: expected input of type range_tree_t *, but received type spa_t *
+@#$ EXIT CODE $#@
+1

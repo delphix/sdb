@@ -1,1 +1,3 @@
 sdb: ptype: couldn't find type 'struct bogus'
+@#$ EXIT CODE $#@
+1

@@ -89,3 +89,5 @@ ADDR               NAME
            128.0MB:     12 
            256.0MB:      7 
           Approx. Median: 99.5MB
+@#$ EXIT CODE $#@
+0

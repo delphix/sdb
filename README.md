@@ -103,26 +103,8 @@ If you want `pytest` to stop on the first failure it encounters add
 `-x/--exitfirst` in the command above.
 
 If you've added new test commands or found mistakes in the current reference
-output and you want (re)generate reference output for a crash dump - let's say
-`dump.201912060006` from above:
+output and you want (re)generate some reference output download all crash/core
+dumps (or the specific one you want to correct) and run the following:
 ```
-$ PYTHONPATH=$(pwd) python3 tests/integration/gen_regression_output.py dump.201912060006
-```
-
-or more generically:
-```
-$ PYTHONPATH=$(pwd) python3 tests/integration/gen_regression_output.py <dump name>
-```
-
-For the time being, the test suite is not smart enought to handle the testing
-of multiple crash dumps at the same time. Until that happens, developers that
-want to test multiple crash dumps need to delete their current crash dump
-before downloading the next to run `pytest`. Here is a sequence of commands to
-run `pytest` against two crash dumps:
-```
-$ .github/scripts/download-dump-from-s3.sh dump.201912060006.tar.lzma
-$ python3 -m pytest -v --cov sdb --cov-report xml tests
-$ .github/scripts/clear-dump.sh
-$ .github/scripts/download-dump-from-s3.sh dump.202303131823.tar.gz
-$ python3 -m pytest -v --cov sdb --cov-report xml tests
+$ PYTHONPATH=$(pwd) python3 tests/integration/gen_regression_output.py
 ```

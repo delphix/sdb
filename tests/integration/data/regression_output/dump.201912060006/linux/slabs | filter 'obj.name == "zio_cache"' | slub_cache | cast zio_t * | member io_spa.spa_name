@@ -16,3 +16,5 @@
 (char [256])"rpool"
 (char [256])"data"
 (char [256])"data"
+@#$ EXIT CODE $#@
+0

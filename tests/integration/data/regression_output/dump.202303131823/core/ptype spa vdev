@@ -363,3 +363,5 @@ struct vdev {
 	uint64_t vdev_io_n;
 	uint64_t vdev_io_t;
 }
+@#$ EXIT CODE $#@
+0

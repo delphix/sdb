@@ -1,1 +1,3 @@
 sdb: array: can't walk pointer array of incomplete type 'void'
+@#$ EXIT CODE $#@
+1

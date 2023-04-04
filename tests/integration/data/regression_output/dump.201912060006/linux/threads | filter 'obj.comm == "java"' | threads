@@ -83,3 +83,5 @@ task               state         pid  prio comm cmdline
 0xffffa08960a3ae00 INTERRUPTIBLE 2857 120  java        
 0xffffa08960a3c500 INTERRUPTIBLE 2858 120  java        
 0xffffa08960a3dc00 INTERRUPTIBLE 2856 120  java        
+@#$ EXIT CODE $#@
+0

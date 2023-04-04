@@ -1,1 +1,3 @@
 sdb: rbtree: 'struct vmap_area' has no member 'bogus_member'
+@#$ EXIT CODE $#@
+1

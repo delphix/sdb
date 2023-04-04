@@ -3,3 +3,5 @@ spa_history.c:306:spa_history_log_sync(): command: zpool create meta-domain raid
 spa_history.c:314:spa_history_log_sync(): txg 8 create meta-domain/fs-tmp (id 69)  
 spa_history.c:339:spa_history_log_sync(): ioctl create
 spa_history.c:306:spa_history_log_sync(): command: zfs create meta-domain/fs-tmp
+@#$ EXIT CODE $#@
+0

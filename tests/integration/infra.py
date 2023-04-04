@@ -24,7 +24,7 @@ import shutil
 from contextlib import redirect_stdout
 from importlib import import_module
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import Any, Callable, List, Optional, Tuple
 
 import drgn
 import sdb
@@ -33,236 +33,362 @@ from sdb.internal.repl import REPL
 
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 DATA_DIR = f"{THIS_DIR}/data"
+DUMPS_DIR = f"{DATA_DIR}/dumps"
 TEST_OUTPUT_DIR = f"{DATA_DIR}/regression_output"
 
 # OS Crash Dump Related Path/Prefixes
-CRASH_PREFIX = f"{DATA_DIR}/dump.*"
-MODS_DIR = f"{DATA_DIR}/usr"
-ALTERNATIVE_MODS_DIR = f"{DATA_DIR}/mods"
-VMLINUX_PREFIX = f"{DATA_DIR}/vmlinux-*"
+CRASH_PREFIX = f"{DUMPS_DIR}/dump.*"
+MODS_DIR = "usr"
+ALTERNATIVE_MODS_DIR = "mods"
+VMLINUX_PREFIX = "vmlinux-*"
 
 # Userland Core Dump
-UCORE_PREFIX = f"{DATA_DIR}/core.*"
-LIBS_PATH = f"{DATA_DIR}/lib"
-LIBS64_PATH = f"{DATA_DIR}/lib64"
-LIBS_DEBUG_PATH = f"{DATA_DIR}/usr"
-EXEC_DIR = f"{DATA_DIR}/bin"
-ALTERNATIVE_EXEC_DIR = f"{DATA_DIR}/sbin"
+UCORE_PREFIX = f"{DUMPS_DIR}/archive-core.*"
+LIBS_PATH = "lib"
+LIBS64_PATH = "lib64"
+LIBS_DEBUG_PATH = "usr"
+EXEC_DIR = "bin"
+ALTERNATIVE_EXEC_DIR = "sbin"
+EXPORT_DIR = "export"
 
 
-def get_path_from_prefix(prefix: str) -> Optional[str]:
+def get_all_dump_dir_paths() -> List[str]:
     """
-    Helper for finding required files by dump type.
+    Returns all the discovered dump directories under the data/dumps folder.
     """
-    res = glob.glob(prefix)
-    if len(res) == 1:
-        return res[0]
-    assert len(res) == 0
-    return None
+    return get_crash_dump_dir_paths() + get_core_dump_dir_paths()
 
 
-def get_crash_dump_path() -> Optional[str]:
+def get_crash_dump_dir_paths() -> List[str]:
     """
-    Get crash dump path as string if it exists. None otherwise.
+    Get crash dump directory paths as a list of strings if any exists.
+
+    Note: Besides returning the discovered paths, this function is also used as
+    a predicate by specific test modules from the test suite to see if they
+    should be ran.
+    """
+    return glob.glob(CRASH_PREFIX)
+
+
+def get_vmlinux_path(dump_dir_path: str) -> str:
+    """
+    Get vmlinux path as a string.
+    """
+    paths = glob.glob(f"{dump_dir_path}/{VMLINUX_PREFIX}")
+    assert len(paths) == 1
+    return paths[0]
+
+
+def get_modules_dir(dump_dir_path: str) -> str:
+    """
+    Get modules directory path as a string.
+    """
+    paths = glob.glob(f"{dump_dir_path}/{MODS_DIR}")
+    if len(paths) == 1:
+        return paths[0]
+    assert len(paths) == 0
+
+    paths = glob.glob(f"{dump_dir_path}/{ALTERNATIVE_MODS_DIR}")
+    assert len(paths) == 1
+    return paths[0]
+
+
+def get_core_dump_dir_paths() -> List[str]:
+    """
+    Get core dump directory paths as list of strings if any exists.
 
     Note: Besides returning the discovered path, this function is also used as
     a predicate by specific test modules from the test suite to see if they
     should be ran.
     """
-    return get_path_from_prefix(CRASH_PREFIX)
+    return glob.glob(UCORE_PREFIX)
 
 
-def get_vmlinux_path() -> Optional[str]:
-    """
-    Get vmlinux path as string if it exists. None otherwise.
-    """
-    return get_path_from_prefix(VMLINUX_PREFIX)
-
-
-def get_modules_dir() -> Optional[str]:
-    """
-    Get modules directory path as string if it exists.
-    None otherwise.
-    """
-    path = get_path_from_prefix(MODS_DIR)
-    if not path:
-        return get_path_from_prefix(ALTERNATIVE_MODS_DIR)
-    return path
-
-
-def get_core_dump_path() -> Optional[str]:
-    """
-    Get core dump path as string if it exists. None otherwise.
-
-    Note: Besides returning the discovered path, this function is also used as
-    a predicate by specific test modules from the test suite to see if they
-    should be ran.
-    """
-    return get_path_from_prefix(UCORE_PREFIX)
-
-
-def get_libs_path() -> Optional[str]:
+def get_libs_path(dump_dir_path: str) -> Optional[str]:
     """
     Get libraries path as string if it exists. None otherwise.
     """
-    return get_path_from_prefix(LIBS_PATH)
+    paths = glob.glob(f"{dump_dir_path}/{LIBS_PATH}")
+    assert len(paths) < 2
+    if len(paths) == 0:
+        return None
+    return paths[0]
 
 
-def get_libs64_path() -> Optional[str]:
+def get_libs64_path(dump_dir_path: str) -> Optional[str]:
     """
     Get 64-bit libraries path as string if it exists. None otherwise.
     """
-    return get_path_from_prefix(LIBS64_PATH)
+    paths = glob.glob(f"{dump_dir_path}/{LIBS64_PATH}")
+    assert len(paths) < 2
+    if len(paths) == 0:
+        return None
+    return paths[0]
 
 
-def get_lib_debug_info_path() -> Optional[str]:
+def get_lib_debug_info_path(dump_dir_path: str) -> Optional[str]:
     """
-    Get 64-bit libraries path as string if it exists. None otherwise.
+    Get /usr path with debug libraries as string if it exists. None otherwise.
     """
-    return get_path_from_prefix(LIBS_DEBUG_PATH)
+    paths = glob.glob(f"{dump_dir_path}/{LIBS_DEBUG_PATH}")
+    assert len(paths) < 2
+    if len(paths) == 0:
+        return None
+    return paths[0]
 
 
-def get_binary_dir() -> Optional[str]:
+def get_export_dir(dump_dir_path: str) -> Optional[str]:
+    """
+    Get /export path as string if it exists. None otherwise.
+
+    NOTE: This is more delphix-specific and it's there for anything that's
+    compiled and ran out of the home directory.
+    """
+    paths = glob.glob(f"{dump_dir_path}/{EXPORT_DIR}")
+    assert len(paths) < 2
+    if len(paths) == 0:
+        return None
+    return paths[0]
+
+
+def get_binary_dir(dump_dir_path: str) -> Optional[str]:
     """
     Get executable binary directory path as string if it exists.
     None otherwise.
     """
-    path = get_path_from_prefix(EXEC_DIR)
-    if not path:
-        return get_path_from_prefix(ALTERNATIVE_EXEC_DIR)
-    return path
+    paths = glob.glob(f"{dump_dir_path}/{EXEC_DIR}")
+    if len(paths) == 1:
+        return paths[0]
+    assert len(paths) == 0
+
+    paths = glob.glob(f"{dump_dir_path}/{ALTERNATIVE_EXEC_DIR}")
+    assert len(paths) < 2
+    if len(paths) == 0:
+        return None
+    return paths[0]
 
 
-def setup_target() -> Optional[drgn.Program]:
+def setup_crash_dump_target(dump_dir_path: str, dump_path: str) -> drgn.Program:
     """
     Create a drgn.Program instance and setup the SDB context for all the
-    integration tests. If there is no OS crash or userland core to attach to
-    this is going to be an empty drgn.Program and integration tests will be
-    skipped (e.g. only unit tests will run).
+    integration tests from the given crash dump path.
     """
     prog = drgn.Program()
-
-    dump = get_crash_dump_path()
-    if dump:
-        prog.set_core_dump(dump)
-        assert get_vmlinux_path()
-        debug_info = (
-            p
-            for p in [get_vmlinux_path(), get_modules_dir()]
-            if p is not None)
-        load_debug_info(prog, list(debug_info))
-        return prog
-
-    dump = get_core_dump_path()
-    if dump:
-        prog.set_core_dump(dump)
-        debug_info = (p for p in [
-            get_binary_dir(),
-            get_libs_path(),
-            get_libs64_path(),
-            get_lib_debug_info_path()
-        ] if p is not None)
-        load_debug_info(prog, list(debug_info))
-
+    prog.set_core_dump(dump_path)
+    load_debug_info(
+        prog, [get_vmlinux_path(dump_dir_path),
+               get_modules_dir(dump_dir_path)], True, False)
     return prog
 
 
-TEST_PROGRAM = setup_target()
-TEST_REPL = REPL(TEST_PROGRAM, list(sdb.get_registered_commands().keys()))
-
-
-def repl_invoke(cmd: str) -> int:
+def setup_userland_core_target(dump_dir_path: str,
+                               dump_path: str) -> drgn.Program:
     """
-    Accepts a command/pipeline in string form and evaluates
-    it returning the exit code of the evaluation emulating
-    the SDB repl.
+    Create a drgn.Program instance and setup the SDB context for all the
+    integration tests from the given userland core dump path.
     """
-    assert TEST_PROGRAM
-    sdb.target.set_prog(TEST_PROGRAM)
-    sdb.register_commands()
-    return TEST_REPL.eval_cmd(cmd)
+    prog = drgn.Program()
+    prog.set_core_dump(dump_path)
+    debug_info = (p for p in [
+        get_lib_debug_info_path(dump_dir_path),
+        get_binary_dir(dump_dir_path),
+        get_export_dir(dump_dir_path),
+        get_libs_path(dump_dir_path),
+        get_libs64_path(dump_dir_path)
+    ] if p is not None)
+    load_debug_info(prog, list(debug_info), True, True)
+    return prog
 
 
-def sdb_invoke(objs: Iterable[drgn.Object], line: str) -> Iterable[drgn.Object]:
+def removeprefix(text: str, prefix: str) -> str:
     """
-    Dispatch to sdb.invoke, but also drain the generator it returns, so
-    the tests can more easily access the returned objects.
-
-    This method is preferred over repl_invoke() when the test wants to
-    do fancier checks by mocking a few objects that are later passed
-    down to the pipeline. Other scenarios include but are not limited
-    to testing that specific exceptions are thrown or analyzing internal
-    state of objects that is not part of the output in stdout.
+    NOTE: Until we no longer support Python 3.8 and older we'll use this.
     """
-    assert TEST_PROGRAM
-    sdb.target.set_prog(TEST_PROGRAM)
-    sdb.register_commands()
-    return list(sdb.invoke(objs, line))
+    return text[text.startswith(prefix) and len(prefix):]
 
 
-def slurp_output_file(dump_name: str, modname: str, cmd: str) -> str:
+class RefDump:
     """
-    Given a module name and a command, find the output file
-    and return all of its contents as a string.
+    Represents a reference dump for which the test suite can run commands and
+    verify their output and exit code.
     """
-    # The pylint below is a false positive
-    # pylint: disable=unspecified-encoding
-    return Path(f"{TEST_OUTPUT_DIR}/{dump_name}/{modname}/{cmd}").read_text()
+
+    program: drgn.Program
+    repl: REPL
+    dump_name: str
+
+    def __init__(self, dump_dir_path: str,
+                 setup_func: Callable[[str, str], drgn.Program]) -> None:
+        """
+        NOTE: This object assumes that the folder containg the reference dump has
+        the exact same name as the dump file itself.
+        """
+        self.dump_dir_path = dump_dir_path
+        # pylint: disable=comparison-with-callable
+        if setup_func == setup_userland_core_target:
+            self.dump_name = removeprefix(os.path.basename(dump_dir_path),
+                                          "archive-")
+            self.is_userland = True
+        else:
+            self.dump_name = os.path.basename(dump_dir_path)
+            self.is_userland = False
+        self.dump_path = f"{self.dump_dir_path}/{self.dump_name}"
+        assert os.path.isfile(self.dump_path)
+        self.setup_func = setup_func
+
+    def setup_target(self) -> None:
+        """
+        Initialize all the SDB/Drgn context needed for the tests to use the
+        reference dump.
+        """
+        self.program = self.setup_func(self.dump_dir_path, self.dump_path)
+        self.repl = REPL(self.program,
+                         list(sdb.get_registered_commands().keys()))
+
+    def repl_invoke(self, cmd: str) -> int:
+        """
+        Invoke the supplied command from the SDB REPL.  Returns exit code of
+        the command evaluation and will print any command results in stdout or
+        capsys (e.g. when ran by the test suite).
+        """
+        assert self.program
+        assert self.repl
+        sdb.target.set_prog(self.program)
+        sdb.register_commands()
+        return self.repl.eval_cmd(cmd)
+
+    def get_reference_data(self, modname: str, cmd: str) -> Tuple[str, int]:
+        """
+        Given a module name and a command, find the output file and return a
+        tuple containg the expected output and exit code of the given command
+        for the supplied dump.
+        """
+        contents = Path(f"{TEST_OUTPUT_DIR}/{self.dump_name}/{modname}/{cmd}"
+                       ).read_text(encoding='utf-8').splitlines(True)
+        return ("".join(contents[:-2]), int(contents[-1].strip()))
+
+    def verify_cmd_output_and_code(self,
+                                   capsys: Any,
+                                   mod: str,
+                                   cmd: str,
+                                   stripped: bool = False) -> None:
+        """
+        Run supplied command and verify that its exit code and output match our
+        reference results.
+        """
+        ref_output, ref_code = self.get_reference_data(mod, cmd)
+
+        assert self.repl_invoke(cmd) == ref_code
+        captured = capsys.readouterr()
+        if not stripped:
+            assert captured.out == ref_output
+        else:
+            for i, n in enumerate(captured.out):
+                assert n.strip() == ref_output[i].strip()
+            assert len(captured.out) == len(ref_output)
+
+    def generate_output_for_commands(self, cmds: List[str],
+                                     dirpath: str) -> None:
+        """
+        Takes a list of SDB commands in string form, invokes them in the
+        context of the current sdb.REPL, and stores their output in the
+        directory specified, each under a different file.
+
+        Note: Keep in mind that if the directory specified exists then
+        it will be removed together with all of its contents.
+        """
+        if os.path.exists(dirpath):
+            shutil.rmtree(dirpath)
+        os.makedirs(dirpath)
+        for cmd in cmds:
+            with open(f"{dirpath}/{cmd}", 'w', encoding="utf-8") as f:
+                with redirect_stdout(f):
+                    #
+                    # All `print()` output in this block ends up in the file that
+                    # we are writing due to `redirect_stdout()`. This includes
+                    # whatever output is printed by `repl_invoke()`.
+                    #
+                    exit_code = self.repl_invoke(cmd)
+                    print("@#$ EXIT CODE $#@")
+                    print(f"{exit_code}")
+
+    def generate_output_for_test_module(self, modname: str) -> None:
+        """
+        Generates the regression output for all the commands of a test module
+        given  module name. The assumption for this to work automatically is
+        that for the given modname "mod" there exist a test module under
+        test.integration named test_mod_generic which has a list of commands in
+        string form called CMD_TABLE.
+        """
+        test_mod = import_module(f"tests.integration.test_{modname}_generic")
+        self.generate_output_for_commands(
+            test_mod.CMD_TABLE,  # type: ignore[attr-defined]
+            f"{TEST_OUTPUT_DIR}/{self.dump_name}/{modname}")
+        print(
+            f"Generated regression test output for {self.dump_name}/{modname}..."
+        )
+
+    @staticmethod
+    def get_all_generic_test_modules() -> List[str]:
+        """
+        Look at this current directory and capture all modules with generic
+        capsys tests whose filename follows the 'test_{module name}_generic.py'
+        convention.
+        """
+        modnames = []
+        for filename in os.listdir(THIS_DIR):
+            m = re.search('test_(.+?)_generic.py', filename)
+            if m:
+                modnames.append(m.group(1))
+        return modnames
+
+    def generate_known_regression_output(self) -> None:
+        """
+        Iterate through all the test modules and generate reference output for
+        future regression test runs.
+        """
+        for modname in self.get_all_generic_test_modules():
+            if self.is_userland and modname.startswith("user_"):
+                self.generate_output_for_test_module(modname)
+            elif not self.is_userland and not modname.startswith("user_"):
+                self.generate_output_for_test_module(modname)
 
 
-def generate_output_for_commands(cmds: List[str], dirpath: str) -> None:
+def get_all_reference_crash_dumps() -> List[RefDump]:
     """
-    Takes a list of SDB commands in string form, invokes them in the
-    context of the current crash dump/sdb.REPL, and stores their output
-    in the directory specified, each under a different file.
-
-    Note: Keep in mind that if the directory specified exists then
-    it will be removed together with all of its contents.
+    Returns all discoverable kernel crash dumps as RefDump objects.
     """
-    assert TEST_PROGRAM
-    if os.path.exists(dirpath):
-        shutil.rmtree(dirpath)
-    os.makedirs(dirpath)
-    for cmd in cmds:
-        with open(f"{dirpath}/{cmd}", 'w', encoding="utf-8") as f:
-            with redirect_stdout(f):
-                repl_invoke(cmd)
+    rdumps = []
+    for dump_dir_path in get_crash_dump_dir_paths():
+        rdump = RefDump(dump_dir_path, setup_crash_dump_target)
+        rdump.setup_target()
+        rdumps.append(rdump)
+    return rdumps
 
 
-def generate_output_for_test_module(dump_name: str, modname: str) -> None:
+def get_all_reference_core_dumps() -> List[RefDump]:
     """
-    Generates the regression output for all the commands of
-    a test module given  module name. The assumption for this
-    to work automatically is that for the given modname "mod"
-    there exist a test module under test.integration named
-    test_mod_generic which has a list of commands in string
-    form called CMD_TABLE.
+    Returns all discoverable userland core dumps as RefDump objects.
     """
-    test_mod = import_module(f"tests.integration.test_{modname}_generic")
-    generate_output_for_commands(
-        test_mod.CMD_TABLE,  # type: ignore[attr-defined]
-        f"{TEST_OUTPUT_DIR}/{dump_name}/{modname}")
-    print(f"Generated regression test output for {modname}...")
+    rdumps = []
+    for dump_dir_path in get_core_dump_dir_paths():
+        rdump = RefDump(dump_dir_path, setup_userland_core_target)
+        rdump.setup_target()
+        rdumps.append(rdump)
+    return rdumps
 
 
-def get_all_generic_test_modules() -> List[str]:
+def get_all_reference_dumps() -> List[RefDump]:
     """
-    Look at this current directory and capture all modules
-    with generic capsys tests whose filename follows the
-    'test_{module name}_generic.py' convention.
+    Returns all discoverable RefDump objects (both kernel and userland dumps).
     """
-    modnames = []
-    for filename in os.listdir(THIS_DIR):
-        m = re.search('test_(.+?)_generic.py', filename)
-        if m:
-            modnames.append(m.group(1))
-    return modnames
+    return get_all_reference_crash_dumps() + get_all_reference_core_dumps()
 
 
-def generate_known_regression_output(dump_name: str) -> None:
+def generate_regression_output() -> None:
     """
-    Auto-generate the baseline regression output for all
-    the detected test modules in this directory.
+    Auto-generate the baseline regression output for all the detected test
+    modules in this directory.
     """
-    for modname in get_all_generic_test_modules():
-        generate_output_for_test_module(dump_name, modname)
+    for rdump in get_all_reference_dumps():
+        rdump.generate_known_regression_output()

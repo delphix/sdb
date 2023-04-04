@@ -25,3 +25,5 @@ TASK_STRUCT        STATE             COUNT
                   kthread+0x121
                   ret_from_fork+0x1f
 
+@#$ EXIT CODE $#@
+0

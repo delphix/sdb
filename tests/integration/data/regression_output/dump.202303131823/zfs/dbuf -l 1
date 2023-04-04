@@ -242,3 +242,5 @@
   0xffff9ac48fc35260        2    1       30    20 objpool/testfs
   0xffff9ac5b0d06f50      128    1       83    41 testpool/testfs
   0xffff9ac55c898ab8      128    1       17    19 testpool/testfs
+@#$ EXIT CODE $#@
+0

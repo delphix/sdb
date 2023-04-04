@@ -1,1 +1,3 @@
 sdb: member: no identifier specified after .
+@#$ EXIT CODE $#@
+1

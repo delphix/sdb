@@ -81,3 +81,5 @@
 0xffff9ac65a470400 zio_buf_comb_14336          KMC_NODEBUG|KMC_SLAB       14336      16384         0                0                0     0            0          0.0B      320.0KB     0           0             0         zio_buf_comb_14336[SLUB]    0
 0xffff9ac65a470200 zio_buf_comb_8192           KMC_NODEBUG|KMC_SLAB        8192       8192         0                0                0     0            0          0.0B      288.0KB     0           0             0          zio_buf_comb_8192[SLUB]    0
 0xffff9ac55a329200 vdev_object_store_io_cache              KMC_SLAB          32         32         0                0                0     0            0          0.0B      144.0KB     0           0             0 vdev_object_store_io_cache[SLUB]    0
+@#$ EXIT CODE $#@
+0
