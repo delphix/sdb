@@ -137,8 +137,8 @@ class Blkptr(sdb.PrettyPrinter):
                     print(f"iv={bp.blk_dva[2].dva_word[1]:#x}", end='')
                     print(f"{BP_GET_IV2(bp):#x}")
 
-                if BP_IS_GANG(bp) and (DVA_GET_ASIZE(bp.blk_dva[2]) <=
-                                       DVA_GET_ASIZE(bp.blk_dva[1]) / 2):
+                if BP_IS_GANG(bp) and (DVA_GET_ASIZE(bp.blk_dva[2])
+                                       <= DVA_GET_ASIZE(bp.blk_dva[1]) / 2):
                     copies -= 1
 
                 print(f"[L{BP_GET_LEVEL(bp)}", end=' ')
