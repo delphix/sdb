@@ -52,8 +52,8 @@ class ZfsDbgmsg(sdb.Locator, sdb.PrettyPrinter):
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         for obj in objs:
-            ZfsDbgmsg.print_msg(obj, self.args.verbose >= 1,
-                                self.args.verbose >= 2)
+            ZfsDbgmsg.print_msg(obj, self.args.verbose >= 1, self.args.verbose
+                                >= 2)
 
     def no_input(self) -> Iterable[drgn.Object]:
         proc_list = sdb.get_object("zfs_dbgmsgs").pl_list
