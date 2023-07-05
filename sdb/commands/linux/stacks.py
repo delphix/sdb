@@ -207,7 +207,13 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
 
     @staticmethod
     def task_struct_get_state(task: drgn.Object) -> str:
-        state = task.state.value_()
+        task_struct_type = task.type_.type
+        state = 0
+        if task_struct_type.has_member('__state'):
+            state = task.member_('__state').value_()
+        else:
+            # For kernels older than v5.14
+            state = task.state.value_()
         if state == 0x402:
             return "IDLE"
 
