@@ -124,6 +124,14 @@ class Zio(sdb.Locator, sdb.PrettyPrinter):
                 yield from self.from_zio(c.zl_parent)
         self.level -= 1
 
+    @staticmethod
+    def zio_has_parents(zio: drgn.Object) -> bool:
+        parent_list = zio.io_parent_list.list_head.address_of_()
+        first_parent = parent_list.next
+        if parent_list != first_parent:
+            return True
+        return False
+
     def no_input(self) -> drgn.Object:
         if self.args.parents:
             raise sdb.CommandInvalidInputError(
@@ -136,5 +144,5 @@ class Zio(sdb.Locator, sdb.PrettyPrinter):
             [sdb.Walk(), sdb.Cast(["zio_t *"])],
         )
         for zio in zios:
-            if zio.io_parent_count == 0:
+            if not self.zio_has_parents(zio):
                 yield from self.from_zio(zio)
