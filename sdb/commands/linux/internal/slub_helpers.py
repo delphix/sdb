@@ -20,28 +20,49 @@ from typing import Iterable, Optional
 
 import drgn
 from drgn.helpers.linux.list import list_for_each_entry
-from drgn.helpers.linux.slab import find_containing_slab_cache
+from drgn.helpers.linux.slab import find_containing_slab_cache, for_each_slab_cache
 
 import sdb
 
 
 def is_root_cache(cache: drgn.Object) -> bool:
     assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
-    return int(cache.memcg_params.root_cache.value_()) == 0x0
+    #
+    # In v5.9 and later the `memcg_params` field and the concept
+    # of root+children caches was completely removed.
+    #
+    try:
+        return int(cache.memcg_params.root_cache.value_()) == 0x0
+    except AttributeError:
+        return False
 
 
 def for_each_root_cache() -> Iterable[drgn.Object]:
-    yield from list_for_each_entry(
-        "struct kmem_cache",
-        sdb.get_object("slab_root_caches").address_of_(),
-        "memcg_params.__root_caches_node")
+    #
+    # In v5.9 and later the `memcg_params` field and the concept
+    # of root+children caches was completely removed.
+    #
+    try:
+        yield from list_for_each_entry(
+            "struct kmem_cache",
+            sdb.get_object("slab_root_caches").address_of_(),
+            "memcg_params.__root_caches_node")
+    except KeyError:
+        yield from for_each_slab_cache(sdb.get_prog())
 
 
 def for_each_child_cache(root_cache: drgn.Object) -> Iterable[drgn.Object]:
     assert sdb.type_canonical_name(root_cache.type_) == 'struct kmem_cache *'
-    yield from list_for_each_entry(
-        "struct kmem_cache", root_cache.memcg_params.children.address_of_(),
-        "memcg_params.children_node")
+    #
+    # In v5.9 and later the `memcg_params` field and the concept
+    # of root+children caches was completely removed.
+    #
+    try:
+        yield from list_for_each_entry(
+            "struct kmem_cache", root_cache.memcg_params.children.address_of_(),
+            "memcg_params.children_node")
+    except AttributeError:
+        yield from []
 
 
 def for_each_node(cache: drgn.Object) -> Iterable[drgn.Object]:
