@@ -3,12 +3,5 @@ enum zfs_case {
 	ZFS_CASE_INSENSITIVE = 1,
 	ZFS_CASE_MIXED = 2,
 }
-struct v {
-	uint8_t b[16];
-}
-union thread_union {
-	struct task_struct task;
-	unsigned long stack[2048];
-}
 @#$ EXIT CODE $#@
 0

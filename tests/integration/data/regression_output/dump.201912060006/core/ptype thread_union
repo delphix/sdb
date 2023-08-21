@@ -1,0 +1,6 @@
+union thread_union {
+	struct task_struct task;
+	unsigned long stack[2048];
+}
+@#$ EXIT CODE $#@
+0
