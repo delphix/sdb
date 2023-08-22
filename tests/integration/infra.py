@@ -281,6 +281,14 @@ class RefDump:
         assert self.repl_invoke(cmd) == ref_code
         captured = capsys.readouterr()
         if not stripped:
+            with capsys.disabled():
+                if captured.out != ref_output:
+                    #
+                    # If we are about to fail the assertion print the
+                    # actual mismatch in the logs before failing.
+                    #
+                    print("expected:\n" + ref_output)
+                    print("got:\n" + captured.out)
             assert captured.out == ref_output
         else:
             for i, n in enumerate(captured.out):

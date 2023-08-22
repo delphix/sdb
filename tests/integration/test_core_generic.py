@@ -125,7 +125,8 @@ POS_CMDS = [
     # ptype
     "ptype spa_t",
     "ptype spa vdev",
-    "ptype zfs_case 'struct v' thread_union",
+    "ptype zfs_case",
+    "ptype thread_union",
     "ptype 'struct spa'",
 
     # sizeof
