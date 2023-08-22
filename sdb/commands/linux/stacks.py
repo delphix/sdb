@@ -23,6 +23,7 @@ from collections import defaultdict
 import drgn
 from drgn.helpers.linux.list import list_for_each_entry
 from drgn.helpers.linux.pid import for_each_task
+from drgn.helpers.linux.sched import task_state_to_char
 
 import sdb
 
@@ -203,22 +204,13 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
         "t": 0x08,
         "X": 0x10,
         "Z": 0x20,
+        "P": 0x40,
+        "I": 0x402,
     }
 
     @staticmethod
     def task_struct_get_state(task: drgn.Object) -> str:
-        task_struct_type = task.type_.type
-        state = 0
-        if task_struct_type.has_member('__state'):
-            state = task.member_('__state').value_()
-        else:
-            # For kernels older than v5.14
-            state = task.state.value_()
-        if state == 0x402:
-            return "IDLE"
-
-        exit_state = task.exit_state.value_()
-        return KernelStacks.TASK_STATES[(state | exit_state) & 0x7f]
+        return KernelStacks.resolve_state(task_state_to_char(task))
 
     @staticmethod
     def resolve_state(tstate: str) -> str:
