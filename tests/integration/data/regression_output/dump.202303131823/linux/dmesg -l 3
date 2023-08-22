@@ -1,0 +1,5 @@
+[    2.310155] ena 0000:00:05.0: LLQ is not supported Fallback to host mode policy.
+[   42.095750] db_root: cannot open: /etc/target
+[ 1598.032724] Kernel panic - not syncing: sysrq triggered crash
+@#$ EXIT CODE $#@
+0

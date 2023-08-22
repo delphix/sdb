@@ -116,8 +116,7 @@ POS_CMDS = [
 STRIPPED_POS_CMDS = [
     # dmesg
     "dmesg",
-    "dmesg | pp",
-    "dmesg | filter 'obj.level == 3' | dmesg",
+    "dmesg -l 3",
 ]
 
 NEG_CMDS = [
