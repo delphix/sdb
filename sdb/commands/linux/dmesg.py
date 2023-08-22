@@ -16,43 +16,64 @@
 
 # pylint: disable=missing-docstring
 
+import argparse
 from typing import Iterable
 
 import drgn
+from drgn.helpers.linux.printk import get_printk_records
 import sdb
 
+# pylint: disable=line-too-long
 
-class DMesg(sdb.Locator, sdb.PrettyPrinter):
+
+class DMesg(sdb.Command):
+    """
+    DESCRIPTION
+
+        Get contents from kernel log buffer formatted like dmesg(1).
+
+    EXAMPLES
+
+        sdb> dmesg ! tail
+        [   30.544756] AVX2 version of gcm_enc/dec engaged.
+        [   30.545019] AES CTR mode by8 optimization enabled
+        [   38.855043] Rounding down aligned max_sectors from 4294967295 to 4294967288
+        [   38.863427] db_root: cannot open: /etc/target
+        [   39.822443] aufs 5.15.5-20211129
+        [   40.344495] NFSD: Using UMH upcall client tracking operations.
+        [   40.344501] NFSD: starting 20-second grace period (net f0000000)
+        [   40.978893] EXT4-fs (zd0): mounted filesystem with ordered data mode. Opts: (null). Quota mode: none.
+        [  176.825888] bpfilter: Loaded bpfilter_umh pid 4662
+        [  176.826272] Started bpfilter
+
+        sdb> dmesg -l 3
+        [   38.863427] db_root: cannot open: /etc/target
+    """
 
     names = ["dmesg"]
+    # input_type = None
     load_on = [sdb.Kernel()]
 
-    input_type = "struct printk_log *"
-    output_type = "struct printk_log *"
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        #
+        # #define KERN_EMERG	KERN_SOH "0"	/* system is unusable */
+        # #define KERN_ALERT	KERN_SOH "1"	/* action must be taken immediately */
+        # #define KERN_CRIT	KERN_SOH "2"	/* critical conditions */
+        # #define KERN_ERR	KERN_SOH "3"	/* error conditions */
+        # #define KERN_WARNING	KERN_SOH "4"	/* warning conditions */
+        # #define KERN_NOTICE	KERN_SOH "5"	/* normal but significant condition */
+        # #define KERN_INFO	KERN_SOH "6"	/* informational */
+        # #define KERN_DEBUG	KERN_SOH "7"	/* debug-level messages */
+        #
+        parser.add_argument('--level', '-l', nargs="?", type=int, default=7)
+        return parser
 
-    def no_input(self) -> Iterable[drgn.Object]:
-        log_idx = sdb.get_object("log_first_idx")
-        log_seq = sdb.get_object("clear_seq")
-        log_end = sdb.get_object("log_next_seq")
-        log_buf = sdb.get_object("log_buf")
-
-        while log_seq < log_end:
-            entry = drgn.cast('struct printk_log *', log_buf + log_idx)
-
-            yield entry
-
-            if entry.len == 0:
-                log_idx = 0
-            else:
-                log_idx += entry.len
-            log_seq += 1
-
-    def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
-        for obj in objs:
-            secs = int(obj.ts_nsec.value_() / 1000000000)
-            usecs = int((obj.ts_nsec.value_() % 1000000000) / 1000)
-
-            message = drgn.cast("char *", obj) + obj.type_.type.size
-            text = message.string_().decode('utf-8', 'ignore')
-
-            print(f"[{secs:5d}.{usecs:06d}]: {text}")
+    def _call(self, objs: Iterable[drgn.Object]) -> None:
+        for record in get_printk_records(sdb.get_prog()):
+            if self.args.level >= record.level:
+                secs = record.timestamp // 1000000000
+                sub_secs = record.timestamp % 1000000000 // 1000
+                msg = record.text.decode('utf-8')
+                print(f"[{secs: 5d}.{sub_secs:06d}] {msg}")

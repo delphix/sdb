@@ -1,8 +1,0 @@
-[    3.685278]: piix4_smbus 0000:00:07.3: SMBus Host Controller not enabled!SUBSYSTEM=pci
-[    4.346112]: sd 2:0:0:0: [sda] Assuming drive cache: write throughSUBSYSTEM=scsi
-[    4.356113]: sd 2:0:1:0: [sdb] Assuming drive cache: write throughSUBSYSTEM=scsi
-[    4.363435]: sd 2:0:2:0: [sdc] Assuming drive cache: write throughSUBSYSTEM=scsi
-[    4.366085]: sd 2:0:3:0: [sdd] Assuming drive cache: write throughSUBSYSTEM=scsi
-[   48.368009]: db_root: cannot open: /etc/target
-@#$ EXIT CODE $#@
-0
