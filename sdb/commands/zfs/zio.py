@@ -87,8 +87,6 @@ class Zio(sdb.Locator, sdb.PrettyPrinter):
             delta = waiter = "-"
             stage = removeprefix(zio.io_stage.format_(type_name=False),
                                  "ZIO_STAGE_")
-            if stage == "DONE":
-                continue
             if zio.io_error != 0:
                 stage = "FAILED"
             io_type = removeprefix(zio.io_type.format_(type_name=False),
