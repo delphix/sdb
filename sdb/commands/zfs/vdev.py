@@ -21,9 +21,9 @@ from typing import Iterable, List, Optional
 
 import drgn
 import sdb
+from sdb.commands.internal.util import removeprefix
 from sdb.commands.zfs.metaslab import Metaslab
 from sdb.commands.zfs.histograms import ZFSHistogram
-from sdb.commands.zfs.internal import removeprefix
 
 
 class Vdev(sdb.Locator, sdb.PrettyPrinter):

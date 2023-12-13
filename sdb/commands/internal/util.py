@@ -152,3 +152,14 @@ def get_valid_struct_name(cmd: sdb.Command, tname: str) -> str:
 
     raise sdb.CommandError(
         cmd.name, f"{tname} is not a struct nor a typedef to a struct")
+
+
+def removeprefix(text: str, prefix: str) -> str:
+    """
+    Used to pretty-print enum names that have a common
+    prefix and are used as output to the user.
+
+    Note: Python 3.9 and newer have this function in their
+    string library. So until then we use this..
+    """
+    return text[text.startswith(prefix) and len(prefix):]

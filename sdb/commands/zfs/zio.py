@@ -22,7 +22,8 @@ from typing import Iterable, List, Optional
 
 import drgn
 import sdb
-from sdb.commands.zfs.internal import gethrtime, removeprefix, NANOSEC, MSEC
+from sdb.commands.internal.util import removeprefix
+from sdb.commands.zfs.internal import gethrtime, NANOSEC, MSEC
 
 
 class Zio(sdb.Locator, sdb.PrettyPrinter):

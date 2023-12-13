@@ -23,17 +23,6 @@ import drgn
 import sdb
 
 
-def removeprefix(text: str, prefix: str) -> str:
-    """
-    Used to pretty-print enum names that have a common
-    prefix and are used as output to the user.
-
-    Note: Python 3.9 and newer have this function in their
-    string library. So until then we use this..
-    """
-    return text[text.startswith(prefix) and len(prefix):]
-
-
 def nicenum(num: int, suffix: str = "B") -> str:
     for unit in ["", "K", "M", "G", "T", "P", "E", "Z"]:
         if num < 1024:
