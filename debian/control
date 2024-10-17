@@ -7,5 +7,5 @@ Build-Depends: debhelper (>= 9), dh-python, python3
 
 Package: sdb
 Architecture: any
-Depends: ${shlibs:Depends}, ${python3:Depends}
+Depends: libkdumpfile10, python3-drgn, ${shlibs:Depends}, ${python3:Depends}
 Description: The Slick/Simple Debugger
