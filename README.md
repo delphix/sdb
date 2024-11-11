@@ -1,7 +1,7 @@
 # sdb
 The Slick Debugger
 
-![](https://github.com/delphix/sdb/workflows/.github/workflows/main.yml/badge.svg)
+![](https://github.com/sdimitro/sdb/workflows/.github/workflows/main.yml/badge.svg)
 
 ### Installation
 
