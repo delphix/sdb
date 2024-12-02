@@ -14,7 +14,7 @@ Note that in order for `drgn` to support kdump files it needs to be *compiled* w
 
 Finally run the following to install `sdb`:
 ```
-$ git clone https://github.com/delphix/sdb.git
+$ git clone https://github.com/sdimitro/sdb.git
 $ cd sdb
 $ sudo python3 setup.py install
 ```

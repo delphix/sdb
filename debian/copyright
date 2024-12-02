@@ -1,9 +1,13 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: sdb
-Source: https://github.com/delphix/sdb
+Source: https://github.com/sdimitro/sdb
 
 Files: *
-Copyright: Delphix Corp.
+Copyright: 2024 Serapheim Dimitropoulos
+License: Apache-2.0
+
+Files: *
+Copyright: 2016 - 2023 Delphix Corp.
 License: Apache-2.0
 
 License: Apache-2.0

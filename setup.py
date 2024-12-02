@@ -23,9 +23,9 @@ setup(
         'console_scripts': ['sdb=sdb.internal.cli:main'],
     },
 
-    author='Delphix Platform Team',
-    author_email='serapheim@delphix.com',
+    author='Serapheim Dimitropoulos',
+    author_email='serapheimd@gmail.com',
     description='The Slick/Simple Debugger',
     license='Apache-2.0',
-    url='https://github.com/delphix/sdb',
+    url='https://github.com/sdimitro/sdb',
 )

@@ -1,7 +1,7 @@
 Source: sdb
 Section: misc
 Priority: optional
-Maintainer: Delphix Engineering <eng@delphix.com>
+Maintainer: Serapheim Dimitropoulos <serapheimd@gmail.com>
 Standards-Version: 4.1.2
 Build-Depends: debhelper (>= 9), dh-python, python3
 
