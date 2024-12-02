@@ -1,5 +1,6 @@
-# sdb
-The Slick Debugger
+<p align="center">
+    <img src="assets/img/sdb-logo.png" alt="SDB" width="350" height="300">
+</p>
 
 ![](https://github.com/sdimitro/sdb/workflows/.github/workflows/main.yml/badge.svg)
 
