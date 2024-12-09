@@ -92,15 +92,13 @@ $ python3 -m yapf -i --style google --recursive tests
 
 Regression testing is currently done by downloading a refererence crash/core
 dump and running a predetermined set of commads on it, ensuring that they
-return the same reference output before and after your changes. To see the list
-of reference crash dumps refer to the testing matrix of the `pytest` Github
-action in `.github/workflows/main.yml`. Here is an example of running the
-regression test commands against `dump.201912060006.tar.lzma` with code
-coverage and verbose output:
+return the same reference output before and after your changes.
 
 ```
 $ python3 -m pip install python-config pytest pytest-cov
-$ .github/scripts/download-dump-from-s3.sh dump.201912060006.tar.lzma
+$ .github/scripts/download-dumps-from-gdrive.sh
+$ .github/scripts/extract-dump.sh dump.201912060006.tar.lzma
+$ .github/scripts/extract-dump.sh dump.202303131823.tar.gz
 $ python3 -m pytest -v --cov sdb --cov-report xml tests
 ```
 
