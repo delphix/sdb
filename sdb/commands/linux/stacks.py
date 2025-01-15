@@ -369,6 +369,12 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             stack_aggr[stack_key].append(task)
         return sorted(stack_aggr.items(), key=lambda x: len(x[1]), reverse=True)
 
+    @staticmethod
+    def frame_string(frame_info: str, count: int) -> str:
+        if count > 1:
+            return f"{frame_info} ({str(count)})\n"
+        return f"{frame_info}\n"
+
     def print_stacks(self, objs: Iterable[drgn.Object]) -> None:
         self.print_header()
         for stack_key, tasks in KernelStacks.aggregate_stacks(objs):
@@ -382,16 +388,47 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
                 task_ptr = hex(tasks[0].value_())
                 stacktrace_info += f"{task_ptr:<18s} {task_state:<16s} {len(tasks):6d}\n"
 
+            #
+            # List the frames for each task in the stack. Ignore frames
+            # with a program counter of zero (sometimes the stack will be
+            # padded out with zeros). Aggregate frames with the same program
+            # counter and offset.
+            #
             frame_pcs: Tuple[int, ...] = stack_key[1]
+            last_frame_pc = 0x0
+            last_offset = 0x0
+            count = 0
             for frame_pc in frame_pcs:
                 try:
+                    # ignore frames with a program counter of zero
+                    if frame_pc == 0x0:
+                        continue
                     sym = sdb.get_symbol(frame_pc)
                     func = sym.name
                     offset = frame_pc - sym.address
+                    if frame_pc == last_frame_pc and offset == last_offset:
+                        count += 1
+                        continue
+                    # emit the last frame we have accumulated
+                    if count > 0:
+                        stacktrace_info += KernelStacks.frame_string(frame_info, count)
+                    frame_info = f"{'':18s}{func}+0x{hex(offset)}"
+                    last_frame_pc = frame_pc
+                    last_offset = offset
+                    count = 1
                 except LookupError:
-                    func = hex(frame_pc)
-                    offset = 0x0
-                stacktrace_info += f"{'':18s}{func}+{hex(offset)}\n"
+                    if frame_pc == last_frame_pc:
+                        count += 1
+                        continue
+                    # emit any previous frame info we have accumulated
+                    if count > 0:
+                        stacktrace_info += KernelStacks.frame_string(frame_info, count)
+                    frame_info = f"{'':18s}{hex(frame_pc)}+0x0"
+                    last_frame_pc = frame_pc
+                    count = 1
+            # emit the final frame if we have one
+            if count > 0:
+                stacktrace_info += KernelStacks.frame_string(frame_info, count)
             print(stacktrace_info)
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
