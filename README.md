@@ -108,3 +108,4 @@ dumps (or the specific one you want to correct) and run the following:
 ```
 $ PYTHONPATH=$(pwd) python3 tests/integration/gen_regression_output.py
 ```
+
