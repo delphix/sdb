@@ -358,6 +358,12 @@ class Command:
         for obj in objs:
             try:
                 obj.read_()
+            except AttributeError:
+                #
+                # This object does not support the read_() method.
+                #
+                yield obj
+                continue
             except TypeError as err:
                 obj_type = type_canonicalize(obj.type_)
                 if obj_type.kind == drgn.TypeKind.ARRAY and not obj_type.is_complete(
@@ -388,6 +394,12 @@ class Command:
                 if fatal:
                     raise err
                 print(err.text)
+                continue
+            except drgn.ObjectAbsentError as err:
+                # XXX - maybe just go ahead and yield the object?
+                if fatal:
+                    raise CommandError(self.name, str(err)) from err
+                print(str(err))
                 continue
             yield obj
 
@@ -587,7 +599,12 @@ class Locator(Command):
             return
 
         for i in objs:
-            obj_type_name = type_canonical_name(i.type_)
+            try:
+                obj_type_name = type_canonical_name(i.type_)
+            except AttributeError:
+                # This input is not a drgn.Object, so we can't check its type.
+                yield i
+                continue
 
             # try subclass-specified input types first, so that they can
             # override any other behavior

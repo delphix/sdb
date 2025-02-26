@@ -282,6 +282,7 @@ class Member(sdb.SingleInputCommand):
             terms: List[Tuple[MemberExprSep, str]]) -> drgn.Object:
         """
         Evaluates member terms passed to us by _parse_member_tokens()
+        Given a.b.c this function will return the object for term c
         """
         obj = initial_obj
         for term in terms:

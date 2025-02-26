@@ -35,8 +35,9 @@ def parse_arguments() -> argparse.Namespace:
     Sets up argument parsing and does the first pass of validation
     of the command line input.
     """
-    parser = argparse.ArgumentParser(prog="sdb",
-                                     description="The Slick/Simple Debugger")
+    parser = argparse.ArgumentParser(
+        prog="sdb", description="The Slick/Simple Debugger"
+    )
 
     dump_group = parser.add_argument_group("core/crash dump analysis")
     dump_group.add_argument(
@@ -45,17 +46,16 @@ def parse_arguments() -> argparse.Namespace:
         default="",
         help="a namelist like vmlinux or userland binary",
     )
-    dump_group.add_argument("core",
-                            nargs="?",
-                            default="",
-                            help="the core/crash dump to be debugged")
+    dump_group.add_argument(
+        "core", nargs="?", default="", help="the core/crash dump to be debugged"
+    )
 
     live_group = parser.add_argument_group(
-        "live system analysis").add_mutually_exclusive_group()
-    live_group.add_argument("-k",
-                            "--kernel",
-                            action="store_true",
-                            help="debug the running kernel (default)")
+        "live system analysis"
+    ).add_mutually_exclusive_group()
+    live_group.add_argument(
+        "-k", "--kernel", action="store_true", help="debug the running kernel (default)"
+    )
     live_group.add_argument(
         "-p",
         "--pid",
@@ -71,28 +71,28 @@ def parse_arguments() -> argparse.Namespace:
         metavar="PATH",
         default=[],
         action="append",
-        help="load debug info and symbols from the given directory or file;" +
-        " this may option may be given more than once",
+        help="load debug info and symbols from the given directory or file;"
+        + " this may option may be given more than once",
     )
     dis_group.add_argument(
         "-A",
         "--no-default-symbols",
         dest="default_symbols",
         action="store_false",
-        help=
-        "don't load any debugging symbols that were not explicitly added with -s",
+        help="don't load any debugging symbols that were not explicitly added with -s",
     )
 
-    parser.add_argument("-e",
-                        "--eval",
-                        metavar="CMD",
-                        type=str,
-                        action="store",
-                        help="evaluate CMD and exit")
-    parser.add_argument("-q",
-                        "--quiet",
-                        action="store_true",
-                        help="don't print non-fatal warnings")
+    parser.add_argument(
+        "-e",
+        "--eval",
+        metavar="CMD",
+        type=str,
+        action="store",
+        help="evaluate CMD and exit",
+    )
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="don't print non-fatal warnings"
+    )
     args = parser.parse_args()
 
     #
@@ -112,11 +112,9 @@ def parse_arguments() -> argparse.Namespace:
     # ```
     #
     if args.object and args.kernel:
-        parser.error(
-            "cannot specify an object file while also specifying --kernel")
+        parser.error("cannot specify an object file while also specifying --kernel")
     if args.object and args.pid:
-        parser.error(
-            "cannot specify an object file while also specifying --pid")
+        parser.error("cannot specify an object file while also specifying --pid")
 
     #
     # We currently cannot handle object files without cores.
@@ -127,8 +125,9 @@ def parse_arguments() -> argparse.Namespace:
     return args
 
 
-def load_debug_info(prog: drgn.Program, dpaths: List[str], quiet: bool,
-                    no_filter: bool) -> None:
+def load_debug_info(
+    prog: drgn.Program, dpaths: List[str], quiet: bool, no_filter: bool
+) -> None:
     """
     Iterates over all the paths provided (`dpaths`) and attempts
     to load any debug information it finds. If the path provided
@@ -140,10 +139,14 @@ def load_debug_info(prog: drgn.Program, dpaths: List[str], quiet: bool,
             prog.load_debug_info([path])
         elif os.path.isdir(path):
             kos = []
-            for (ppath, __, files) in os.walk(path):
+            for ppath, __, files in os.walk(path):
                 for i in files:
-                    if i.endswith(".ko") or i.endswith(".debug") or re.match(
-                            r".+\.so(\.\d)?", i) or no_filter:
+                    if (
+                        i.endswith(".ko")
+                        or i.endswith(".debug")
+                        or re.match(r".+\.so(\.\d)?", i)
+                        or no_filter
+                    ):
                         # matches:
                         #     kernel modules - .ko suffix
                         #     userland debug files - .debug suffix
@@ -214,8 +217,8 @@ def setup_target(args: argparse.Namespace) -> drgn.Program:
         try:
             load_debug_info(prog, args.symbol_search, args.quiet, False)
         except (
-                drgn.MissingDebugInfoError,
-                OSError,
+            drgn.MissingDebugInfoError,
+            OSError,
         ) as debug_info_err:
             #
             # See similar comment above
@@ -227,7 +230,7 @@ def setup_target(args: argparse.Namespace) -> drgn.Program:
 
 
 def main() -> None:
-    """ The entry point of the sdb "executable" """
+    """The entry point of the sdb "executable" """
     args = parse_arguments()
 
     try:
@@ -236,10 +239,15 @@ def main() -> None:
         print("sdb: " + str(err))
         return
     sdb.target.set_prog(prog)
+    try:
+        sdb.target.set_thread(prog.crashed_thread().object)
+    except ValueError:
+        sdb.target.set_thread(next(prog.threads()).object)
+    sdb.target.set_frame(-1)
     sdb.register_commands()
 
     repl = REPL(prog, list(sdb.get_registered_commands().keys()))
-    repl.enable_history(os.getenv('SDB_HISTORY_FILE', '~/.sdb_history'))
+    repl.enable_history(os.getenv("SDB_HISTORY_FILE", "~/.sdb_history"))
     if args.eval:
         exit_code = repl.eval_cmd(args.eval)
         sys.exit(exit_code)
