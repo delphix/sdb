@@ -17,6 +17,7 @@
 # pylint: disable=missing-docstring
 
 import argparse
+import textwrap
 from textwrap import shorten
 from typing import Callable, Dict, Iterable, Optional, Union
 
@@ -209,6 +210,20 @@ class KernelTrace(sdb.Locator, sdb.PrettyPrinter):
         )
         return parser
 
+    @classmethod
+    def help_text(cls):
+        p1 = (
+            "If this command is used to end a pipeline, it will print a"
+            + " human-readable decoding of the execution state of threads."
+            + " Otherwise, it will set the current thread context to the final"
+            + " input thread and return the threads that were input to it."
+        )
+        p2 = (
+            "This command can be used to start a pipeline, in which"
+            + " case it will use the current thread context as input."
+        )
+        return [p1, p2]
+
     def pretty_print(self, threads: Iterable[drgn.Object]) -> None:
         if not self.isfirst and self.args.task:
             raise sdb.CommandError(self.name, "<task> argument not allowed with input")
@@ -252,10 +267,6 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
     """
     Given a task_struct and frame, return requested stack frame
 
-    This command is used to set the context for the locals and registers
-    commands. If no frame is specified, the most recent frame is used. If
-    no task is specified, the current thread is used.
-
     EXAMPLE
         sdb> frame 7
         #7  0xffffffffc048c8d1 in thread_generic_wrapper (arg=0xffff94614f3cc400) at spl-thread.c:61:3
@@ -286,6 +297,22 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
         )
         return parser
 
+    @classmethod
+    def help_text(cls):
+        p1 = (
+            "This command is used to set the context for the 'locals' and 'registers'"
+            + " commands. If no frame is specified, the most recent frame is used. If"
+            + " no thread is input, the current thread context is used."
+        )
+        p2 = (
+            "If this command is used to end a pipeline, it will print a"
+            + " human-readable decoding of the requested stack frame for"
+            + " each stack trace provided. Otherwise, it will set the current"
+            + " frame context to the specified frame and return the threads"
+            + " that were input to it."
+        )
+        return [p1, p2]
+
     def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         if self.args.frame:
             self.frame_id = self.args.frame
@@ -300,7 +327,7 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
             self.pretty_print(self.caller(objs))
         else:
             # return threads that have the requested frame number
-            for thread in objs:
+            for thread in self.caller(objs):
                 try:
                     _frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
                 except IndexError:
@@ -327,8 +354,6 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
 class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
     """
     Given a stack frame, return the local variables
-
-    If the frame is not specified, the most recent frame is used.
 
     EXAMPLE
         sdb> frame 7 | locals
@@ -359,6 +384,22 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
             help="dereference pointers",
         )
         return parser
+
+    @classmethod
+    def help_text(cls):
+        p1 = (
+            "This command is used to print the local variables for the frame"
+            + " context set by the last 'frame' command."
+            + " If no variables are specified, all local variables are printed."
+            + " If no thread is input, the current thread context is used."
+        )
+        p2 = (
+            "If this command is used to end a pipeline, it will print a"
+            + " human-readable decoding of the requested variables for"
+            + " each thread provided. Otherwise, it will output the"
+            + " requested variable(s) in raw format."
+        )
+        return [p1, p2]
 
     def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         frame_id = sdb.get_frame()
@@ -418,8 +459,6 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
     """
     Given a stack frame, return the registers
 
-    If the frame is not specified, the most recent frame is used.
-
     EXAMPLE
         sdb> frame 7 | registers
         rbx = 18446744072641516784
@@ -453,6 +492,22 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
             help="print registers in hexadecimal",
         )
         return parser
+
+    @classmethod
+    def help_text(cls):
+        p1 = (
+            "This command is used to print the registers for the frame"
+            + " context set by the last 'frame' command."
+            + " If no register names are specified, all registers are printed."
+            + " If no thread is input, the current thread context is used."
+        )
+        p2 = (
+            "If this command is used to end a pipeline, it will print a"
+            + " human-readable decoding of the requested registers for"
+            + " each thread provided. Otherwise, it will output the"
+            + " requested register(s) in raw format."
+        )
+        return [p1, p2]
 
     def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         frame_id = sdb.get_frame()
