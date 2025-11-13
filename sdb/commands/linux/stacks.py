@@ -409,25 +409,23 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             #    frame_pcs: Tuple[int, ...] = stack_key[1]
             #    sdb.get_prog().stack_trace_from_pcs(frame_pcs)
             for frame in sdb.get_prog().stack_trace(task_ptr):
-                pc = 0x0
+                name = frame.name
+                if frame.is_inline:
+                    stacktrace_info += f"{'':18s}{name} (inlined)\n"
+                    continue
+                pc = frame.pc
+                if pc == 0x0:
+                    continue
                 try:
-                    name = frame.name
-                    pc = frame.pc
-                    if pc == 0x0:
-                        assert name is None
-                        continue
                     sym = frame.symbol()
                     if name is None:
                         name = sym.name
                     offset = pc - sym.address
                 except LookupError:
-                    assert name is None
-                    name = hex(pc)
+                    if name is None:
+                        name = hex(pc)
                     offset = 0x0
-                if frame.is_inline:
-                    stacktrace_info += f"{'':18s}{name} (inlined)\n"
-                else:
-                    stacktrace_info += f"{'':18s}{name}+{hex(offset)}\n"
+                stacktrace_info += f"{'':18s}{name}+{hex(offset)}\n"
             print(stacktrace_info)
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:

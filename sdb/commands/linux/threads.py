@@ -124,6 +124,9 @@ def _framestr(frame: drgn.Object, args: bool) -> str:
     if len(id) < 3:
         id = id + " "
     addr = parts[2]
+    # Just have an address
+    if len(parts) < 4:
+        return id + " " + addr
     # No function or file path available? Just return the symbol
     if len(parts) < 5:
         return id + " " + addr + " " + parts[3]
@@ -314,7 +317,7 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
         return [p1, p2]
 
     def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
-        if self.args.frame:
+        if self.args.frame >= 0:
             self.frame_id = self.args.frame
             sdb.set_frame(self.frame_id)
         else:
