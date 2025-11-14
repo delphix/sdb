@@ -48,6 +48,28 @@ import drgn
 # pylint: disable=missing-function-docstring
 # pylint: disable=global-statement
 prog: drgn.Program
+thread: int
+frame: int
+
+
+def set_thread(thread_: int) -> None:
+    global thread
+    thread = thread_
+
+
+def get_thread() -> int:
+    global thread
+    return thread
+
+
+def set_frame(frame_: int) -> None:
+    global frame
+    frame = frame_
+
+
+def get_frame() -> int:
+    global frame
+    return frame
 
 
 def get_type(type_name: str) -> drgn.Type:
@@ -156,7 +178,7 @@ def type_equals(a: drgn.Type, b: drgn.Type) -> bool:
     return type_canonical_name(a) == type_canonical_name(b)
 
 
-#pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
 class All:
     """
     Commands that specify this runtime should always be loaded; these commands
@@ -164,7 +186,7 @@ class All:
     """
 
 
-#pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
 class Kernel:
     """
     Commands that specify this runtime should be loaded any time a kernel
@@ -172,7 +194,7 @@ class Kernel:
     """
 
 
-#pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
 class Userland:
     """
     Commands that specify this runtime should be loaded any time a userland
@@ -180,7 +202,7 @@ class Userland:
     """
 
 
-#pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
 class Module:
     """
     Commands that specify this runtime should be loaded whenever the kernel
@@ -191,7 +213,7 @@ class Module:
         self.name = name
 
 
-#pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
 class Library:
     """
     Commands that specify this runtime should be loaded whenever the library

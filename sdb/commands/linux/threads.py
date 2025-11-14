@@ -16,8 +16,10 @@
 
 # pylint: disable=missing-docstring
 
+import argparse
+import textwrap
 from textwrap import shorten
-from typing import Callable, Dict, Iterable, Union
+from typing import Callable, Dict, Iterable, Optional, Union
 
 import drgn
 from drgn.helpers.linux.pid import for_each_task
@@ -26,6 +28,10 @@ from drgn.helpers.linux.mm import cmdline
 import sdb
 from sdb.commands.internal.table import Table
 from sdb.commands.linux.stacks import KernelStacks
+from sdb.error import SymbolNotFoundError
+
+TraceContext = None
+FrameContext = None
 
 
 def _cmdline(obj: drgn.Object) -> str:
@@ -93,9 +99,7 @@ class KernelThreads(sdb.Locator, sdb.PrettyPrinter):
         fields = list(KernelThreads.FIELDS.keys())
         table = Table(fields, None, {"task": str})
         for obj in objs:
-            row_dict = {
-                field: KernelThreads.FIELDS[field](obj) for field in fields
-            }
+            row_dict = {field: KernelThreads.FIELDS[field](obj) for field in fields}
             table.add_row(row_dict["task"], row_dict)
         table.print_()
 
@@ -104,3 +108,460 @@ class KernelThreads(sdb.Locator, sdb.PrettyPrinter):
         # triggered by some updates to drgn's function signatures.
         # pylint: disable=no-value-for-parameter
         yield from for_each_task(sdb.get_prog())
+
+
+def _framestr(frame: drgn.Object, args: bool) -> str:
+    # This parsing is a bit fragile. It depends on the string
+    # for the frame to have the following format:
+    # <id> in <addr> <symbol> [in <function>] at <filepath> [(inlined)]
+    # It pulls off the last element of the file path and returns:
+    # <id> <addr> in <function>() at <filename> [(inlined)]
+    # or (if no function is available):
+    # <id> <addr> <symbol> at <filename> [(inlined)]
+    inlined = ""
+    parts = str(frame).split()
+    id = parts[0]
+    if len(id) < 3:
+        id = id + " "
+    addr = parts[2]
+    # Just have an address
+    if len(parts) < 4:
+        return id + " " + addr
+    # No function or file path available? Just return the symbol
+    if len(parts) < 5:
+        return id + " " + addr + " " + parts[3]
+    if parts[4] != "in":
+        addr = addr + " " + parts[3]
+        function = ""
+        filepath = parts[5]
+    else:
+        function = " in " + parts[5] + "()"
+        if args:
+            function = " in " + _funcstr(frame)
+        filepath = parts[7]
+    filename = " at " + filepath.split("/")[-1]
+    if frame.is_inline:
+        inlined = " (inlined)"
+    return id + " " + addr + function + filename + inlined
+
+
+def _funcstr(frame: drgn.Object) -> str:
+    name = frame.name
+    if name is None:
+        try:
+            name = frame.symbol().name
+        except LookupError:
+            name = hex(frame.pc)
+
+    func = sdb.get_prog().function(name)
+    func_type = func.type_
+    func_info = f"{name} ("
+    first = True
+    for parm in func_type.parameters:
+        if not first:
+            func_info += ", "
+        func_info += f"{parm.name}"
+        try:
+            func_info += f"={(frame[parm.name].format_(dereference=False, type_name=False, member_type_names=False, member_names=False, members_same_line=True))}"
+        except KeyError:
+            func_info += "=<absent>"
+        first = False
+    func_info += ")"
+    return func_info
+
+
+class KernelTrace(sdb.Locator, sdb.PrettyPrinter):
+    """
+    Given a task_struct, trace the thread's execution state.
+
+    FIELDS
+        frame# - frame number in backtrace (most recent first)
+        addr - address of the frame
+        function - function name in the frame (or symbol if no function)
+        file - file name (if available) containing the function
+        line - line number in the file
+
+    EXAMPLE
+        sdb> trace 0xffff94614e796000
+        TASK: 0xffff94614e796000 INTERRUPTIBLE PID: 268
+        #0  0xffffffffa0c549e8 in context_switch() at core.c:5038:2 (inlined)
+        #1  0xffffffffa0c549e8 in __schedule() at core.c:6384:8
+        #2  0xffffffffa0c54fe9 in schedule() at core.c:6467:3
+        #3  0xffffffffa0c595c2 in schedule_timeout() at timer.c:2116:2
+        #4  0xffffffffc04836ae in __cv_timedwait_common() at spl-condvar.c:250:15
+        #5  0xffffffffc0483829 in __cv_timedwait_idle() at spl-condvar.c:307:7
+        #6  0xffffffffc0571554 in l2arc_feed_thread() at arc.c:9460:10
+        #7  0xffffffffc048c8d1 in thread_generic_wrapper() at spl-thread.c:61:3
+        #8  0xffffffffa00efb17 in kthread() at kthread.c:334:9
+        #9  0xffffffffa0004c3f (ret_from_fork+0x1f/0x2d) at entry_64.S:287
+    """
+
+    names = ["trace", "bt"]
+    input_type = "struct task_struct *"
+    output_type = "struct task_struct *"
+    load_on = [sdb.Kernel()]
+
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        parser.add_argument(
+            "task",
+            metavar="<task address>",
+            nargs="?",
+            default=None,
+            help="trace this task if no input",
+        )
+        return parser
+
+    @classmethod
+    def help_text(cls):
+        p1 = (
+            "If this command is used to end a pipeline, it will print a"
+            + " human-readable decoding of the execution state of threads."
+            + " Otherwise, it will set the current thread context to the final"
+            + " input thread and return the threads that were input to it."
+        )
+        p2 = (
+            "This command can be used to start a pipeline, in which"
+            + " case it will use the current thread context as input."
+        )
+        return [p1, p2]
+
+    def pretty_print(self, threads: Iterable[drgn.Object]) -> None:
+        if not self.isfirst and self.args.task:
+            raise sdb.CommandError(self.name, "<task> argument not allowed with input")
+        for thread in threads:
+            try:
+                stack_trace = sdb.get_prog().stack_trace(thread)
+            except drgn.FaultError:
+                raise sdb.CommandError(self.name, f"Thread {hex(thread)} not found")
+            except LookupError:
+                raise sdb.CommandError(
+                    self.name, f"Thread with id {hex(thread)} not found"
+                )
+            sdb.set_thread(thread)
+            print(
+                f"TASK: {hex(thread.value_())} "
+                + str(KernelStacks.task_struct_get_state(thread))
+                + f" PID: {int(thread.pid)}"
+            )
+            for frame in stack_trace:
+                if frame.pc == 0:
+                    # Note: We filter out frames with zero program counter,
+                    # as we often see the stack trace padded with zeros
+                    continue
+                print(_framestr(frame, False))
+
+    def no_input(self) -> Iterable[drgn.Object]:
+        if self.args.task:
+            try:
+                yield sdb.target.create_object(
+                    "struct task_struct *", int(self.args.task, 16)
+                )
+            except ValueError:
+                raise sdb.CommandError(
+                    self.name, f"Invalid task address: {self.args.task}"
+                )
+        else:
+            yield sdb.get_thread()
+
+
+class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
+    """
+    Given a task_struct and frame, return requested stack frame
+
+    EXAMPLE
+        sdb> frame 7
+        #7  0xffffffffc048c8d1 in thread_generic_wrapper (arg=0xffff94614f3cc400) at spl-thread.c:61:3
+    """
+
+    names = ["stackframe", "frame", "f"]
+    input_type = "struct task_struct *"
+    output_type = "struct task_struct *"
+    load_on = [sdb.Kernel()]
+    frame_id = -1
+
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        parser.add_argument(
+            "frame",
+            metavar="<frame>",
+            nargs="?",
+            default=None,
+            type=int,
+            help="set local context to this frame number",
+        )
+        parser.add_argument(
+            "-v",
+            "--verbose",
+            action="store_true",
+            help="print full file path for frame",
+        )
+        return parser
+
+    @classmethod
+    def help_text(cls):
+        p1 = (
+            "This command is used to set the context for the 'locals' and 'registers'"
+            + " commands. If no frame is specified, the most recent frame is used. If"
+            + " no thread is input, the current thread context is used."
+        )
+        p2 = (
+            "If this command is used to end a pipeline, it will print a"
+            + " human-readable decoding of the requested stack frame for"
+            + " each stack trace provided. Otherwise, it will set the current"
+            + " frame context to the specified frame and return the threads"
+            + " that were input to it."
+        )
+        return [p1, p2]
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+        if self.args.frame >= 0:
+            self.frame_id = self.args.frame
+            sdb.set_frame(self.frame_id)
+        else:
+            self.frame_id = sdb.get_frame()
+        if self.frame_id == -1:
+            raise sdb.CommandError(
+                self.name, "No frame context set. Use 'frame' command to set frame"
+            )
+        if self.islast:
+            self.pretty_print(self.caller(objs))
+        else:
+            # return threads that have the requested frame number
+            for thread in self.caller(objs):
+                try:
+                    _frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
+                except IndexError:
+                    continue
+                yield thread
+
+    def pretty_print(self, threads: Iterable[drgn.Object]) -> None:
+        for thread in threads:
+            try:
+                frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
+                if self.args.verbose:
+                    print(frame)
+                else:
+                    print(_framestr(frame, True))
+            except IndexError:
+                print(f"Frame {self.frame_id} out of range for thread {hex(thread)}")
+                continue
+
+    def no_input(self) -> Iterable[drgn.Object]:
+        threads = [sdb.get_thread()]
+        yield from threads
+
+
+class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
+    """
+    Given a stack frame, return the local variables
+
+    EXAMPLE
+        sdb> frame 7 | locals
+        arg = (void *)0xffff94614f3cc400
+        tp = (thread_priv_t *)0xffff94614f3cc400
+        func = (void (*)(void *))l2arc_feed_thread+0x0 = 0xffffffffc05714f0
+        args = (void *)0x0
+    """
+
+    names = ["locals", "local"]
+    input_type = "struct task_struct *"
+    load_on = [sdb.Kernel()]
+
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        parser.add_argument(
+            "variables",
+            nargs="*",
+            default=None,
+            metavar="<variable>",
+            help="variable to retrieve",
+        )
+        parser.add_argument(
+            "-v",
+            "--verbose",
+            action="store_true",
+            help="dereference pointers",
+        )
+        return parser
+
+    @classmethod
+    def help_text(cls):
+        p1 = (
+            "This command is used to print the local variables for the frame"
+            + " context set by the last 'frame' command."
+            + " If no variables are specified, all local variables are printed."
+            + " If no thread is input, the current thread context is used."
+        )
+        p2 = (
+            "If this command is used to end a pipeline, it will print a"
+            + " human-readable decoding of the requested variables for"
+            + " each thread provided. Otherwise, it will output the"
+            + " requested variable(s) in raw format."
+        )
+        return [p1, p2]
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+        frame_id = sdb.get_frame()
+        if frame_id == -1:
+            raise sdb.CommandError(
+                self.name, "No frame context set. Use 'frame' command to set frame"
+            )
+        if self.islast:
+            self.pretty_print(self.caller(objs))
+        else:
+            # return all locals or variables requested
+            for thread in self.caller(objs):
+                try:
+                    frame = sdb.get_prog().stack_trace(thread)[frame_id]
+                    if self.args.variables:
+                        for variable in self.args.variables:
+                            try:
+                                yield frame[variable]
+                            except KeyError as err:
+                                raise SymbolNotFoundError(self.name, variable) from err
+                    else:
+                        for variable in frame.locals():
+                            if frame[variable].absent_:
+                                continue
+                            try:
+                                yield frame[variable]
+                            except drgn.ObjectAbsentError:
+                                continue
+                except IndexError:
+                    continue
+
+    def pretty_print(self, stacks: Iterable[drgn.Object]) -> None:
+        frame_id = sdb.get_frame()
+        for stack in stacks:
+            frame = sdb.get_prog().stack_trace(stack)[frame_id]
+            if self.args.variables:
+                for variable in self.args.variables:
+                    try:
+                        local = frame[variable]
+                        print(
+                            f"{variable} = {local.format_(dereference=self.args.verbose)}"
+                        )
+                    except KeyError:
+                        print(f"'{variable}' is not a local variable in this frame")
+                continue
+            for variable in frame.locals():
+                print(
+                    f"{variable} = {frame[variable].format_(dereference=self.args.verbose)}"
+                )
+
+    def no_input(self) -> Iterable[drgn.Object]:
+        threads = [sdb.get_thread()]
+        yield from threads
+
+
+class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
+    """
+    Given a stack frame, return the registers
+
+    EXAMPLE
+        sdb> frame 7 | registers
+        rbx = 18446744072641516784
+        rbp = 18446653449961438984
+        rsp = 18446653449961438960
+        r12 = 18446625744394961920
+        r13 = 0
+        r14 = 18446653449906223704
+        r15 = 18446625744394961920
+        rip = 18446744072640579793
+    """
+
+    names = ["registers", "register"]
+    input_type = "struct task_struct *"
+    load_on = [sdb.Kernel()]
+
+    @classmethod
+    def _init_parser(cls, name: str) -> argparse.ArgumentParser:
+        parser = super()._init_parser(name)
+        parser.add_argument(
+            "registers",
+            nargs="*",
+            default=None,
+            metavar="<register>",
+            help="register to retrieve",
+        )
+        parser.add_argument(
+            "-x",
+            "--hex",
+            action="store_true",
+            help="print registers in hexadecimal",
+        )
+        return parser
+
+    @classmethod
+    def help_text(cls):
+        p1 = (
+            "This command is used to print the registers for the frame"
+            + " context set by the last 'frame' command."
+            + " If no register names are specified, all registers are printed."
+            + " If no thread is input, the current thread context is used."
+        )
+        p2 = (
+            "If this command is used to end a pipeline, it will print a"
+            + " human-readable decoding of the requested registers for"
+            + " each thread provided. Otherwise, it will output the"
+            + " requested register(s) in raw format."
+        )
+        return [p1, p2]
+
+    def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+        frame_id = sdb.get_frame()
+        if frame_id == -1:
+            raise sdb.CommandError(
+                self.name, "No frame context set. Use 'frame' command to set frame"
+            )
+        if self.islast:
+            self.pretty_print(self.caller(objs))
+        else:
+            frame_id = sdb.get_frame()
+            for stack in self.caller(objs):
+                frame = sdb.get_prog().stack_trace(stack)[frame_id]
+                if self.args.registers:
+                    for register in self.args.registers:
+                        try:
+                            yield sdb.target.create_object(
+                                "void *", frame.register(register)
+                            )
+                        except ValueError as err:
+                            raise SymbolNotFoundError(self.name, register) from err
+                    continue
+                registers = frame.registers()
+                for value in registers.values():
+                    yield sdb.target.create_object("void *", value)
+
+    def pretty_print(self, stacks: Iterable[drgn.Object]) -> None:
+        frame_id = sdb.get_frame()
+        for stack in stacks:
+            try:
+                frame = sdb.get_prog().stack_trace(stack)[frame_id]
+            except IndexError:
+                raise sdb.CommandError(
+                    self.name, f"Frame {frame_id} out of range for thread {hex(stack)}"
+                )
+            if self.args.registers:
+                for register in self.args.registers:
+                    try:
+                        value = frame.register(register)
+                        if self.args.hex:
+                            value = hex(value)
+                        print(f"{register} = {value}")
+                    except ValueError as err:
+                        raise SymbolNotFoundError(self.name, register) from err
+                continue
+            registers = frame.registers()
+            for register, value in registers.items():
+                if self.args.hex:
+                    value = hex(value)
+                print(f"{register} = {value}")
+
+    def no_input(self) -> Iterable[drgn.Object]:
+        threads = [sdb.get_thread()]
+        yield from threads
