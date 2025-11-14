@@ -145,9 +145,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
     output_type = "struct task_struct *"
     load_on = [sdb.Kernel()]
 
-    def __init__(self,
-                 args: Optional[List[str]] = None,
-                 name: str = "_") -> None:
+    def __init__(self, args: Optional[List[str]] = None, name: str = "_") -> None:
         super().__init__(args, name)
         self.mod_start, self.mod_end = 0, 0
         self.func_start, self.func_end = 0, 0
@@ -160,22 +158,33 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             "-a",
             "--all",
             action="store_true",
-            help="list all threads for each unique stack trace" +
-            " instead of printing a single representative thread")
+            help="list all threads for each unique stack trace"
+            + " instead of printing a single representative thread",
+        )
         parser.add_argument(
-            "-c",
-            "--function",
-            help="only print threads whose stacks contains FUNCTION")
+            "-v",
+            "--verbose",
+            action="store_true",
+            help="print the arguments for each function in the stack trace",
+        )
+        parser.add_argument(
+            "-l",
+            "--locals",
+            action="store_true",
+            help="print local variables in for each function in the stack trace",
+        )
+        parser.add_argument(
+            "-c", "--function", help="only print threads whose stacks contains FUNCTION"
+        )
         parser.add_argument(
             "-m",
             "--module",
-            help="only print threads whose stacks contain functions from MODULE"
+            help="only print threads whose stacks contain functions from MODULE",
         )
         parser.add_argument(
-            "-t",
-            "--tstate",
-            help="only print threads which are in TSTATE thread state")
-        parser.epilog = f'TSTATE := [{", ".join(KernelStacks.TASK_STATES.values()):s}]'
+            "-t", "--tstate", help="only print threads which are in TSTATE thread state"
+        )
+        parser.epilog = f"TSTATE := [{', '.join(KernelStacks.TASK_STATES.values()):s}]"
         return parser
 
     #
@@ -216,8 +225,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
     def resolve_state(tstate: str) -> str:
         tstate = tstate.upper()
         if tstate in KernelStacks.TASK_STATE_SHORTCUTS:
-            return KernelStacks.TASK_STATES[
-                KernelStacks.TASK_STATE_SHORTCUTS[tstate]]
+            return KernelStacks.TASK_STATES[KernelStacks.TASK_STATE_SHORTCUTS[tstate]]
         return tstate
 
     @staticmethod
@@ -226,13 +234,16 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
         try:
             for frame in sdb.get_prog().stack_trace(task):
                 frame_pcs.append(frame.pc)
+        except LookupError:
+            #
+            # Unwinding the stack of a running/runnable task can
+            # result in an exception since we expect some tasks to
+            # be running. We silently ignore this case, and move on.
+            #
+            pass
         except ValueError:
             #
-            # Unwinding the stack of a running/runnable task will
-            # result in an exception. Since we expect some tasks to
-            # be running, we silently ignore this case, and move on.
-            #
-            # Unfortunately, the exception thrown in this case is a
+            # Unfortunately, one exception thrown in this case is a
             # generic "ValueError" exception, so we may wind up
             # masking other "ValueError" exceptions that are not due
             # to unwinding the stack of a running task.
@@ -265,12 +276,11 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             (<base_offset>, <size>) if `mod_name` is found.
             (-1, 0) otherwise.
         """
-        for mod in list_for_each_entry('struct module',
-                                       sdb.get_object('modules').address_of_(),
-                                       'list'):
+        for mod in list_for_each_entry(
+            "struct module", sdb.get_object("modules").address_of_(), "list"
+        ):
             if mod.name.string_().decode("utf-8") == mod_name:
-                return (mod.core_layout.base.value_(),
-                        mod.core_layout.size.value_())
+                return (mod.core_layout.base.value_(), mod.core_layout.size.value_())
         return (-1, 0)
 
     def validate_context(self) -> None:
@@ -281,8 +291,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
         # codepath depending on the target.
         #
         if not sdb.get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL:
-            raise sdb.CommandError(self.name,
-                                   "userland targets are not supported yet")
+            raise sdb.CommandError(self.name, "userland targets are not supported yet")
         self.validate_args()
 
     def validate_args(self) -> None:
@@ -296,11 +305,12 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
                 sym = sdb.get_symbol(func.address_of_())
             except KeyError as err:
                 raise sdb.CommandError(
-                    self.name,
-                    f"symbol '{self.args.function}' does not exist") from err
+                    self.name, f"symbol '{self.args.function}' does not exist"
+                ) from err
             if func.type_.kind != drgn.TypeKind.FUNCTION:
                 raise sdb.CommandError(
-                    self.name, f"'{self.args.function}' is not a function")
+                    self.name, f"'{self.args.function}' is not a function"
+                )
             self.func_start = sym.address
             self.func_end = self.func_start + sym.size
 
@@ -312,23 +322,26 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
                 raise sdb.CommandError(
                     self.name,
                     f"'{self.args.tstate}' is not a valid task state"
-                    f" (acceptable states: {valid_states})")
+                    f" (acceptable states: {valid_states})",
+                )
+>>>>>>> 3950641 (DLPX-84435 Support printing local variables (#352))
 
         if self.args.module:
-            if KernelStacks.find_module_memory_segment(
-                    self.args.module)[0] == -1:
+            if KernelStacks.find_module_memory_segment(self.args.module)[0] == -1:
                 raise sdb.CommandError(
                     self.name,
-                    f"module '{self.args.module}' doesn't exist or isn't currently loaded"
+                    f"module '{self.args.module}' doesn't exist or isn't currently loaded",
                 )
             self.mod_start, mod_size = KernelStacks.find_module_memory_segment(
-                self.args.module)
+                self.args.module
+            )
             assert self.mod_start != -1
             self.mod_end = self.mod_start + mod_size
 
     def match_stack(self, task: drgn.Object) -> bool:
         if self.args.tstate and self.match_state != KernelStacks.task_struct_get_state(
-                task):
+            task
+        ):
             return False
 
         if not (self.args.module or self.args.function):
@@ -360,78 +373,82 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
     #
     @staticmethod
     def aggregate_stacks(
-        objs: Iterable[drgn.Object]
+        objs: Iterable[drgn.Object],
     ) -> List[Tuple[Tuple[str, Tuple[int, ...]], List[drgn.Object]]]:
-        stack_aggr: Dict[Tuple[str, Tuple[int, ...]],
-                         List[drgn.Object]] = defaultdict(list)
+        stack_aggr: Dict[Tuple[str, Tuple[int, ...]], List[drgn.Object]] = defaultdict(
+            list
+        )
         for task in objs:
-            stack_key = (KernelStacks.task_struct_get_state(task),
-                         tuple(KernelStacks.get_frame_pcs(task)))
+            stack_key = (
+                KernelStacks.task_struct_get_state(task),
+                tuple(KernelStacks.get_frame_pcs(task)),
+            )
             stack_aggr[stack_key].append(task)
         return sorted(stack_aggr.items(),
                       key=lambda x: len(x[1]),
                       reverse=True)
-
-    @staticmethod
-    def frame_string(frame_info: str, count: int) -> str:
-        if count > 1:
-            return f"{frame_info} ({str(count)})\n"
-        return f"{frame_info}\n"
 
     def print_stacks(self, objs: Iterable[drgn.Object]) -> None:
         self.print_header()
         for stack_key, tasks in KernelStacks.aggregate_stacks(objs):
             stacktrace_info = ""
             task_state = stack_key[0]
+            task_ptr = tasks[0]
 
+            stacktrace_info += f"{hex(task_ptr.value_()):<18s} {task_state:<16s}"
             if self.args.all:
-                for task in tasks:
-                    stacktrace_info += f"{hex(task.value_()):<18s} {task_state:<16s}\n"
+                stacktrace_info += "\n"
+                for task in tasks[1:]:
+                    stacktrace_info += f"{hex(task.value_()):<18s}\n"
             else:
-                task_ptr = hex(tasks[0].value_())
-                stacktrace_info += f"{task_ptr:<18s} {task_state:<16s} {len(tasks):6d}\n"
+                stacktrace_info += f" {len(tasks):6d}\n"
 
             #
-            # List the frames for each task in the stack. Ignore frames
-            # with a program counter of zero (sometimes the stack will be
-            # padded out with zeros). Aggregate frames with the same program
-            # counter and offset.
+            # XXX - Could also use:
+            #    frame_pcs: Tuple[int, ...] = stack_key[1]
+            #    sdb.get_prog().stack_trace_from_pcs(frame_pcs)
             #
-            frame_pcs: Tuple[int, ...] = stack_key[1]
-            last_frame_pc = 0x0
+            # Aggregate frames with the same name and offset.
+            #
+            last_frame_name = ""
             last_offset = 0x0
             count = 0
             frame_info = ""
-            for frame_pc in frame_pcs:
+            for frame in sdb.get_prog().stack_trace(task_ptr):
+                name = frame.name
+                if frame.is_inline:
+                    # Emit any accumulated frames before inline
+                    if count > 0:
+                        stacktrace_info += KernelStacks.frame_string(
+                            frame_info, count)
+                        count = 0
+                    stacktrace_info += f"{"":18s}{name} (inlined)
+"
+                    continue
+                pc = frame.pc
+                if pc == 0x0:
+                    continue
                 try:
-                    # ignore frames with a program counter of zero
-                    if frame_pc == 0x0:
-                        continue
-                    sym = sdb.get_symbol(frame_pc)
-                    func = sym.name
-                    offset = frame_pc - sym.address
-                    if frame_pc == last_frame_pc and offset == last_offset:
-                        count += 1
-                        continue
-                    # emit the last frame we have accumulated
-                    if count > 0:
-                        stacktrace_info += KernelStacks.frame_string(
-                            frame_info, count)
-                    frame_info = f"{'':18s}{func}+{hex(offset)}"
-                    last_frame_pc = frame_pc
-                    last_offset = offset
-                    count = 1
+                    sym = frame.symbol()
+                    if name is None:
+                        name = sym.name
+                    offset = pc - sym.address
                 except LookupError:
-                    if frame_pc == last_frame_pc:
-                        count += 1
-                        continue
-                    # emit any previous frame info we have accumulated
-                    if count > 0:
-                        stacktrace_info += KernelStacks.frame_string(
-                            frame_info, count)
-                    frame_info = f"{'':18s}{hex(frame_pc)}+0x0"
-                    last_frame_pc = frame_pc
-                    count = 1
+                    if name is None:
+                        name = hex(pc)
+                    offset = 0x0
+                # Check if this is a repeat of the last frame
+                if name == last_frame_name and offset == last_offset:
+                    count += 1
+                    continue
+                # Emit the last frame we have accumulated
+                if count > 0:
+                    stacktrace_info += KernelStacks.frame_string(
+                        frame_info, count)
+                frame_info = f"{"":18s}{name}+{hex(offset)}"
+                last_frame_name = name
+                last_offset = offset
+                count = 1
             # emit the final frame if we have one
             if count > 0:
                 stacktrace_info += KernelStacks.frame_string(frame_info, count)
@@ -483,18 +500,17 @@ class KernelCrashedThread(sdb.Locator, sdb.PrettyPrinter):
 
     def validate_context(self) -> None:
         if sdb.get_target_flags() & drgn.ProgramFlags.IS_LIVE:
-            raise sdb.CommandError(self.name,
-                                   "command only works for core/crash dumps")
+            raise sdb.CommandError(self.name, "command only works for core/crash dumps")
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         self.validate_context()
+        if not self.isfirst:
+            raise sdb.CommandError(
+                self.name, "can only pretty print the crashed thread"
+            )
         thread_obj = sdb.get_prog().crashed_thread().object
         stacks_obj = KernelStacks()
-        for obj in objs:
-            if obj.value_() != thread_obj.value_():
-                raise sdb.CommandError(
-                    self.name, "can only pretty print the crashed thread")
-            stacks_obj.print_stacks([thread_obj])
+        stacks_obj.print_stacks([thread_obj])
 
     def no_input(self) -> Iterable[drgn.Object]:
         self.validate_context()

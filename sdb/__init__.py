@@ -34,19 +34,54 @@ except ImportError:
 # the modules are imported and attempt to have a cleaner
 # separation of concerns between modules.
 #
-from sdb.error import (Error, CommandNotFoundError, CommandError,
-                       CommandInvalidInputError, SymbolNotFoundError,
-                       CommandArgumentsError, CommandEvalSyntaxError,
-                       ParserError)
-from sdb.target import (create_object, get_object, get_prog, get_type,
-                        get_pointer_type, get_target_flags, get_symbol, is_null,
-                        type_canonical_name, type_canonicalize,
-                        type_canonicalize_name, type_canonicalize_size,
-                        type_equals, Runtime, All, Kernel, Userland, Module,
-                        Library)
-from sdb.command import (Address, Cast, Command, InputHandler, Locator,
-                         PrettyPrinter, Walk, Walker, SingleInputCommand,
-                         get_registered_commands, register_commands)
+from sdb.error import (
+    Error,
+    CommandNotFoundError,
+    CommandError,
+    CommandInvalidInputError,
+    SymbolNotFoundError,
+    CommandArgumentsError,
+    CommandEvalSyntaxError,
+    ParserError,
+)
+from sdb.target import (
+    create_object,
+    get_object,
+    get_prog,
+    get_type,
+    set_thread,
+    get_thread,
+    set_frame,
+    get_frame,
+    get_pointer_type,
+    get_target_flags,
+    get_symbol,
+    is_null,
+    type_canonical_name,
+    type_canonicalize,
+    type_canonicalize_name,
+    type_canonicalize_size,
+    type_equals,
+    Runtime,
+    All,
+    Kernel,
+    Userland,
+    Module,
+    Library,
+)
+from sdb.command import (
+    Address,
+    Cast,
+    Command,
+    InputHandler,
+    Locator,
+    PrettyPrinter,
+    Walk,
+    Walker,
+    SingleInputCommand,
+    get_registered_commands,
+    register_commands,
+)
 from sdb.pipeline import execute_pipeline, get_first_type, invoke
 
 __all__ = [
@@ -79,14 +114,18 @@ __all__ = [
     'invoke',
     'is_null',
     'get_first_type',
+    'get_frame',
     'get_object',
     'get_pointer_type',
     'get_prog',
     'get_registered_commands',
+    'get_thread',
     'get_symbol',
     'get_target_flags',
     'get_type',
     'register_commands',
+    'set_frame',
+    'set_thread',
     'type_canonical_name',
     'type_canonicalize',
     'type_canonicalize_name',

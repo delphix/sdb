@@ -109,7 +109,10 @@ class REPL:
         # pylint: disable=broad-except
         try:
             for obj in invoke([], input_):
-                print(obj.format_(dereference=False))
+                try:
+                    print(obj.format_(dereference=False))
+                except AttributeError:
+                    print(obj)
         except CommandArgumentsError:
             #
             # We skip printing anything for this specific error
