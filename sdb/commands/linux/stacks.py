@@ -1,5 +1,5 @@
 #
-# Copyright 2019 Delphix
+# Copyright 2025 Delphix
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ from typing import Dict, Iterable, List, Optional, Tuple
 from collections import defaultdict
 
 import drgn
-from drgn.helpers.linux.list import list_for_each_entry
 from drgn.helpers.linux.pid import for_each_task
 from drgn.helpers.linux.sched import task_state_to_char
 
@@ -276,12 +275,23 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             (<base_offset>, <size>) if `mod_name` is found.
             (-1, 0) otherwise.
         """
-        for mod in list_for_each_entry(
-            "struct module", sdb.get_object("modules").address_of_(), "list"
-        ):
-            if mod.name.string_().decode("utf-8") == mod_name:
-                return (mod.core_layout.base.value_(), mod.core_layout.size.value_())
-        return (-1, 0)
+        # Use drgn's Module API to get address ranges.
+        # This handles all kernel version differences internally.
+        try:
+            mod = sdb.get_prog().module(mod_name)
+            ranges = mod.address_ranges
+
+            if not ranges:
+                return (-1, 0)
+
+            # Find the overall memory range across all segments
+            min_base = min(r[0] for r in ranges)
+            max_end = max(r[1] for r in ranges)
+
+            return (min_base, max_end - min_base)
+        except LookupError:
+            # Module not found
+            return (-1, 0)
 
     def validate_context(self) -> None:
         #
