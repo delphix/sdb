@@ -1,5 +1,5 @@
 #
-# Copyright 2020 Delphix
+# Copyright 2020, 2025 Delphix
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -110,42 +110,57 @@ class KernelThreads(sdb.Locator, sdb.PrettyPrinter):
         yield from for_each_task(sdb.get_prog())
 
 
-def _framestr(frame: drgn.Object, args: bool) -> str:
-    # This parsing is a bit fragile. It depends on the string
-    # for the frame to have the following format:
-    # <id> in <addr> <symbol> [in <function>] at <filepath> [(inlined)]
-    # It pulls off the last element of the file path and returns:
-    # <id> <addr> in <function>() at <filename> [(inlined)]
-    # or (if no function is available):
-    # <id> <addr> <symbol> at <filename> [(inlined)]
-    inlined = ""
-    parts = str(frame).split()
-    id = parts[0]
-    if len(id) < 3:
-        id = id + " "
-    addr = parts[2]
-    # Just have an address
-    if len(parts) < 4:
-        return id + " " + addr
-    # No function or file path available? Just return the symbol
-    if len(parts) < 5:
-        return id + " " + addr + " " + parts[3]
-    if parts[4] != "in":
-        addr = addr + " " + parts[3]
-        function = ""
-        filepath = parts[5]
+def _framestr(frame_index: int, frame: drgn.StackFrame, args: bool) -> str:
+    """
+    Format a stack frame using drgn StackFrame API properties.
+
+    Args:
+        frame_index: Frame index number
+        frame: drgn StackFrame object
+        args: If True, show function arguments
+
+    Returns:
+        Formatted frame string like: "#0  0xaddr in function() at file.c:line:col (inlined)"
+    """
+    # Format frame index with padding for alignment
+    id_str = f"#{frame_index}"
+    if len(id_str) < 3:
+        id_str = id_str + " "
+
+    # Get program counter (address) - pc is always available as a Final[int] attribute
+    addr = hex(frame.pc)
+
+    # Get function/symbol name
+    function_name = frame.function_name
+    if function_name is None:
+        try:
+            function_name = frame.symbol().name
+        except LookupError:
+            # No symbol available, just return address
+            return f"{id_str} {addr}"
+
+    # Build function string
+    if args:
+        function_str = " in " + _funcstr(frame)
     else:
-        function = " in " + parts[5] + "()"
-        if args:
-            function = " in " + _funcstr(frame)
-        filepath = parts[7]
-    filename = " at " + filepath.split("/")[-1]
-    if frame.is_inline:
-        inlined = " (inlined)"
-    return id + " " + addr + function + filename + inlined
+        function_str = f" in {function_name}()"
 
+    # Get source location
+    try:
+        filename, line, column = frame.source()
+        # Extract just the filename from the full path
+        filename_only = filename.split("/")[-1] if filename else "??"
+        location_str = f" at {filename_only}:{line}:{column}"
+    except LookupError:
+        # No source information available
+        location_str = ""
 
-def _funcstr(frame: drgn.Object) -> str:
+    # Add inline marker if applicable
+    inline_str = " (inlined)" if frame.is_inline else ""
+
+    return id_str + " " + addr + function_str + location_str + inline_str
+
+def _funcstr(frame: drgn.StackFrame) -> str:
     name = frame.name
     if name is None:
         try:
@@ -245,12 +260,12 @@ class KernelTrace(sdb.Locator, sdb.PrettyPrinter):
                 + str(KernelStacks.task_struct_get_state(thread))
                 + f" PID: {int(thread.pid)}"
             )
-            for frame in stack_trace:
+            for frame_index, frame in enumerate(stack_trace):
                 if frame.pc == 0:
                     # Note: We filter out frames with zero program counter,
                     # as we often see the stack trace padded with zeros
                     continue
-                print(_framestr(frame, False))
+                print(_framestr(frame_index, frame, False))
 
     def no_input(self) -> Iterable[drgn.Object]:
         if self.args.task:
@@ -344,7 +359,7 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
                 if self.args.verbose:
                     print(frame)
                 else:
-                    print(_framestr(frame, True))
+                    print(_framestr(self.frame_id, frame, True))
             except IndexError:
                 print(f"Frame {self.frame_id} out of range for thread {hex(thread)}")
                 continue
