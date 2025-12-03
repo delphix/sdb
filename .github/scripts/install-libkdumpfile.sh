@@ -7,8 +7,8 @@
 # libkdumpfile with the right version.
 #
 sudo apt update
-sudo apt install autoconf automake liblzo2-dev libsnappy1v5 libtool pkg-config zlib1g-dev binutils-dev
-sudo apt install python3.8-dev python3.9-dev
+sudo apt install autoconf automake liblzo2-dev libsnappy-dev libtool pkg-config zlib1g-dev binutils-dev
+sudo apt install python3.10-dev python3.12-dev
 
 git clone https://github.com/ptesarik/libkdumpfile.git
 

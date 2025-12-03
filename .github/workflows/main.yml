@@ -9,16 +9,17 @@ jobs:
   # Verify the build and installation of SDB.
   #
   install:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        python-version: [3.8, 3.9]
+        python-version: ['3.10', '3.12']
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: python3 setup.py install
+      - run: python3 -m pip install --upgrade pip setuptools wheel
+      - run: python3 -m pip install .
         #
         # The statement below is used for debugging the Github job.
         #
@@ -31,12 +32,12 @@ jobs:
   # the "drgn" from source (there's no package currently available).
   #
   pylint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.10'
       - run: ./.github/scripts/install-drgn.sh
       - run: python3 -m pip install pylint pytest
       - run: pylint -d duplicate-code -d invalid-name sdb
@@ -52,15 +53,15 @@ jobs:
   # can open kdump-compressed crash dumps for the integration tests.
   #
   pytest:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        python-version: [3.8, 3.9]
+        python-version: ['3.10', '3.12']
     env:
       AWS_DEFAULT_REGION: 'us-west-2'
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - run: python3 -m pip install aws python-config pytest pytest-cov
@@ -70,19 +71,19 @@ jobs:
       - run: ./.github/scripts/extract-dump.sh dump.201912060006.tar.lzma
       - run: ./.github/scripts/extract-dump.sh dump.202303131823.tar.gz
       - run: pytest -v --cov sdb --cov-report xml tests
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
   #
   # Verify "yapf" runs successfully.
   #
   yapf:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.10'
       - run: python3 -m pip install yapf
       - run: yapf --diff --style google --recursive sdb
       - run: yapf --diff --style google --recursive tests
@@ -102,12 +103,12 @@ jobs:
   #     pytest doesn't provide stubs on typeshed.
   #
   mypy:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.10'
       - run: ./.github/scripts/install-drgn.sh
       - run: python3 -m pip install mypy==0.730
       - run: python3 -m mypy --strict --show-error-codes -p sdb
