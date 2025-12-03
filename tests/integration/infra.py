@@ -330,8 +330,7 @@ class RefDump:
         """
         test_mod = import_module(f"tests.integration.test_{modname}_generic")
         self.generate_output_for_commands(
-            test_mod.CMD_TABLE,  # type: ignore[attr-defined]
-            f"{TEST_OUTPUT_DIR}/{self.dump_name}/{modname}")
+            test_mod.CMD_TABLE, f"{TEST_OUTPUT_DIR}/{self.dump_name}/{modname}")
         print(
             f"Generated regression test output for {self.dump_name}/{modname}..."
         )

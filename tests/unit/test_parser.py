@@ -105,8 +105,8 @@ PARSER_POSITIVE_TABLE = [
 ]
 
 
-@pytest.mark.parametrize(  # type: ignore[misc]
-    'entry,expected', PARSER_POSITIVE_TABLE)
+@pytest.mark.parametrize(
+    'entry,expected', PARSER_POSITIVE_TABLE)  # type: ignore[untyped-decorator]
 def test_parser(entry: str, expected: List[Tuple[List[str],
                                                  ExpressionType]]) -> None:
     assert list(tokenize(entry)) == expected
@@ -140,8 +140,9 @@ PARSER_NEGATIVE_TABLE = [
 ]
 
 
-@pytest.mark.parametrize(  # type: ignore[misc]
-    'entry,expected_cause', PARSER_NEGATIVE_TABLE)
+@pytest.mark.parametrize(
+    'entry,expected_cause',
+    PARSER_NEGATIVE_TABLE)  # type: ignore[untyped-decorator]
 def test_parser_negative(entry: str, expected_cause: str) -> None:
     with pytest.raises(ParserError) as err:
         list(tokenize(entry))

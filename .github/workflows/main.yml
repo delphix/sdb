@@ -97,23 +97,17 @@ jobs:
   # Thus, prior to running "mypy" we have to clone, build, and install
   # the "drgn" from source (there's no package currently available).
   #
-  # Also note the following 2 things specific to mypy:
-  # [1] We expicitly install version 0.730 as the default version that
-  #     comes with Ubuntu is 0.75 which has a couple of bugs triggered
-  #     by our codebase (they've been resolved on trunk though so we
-  #     may want to change this soon).
-  # [2] We supply --ignore-missing-imports to the tests package because
-  #     pytest doesn't provide stubs on typeshed.
+  # Also note that we supply --ignore-missing-imports to the tests package
+  # because pytest doesn't provide stubs on typeshed.
   #
-  # TEMPORARILY DISABLED
-  #mypy:
-  #  runs-on: ubuntu-24.04
-  #  steps:
-  #    - uses: actions/checkout@v4
-  #    - uses: actions/setup-python@v5
-  #      with:
-  #        python-version: '3.10'
-  #    - run: ./.github/scripts/install-drgn.sh
-  #    - run: python3 -m pip install mypy==0.730
-  #    - run: python3 -m mypy --strict --show-error-codes -p sdb
-  #    - run: python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests
+  mypy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: ./.github/scripts/install-drgn.sh
+      - run: python3 -m pip install mypy
+      - run: python3 -m mypy --strict --show-error-codes -p sdb
+      - run: python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests

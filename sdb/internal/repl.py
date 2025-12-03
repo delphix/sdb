@@ -44,12 +44,13 @@ class REPL:
         released under the public domain.
         """
 
-        def custom_complete(text: str, state: int) -> str:
+        def custom_complete(text: str, state: int) -> Optional[str]:
             #
             # None is returned for the end of the completion session.
             #
-            results = [x for x in vocabulary if x.startswith(text)
-                      ] + [None]  # type: ignore[list-item]
+            results: List[Optional[str]] = [
+                x for x in vocabulary if x.startswith(text)
+            ] + [None]
 
             #
             # A space is added to the completion since the Python readline
@@ -57,7 +58,10 @@ class REPL:
             # want to mimic the default readline library behavior of adding
             # a space after it.
             #
-            return results[state] + " "
+            result = results[state]
+            if result is None:
+                return None
+            return result + " "
 
         return custom_complete
 

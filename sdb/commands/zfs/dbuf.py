@@ -62,7 +62,8 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
         name = ""
         if dd.dd_parent:
             name = Dbuf.DslDirName(dd.dd_parent) + "/"
-        name += dd.dd_myname.string_().decode("utf-8")
+        myname: str = dd.dd_myname.string_().decode("utf-8")
+        name += myname
         return name
 
     @staticmethod

@@ -139,11 +139,7 @@ def invoke(first_input: Iterable[drgn.Object],
                                       stdin=subprocess.PIPE,
                                       encoding="utf-8")
         old_stdout = sys.stdout
-        #
-        # The type ignore below is due to the following false positive:
-        # https://github.com/python/typeshed/issues/1229
-        #
-        sys.stdout = shell_proc.stdin  # type: ignore[assignment]
+        sys.stdout = shell_proc.stdin
 
     try:
         if pipeline:
@@ -151,7 +147,7 @@ def invoke(first_input: Iterable[drgn.Object],
             pipeline[-1].islast = True
             yield from execute_pipeline(first_input, pipeline)
 
-        if shell_cmd is not None:
+        if shell_cmd is not None and shell_proc.stdin is not None:
             shell_proc.stdin.flush()
             shell_proc.stdin.close()
 

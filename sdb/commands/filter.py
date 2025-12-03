@@ -58,7 +58,7 @@ class Filter(sdb.SingleInputCommand):
 
     @staticmethod
     def _parse_expression(input_expr: str) -> List[str]:
-        pass
+        raise NotImplementedError()
 
     def __init__(self,
                  args: Optional[List[str]] = None,

@@ -330,11 +330,7 @@ class Command:
         such that the command will be automatically integrated with the
         SDB REPL.
         """
-        #
-        # We ignore the type failure below because of the following issue:
-        # https://github.com/python/mypy/issues/4660
-        #
-        super().__init_subclass__(**kwargs)  # type: ignore[call-arg]
+        super().__init_subclass__(**kwargs)
         if len(cls.names) == 0:
             return
         add_command(cls)
@@ -623,8 +619,9 @@ class Locator(Command):
         if self.islast and isinstance(self, PrettyPrinter):
             # pylint: disable=no-member
             self.pretty_print(self.caller(objs))
-        else:
-            yield from self.caller(objs)
+            return None
+        yield from self.caller(objs)
+        return None
 
 
 T = TypeVar("T", bound=Locator)

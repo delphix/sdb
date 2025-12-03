@@ -68,7 +68,7 @@ $ python3 -m pylint -d duplicate-code -d invalid-name tests
 #### Type Checking
 
 ```
-$ python3 -m pip install mypy==0.730
+$ python3 -m pip install mypy
 $ python3 -m mypy --strict --show-error-codes -p sdb
 $ python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests
 ```

@@ -218,12 +218,13 @@ NEG_CMDS = [
 CMD_TABLE = POS_CMDS + NEG_CMDS + POS_CMDS_201912060006
 
 
-@pytest.mark.skipif(  # type: ignore[misc]
+@pytest.mark.skipif(  # type: ignore[untyped-decorator]
     len(get_crash_dump_dir_paths()) == 0,
     reason="couldn't find any crash/core dumps to run tests against")
-@pytest.mark.parametrize('rdump',
-                         get_all_reference_crash_dumps())  # type: ignore[misc]
-@pytest.mark.parametrize('cmd', CMD_TABLE)  # type: ignore[misc]
+@pytest.mark.parametrize(
+    'rdump',  # type: ignore[untyped-decorator]
+    get_all_reference_crash_dumps())
+@pytest.mark.parametrize('cmd', CMD_TABLE)  # type: ignore[untyped-decorator]
 def test_cmd_output_and_error_code(capsys: Any, rdump: RefDump,
                                    cmd: str) -> None:
     rdump.verify_cmd_output_and_code(capsys, "core", cmd)
