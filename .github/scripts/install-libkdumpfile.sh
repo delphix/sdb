@@ -2,15 +2,13 @@
 
 #
 # These are build requirements of "libkdumpfile"; if we don't install these,
-# the build/install of "libkdumpfile" will fail below. Note that we install
-# all version of python3.X-dev so the Github actions jobs can install
-# libkdumpfile with the right version.
+# the build/install of "libkdumpfile" will fail below. We install python3-dev
+# which will work with whatever Python version is set up by actions/setup-python.
 #
 sudo apt update
-sudo apt install autoconf automake liblzo2-dev libsnappy-dev libtool pkg-config zlib1g-dev binutils-dev
-sudo apt install python3.10-dev python3.12-dev
+sudo apt install autoconf automake liblzo2-dev libsnappy-dev libtool pkg-config zlib1g-dev binutils-dev python3-dev
 
-git clone https://github.com/ptesarik/libkdumpfile.git
+git clone https://codeberg.org/ptesarik/libkdumpfile.git
 
 cd libkdumpfile
 autoreconf -fi

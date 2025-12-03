@@ -52,29 +52,31 @@ jobs:
   # (there's no package currently for libkdumpfile either) so "drgn"
   # can open kdump-compressed crash dumps for the integration tests.
   #
-  # TEMPORARILY DISABLED
-  #pytest:
-  #  runs-on: ubuntu-24.04
-  #  strategy:
-  #    matrix:
-  #      python-version: ['3.10', '3.12']
-  #  env:
-  #    AWS_DEFAULT_REGION: 'us-west-2'
-  #  steps:
-  #    - uses: actions/checkout@v4
-  #    - uses: actions/setup-python@v5
-  #      with:
-  #        python-version: ${{ matrix.python-version }}
-  #    - run: python3 -m pip install aws python-config pytest pytest-cov
-  #    - run: ./.github/scripts/install-libkdumpfile.sh
-  #    - run: ./.github/scripts/install-drgn.sh
-  #    - run: ./.github/scripts/download-dumps-from-gdrive.sh
-  #    - run: ./.github/scripts/extract-dump.sh dump.201912060006.tar.lzma
-  #    - run: ./.github/scripts/extract-dump.sh dump.202303131823.tar.gz
-  #    - run: pytest -v --cov sdb --cov-report xml tests
-  #    - uses: codecov/codecov-action@v4
-  #      with:
-  #        token: ${{ secrets.CODECOV_TOKEN }}
+  # NOTE: Currently only running unit tests (tests/unit)
+  #
+  pytest:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.12']
+    env:
+      AWS_DEFAULT_REGION: 'us-west-2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python3 -m pip install aws python-config pytest pytest-cov
+      - run: ./.github/scripts/install-libkdumpfile.sh
+      - run: ./.github/scripts/install-drgn.sh
+      # Dump downloads commented out - not needed for unit tests
+      #- run: ./.github/scripts/download-dumps-from-gdrive.sh
+      #- run: ./.github/scripts/extract-dump.sh dump.201912060006.tar.lzma
+      #- run: ./.github/scripts/extract-dump.sh dump.202303131823.tar.gz
+      - run: pytest -v --cov sdb --cov-report xml tests/unit
+      - uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
   #
   # Verify "yapf" runs successfully.
   #
