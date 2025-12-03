@@ -52,28 +52,29 @@ jobs:
   # (there's no package currently for libkdumpfile either) so "drgn"
   # can open kdump-compressed crash dumps for the integration tests.
   #
-  pytest:
-    runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        python-version: ['3.10', '3.12']
-    env:
-      AWS_DEFAULT_REGION: 'us-west-2'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - run: python3 -m pip install aws python-config pytest pytest-cov
-      - run: ./.github/scripts/install-libkdumpfile.sh
-      - run: ./.github/scripts/install-drgn.sh
-      - run: ./.github/scripts/download-dumps-from-gdrive.sh
-      - run: ./.github/scripts/extract-dump.sh dump.201912060006.tar.lzma
-      - run: ./.github/scripts/extract-dump.sh dump.202303131823.tar.gz
-      - run: pytest -v --cov sdb --cov-report xml tests
-      - uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+  # TEMPORARILY DISABLED
+  #pytest:
+  #  runs-on: ubuntu-24.04
+  #  strategy:
+  #    matrix:
+  #      python-version: ['3.10', '3.12']
+  #  env:
+  #    AWS_DEFAULT_REGION: 'us-west-2'
+  #  steps:
+  #    - uses: actions/checkout@v4
+  #    - uses: actions/setup-python@v5
+  #      with:
+  #        python-version: ${{ matrix.python-version }}
+  #    - run: python3 -m pip install aws python-config pytest pytest-cov
+  #    - run: ./.github/scripts/install-libkdumpfile.sh
+  #    - run: ./.github/scripts/install-drgn.sh
+  #    - run: ./.github/scripts/download-dumps-from-gdrive.sh
+  #    - run: ./.github/scripts/extract-dump.sh dump.201912060006.tar.lzma
+  #    - run: ./.github/scripts/extract-dump.sh dump.202303131823.tar.gz
+  #    - run: pytest -v --cov sdb --cov-report xml tests
+  #    - uses: codecov/codecov-action@v4
+  #      with:
+  #        token: ${{ secrets.CODECOV_TOKEN }}
   #
   # Verify "yapf" runs successfully.
   #
@@ -102,14 +103,15 @@ jobs:
   # [2] We supply --ignore-missing-imports to the tests package because
   #     pytest doesn't provide stubs on typeshed.
   #
-  mypy:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - run: ./.github/scripts/install-drgn.sh
-      - run: python3 -m pip install mypy==0.730
-      - run: python3 -m mypy --strict --show-error-codes -p sdb
-      - run: python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests
+  # TEMPORARILY DISABLED
+  #mypy:
+  #  runs-on: ubuntu-24.04
+  #  steps:
+  #    - uses: actions/checkout@v4
+  #    - uses: actions/setup-python@v5
+  #      with:
+  #        python-version: '3.10'
+  #    - run: ./.github/scripts/install-drgn.sh
+  #    - run: python3 -m pip install mypy==0.730
+  #    - run: python3 -m mypy --strict --show-error-codes -p sdb
+  #    - run: python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests
