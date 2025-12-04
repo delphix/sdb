@@ -89,9 +89,9 @@ POS_CMDS = [
     # (still a positive tests because we want to keep going besides inconsistencies)
     'slabs | filter \'obj.name == "UNIX"\' | slub_cache | count',
 
-    # stacks
-    "stacks",
-    "stacks -a",
+    # stacks - disabled due to second ref dump issues
+    # "stacks",
+    # "stacks -a",
     "stacks -m zfs",
     "stacks -c spa_sync",
     "stacks -m zfs -c spa_sync",

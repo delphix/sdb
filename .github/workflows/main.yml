@@ -66,10 +66,10 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
   #
-  # Verify "pytest" runs successfully on integration tests with one crash dump.
+  # Verify "pytest" runs successfully on integration tests with crash dumps.
   #
   # Note, we need to have "drgn" and "libkdumpfile" installed to run pytest
-  # with crash dumps. We download one dump for basic integration testing.
+  # with crash dumps. We download both reference dumps for full integration testing.
   #
   pytest-integration:
     runs-on: ubuntu-24.04
@@ -88,6 +88,7 @@ jobs:
       - run: ./.github/scripts/install-drgn.sh
       - run: ./.github/scripts/download-dumps-from-gdrive.sh
       - run: ./.github/scripts/extract-dump.sh dump.201912060006.tar.lzma
+      - run: ./.github/scripts/extract-dump.sh dump.202303131823.tar.gz
       - run: pytest -v --cov sdb --cov-report xml tests/integration
       - uses: codecov/codecov-action@v4
         with:
