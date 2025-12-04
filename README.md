@@ -99,25 +99,37 @@ $ python3 -m yapf -i --style google --recursive sdb
 $ python3 -m yapf -i --style google --recursive tests
 ```
 
-#### Regression Testing
+#### Unit Testing
 
-Regression testing is currently done by downloading a refererence crash/core
-dump and running a predetermined set of commads on it, ensuring that they
-return the same reference output before and after your changes.
+Unit tests don't require crash dumps and can be run quickly:
 
 ```
-$ python3 -m pip install python-config pytest pytest-cov
+$ python3 -m pip install pytest pytest-cov
+$ python3 -m pytest -v --cov sdb --cov-report xml tests/unit
+```
+
+#### Integration Testing
+
+Integration tests require crash/core dumps to test against live debugging scenarios:
+
+```
+$ python3 -m pip install pytest pytest-cov
 $ .github/scripts/download-dumps-from-gdrive.sh
 $ .github/scripts/extract-dump.sh dump.201912060006.tar.lzma
 $ .github/scripts/extract-dump.sh dump.202303131823.tar.gz
+$ python3 -m pytest -v --cov sdb --cov-report xml tests/integration
+```
+
+To run all tests (unit + integration):
+```
 $ python3 -m pytest -v --cov sdb --cov-report xml tests
 ```
 
 If you want `pytest` to stop on the first failure it encounters add
-`-x/--exitfirst` in the command above.
+`-x/--exitfirst` to the command.
 
 If you've added new test commands or found mistakes in the current reference
-output and you want (re)generate some reference output download all crash/core
+output and you want to (re)generate reference output, download all crash/core
 dumps (or the specific one you want to correct) and run the following:
 ```
 $ PYTHONPATH=$(pwd) python3 tests/integration/gen_regression_output.py
