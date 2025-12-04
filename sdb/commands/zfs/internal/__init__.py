@@ -17,8 +17,6 @@
 
 # pylint: disable=missing-docstring
 
-import os
-
 import drgn
 import sdb
 

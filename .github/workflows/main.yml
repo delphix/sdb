@@ -91,6 +91,18 @@ jobs:
       - run: yapf --diff --style google --recursive sdb
       - run: yapf --diff --style google --recursive tests
   #
+  # Verify "ruff" runs successfully.
+  #
+  ruff:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: python3 -m pip install ruff
+      - run: ruff check sdb tests
+  #
   # Verify "mypy" runs successfully.
   #
   # Note, we need to have "drgn" installed in order to run "mypy".
@@ -108,6 +120,6 @@ jobs:
         with:
           python-version: '3.10'
       - run: ./.github/scripts/install-drgn.sh
-      - run: python3 -m pip install mypy
+      - run: python3 -m pip install mypy pytest
       - run: python3 -m mypy --strict --show-error-codes -p sdb
       - run: python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests

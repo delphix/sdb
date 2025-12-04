@@ -65,13 +65,24 @@ $ python3 -m pylint -d duplicate-code -d invalid-name sdb
 $ python3 -m pylint -d duplicate-code -d invalid-name tests
 ```
 
+#### Ruff (Fast Linting and Formatting)
+
+Ruff is a fast Python linter and formatter that combines multiple tools:
+
+```
+$ python3 -m pip install ruff
+$ ruff check sdb tests
+```
+
 #### Type Checking
 
 ```
-$ python3 -m pip install mypy
+$ python3 -m pip install mypy pytest
 $ python3 -m mypy --strict --show-error-codes -p sdb
 $ python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests
 ```
+
+Note: pytest is required for mypy to properly type-check test decorators.
 
 #### Style Checks
 

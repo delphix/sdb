@@ -91,4 +91,4 @@ __all__ = [
 # The SDB commands build on top of all the SDB "infrastructure" imported
 # above, so we must be sure to import all of the commands last.
 #
-import sdb.commands
+import sdb.commands  # noqa: F401

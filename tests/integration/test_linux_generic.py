@@ -171,27 +171,19 @@ def non_stripped_cmds() -> List[str]:
     return POS_CMDS + NEG_CMDS + POS_CMDS_201912060006
 
 
-@pytest.mark.skipif(  # type: ignore[untyped-decorator]
-    len(get_crash_dump_dir_paths()) == 0,
-    reason="couldn't find any crash dumps to run tests against")
-@pytest.mark.parametrize(
-    'rdump',  # type: ignore[untyped-decorator]
-    get_all_reference_crash_dumps())
-@pytest.mark.parametrize('cmd',
-                         non_stripped_cmds())  # type: ignore[untyped-decorator]
+@pytest.mark.skipif(len(get_crash_dump_dir_paths()) == 0,
+                    reason="couldn't find any crash dumps to run tests against")
+@pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+@pytest.mark.parametrize('cmd', non_stripped_cmds())
 def test_cmd_output_and_error_code(capsys: Any, rdump: RefDump,
                                    cmd: str) -> None:
     rdump.verify_cmd_output_and_code(capsys, "linux", cmd)
 
 
-@pytest.mark.skipif(  # type: ignore[untyped-decorator]
-    len(get_crash_dump_dir_paths()) == 0,
-    reason="couldn't find any crash dumps to run tests against")
-@pytest.mark.parametrize(
-    'rdump',  # type: ignore[untyped-decorator]
-    get_all_reference_crash_dumps())
-@pytest.mark.parametrize('cmd',
-                         STRIPPED_POS_CMDS)  # type: ignore[untyped-decorator]
+@pytest.mark.skipif(len(get_crash_dump_dir_paths()) == 0,
+                    reason="couldn't find any crash dumps to run tests against")
+@pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+@pytest.mark.parametrize('cmd', STRIPPED_POS_CMDS)
 def test_cmd_stripped_output_and_error_code_0(capsys: Any, rdump: RefDump,
                                               cmd: str) -> None:
     rdump.verify_cmd_output_and_code(capsys, "linux", cmd, True)
