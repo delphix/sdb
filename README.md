@@ -18,7 +18,7 @@
 #### From PyPI (Recommended)
 
 ```bash
-pip install sdb
+pip install sdb-debugger
 ```
 
 #### From Source

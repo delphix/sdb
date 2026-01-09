@@ -51,13 +51,13 @@ if [[ "$TARGET" == "test" ]]; then
     python3 -m twine upload --repository-url "$REPOSITORY_URL" dist/*
     echo ""
     echo "Package published to TestPyPI!"
-    echo "Install with: pip install --index-url https://test.pypi.org/simple/ sdb"
+    echo "Install with: pip install --index-url https://test.pypi.org/simple/ sdb-debugger"
 else
     echo "==> Publishing to PyPI..."
     python3 -m twine upload dist/*
     echo ""
     echo "Package published to PyPI!"
-    echo "Install with: pip install sdb"
+    echo "Install with: pip install sdb-debugger"
 fi
 
 echo ""

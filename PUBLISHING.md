@@ -23,7 +23,7 @@ SDB uses GitHub Actions with **Trusted Publishing** (OIDC) for secure, automated
    - Go to [https://pypi.org/manage/account/publishing/](https://pypi.org/manage/account/publishing/)
    - Click "Add a new pending publisher" (or "Add a new publisher" if the project exists)
    - Fill in the details:
-     - **PyPI Project Name**: `sdb`
+     - **PyPI Project Name**: `sdb-debugger`
      - **Owner**: `sdimitro`
      - **Repository name**: `sdb`
      - **Workflow name**: `release.yml`
@@ -80,7 +80,7 @@ Always test on TestPyPI first:
 
 Install from TestPyPI to verify:
 ```bash
-pip install --index-url https://test.pypi.org/simple/ sdb
+pip install --index-url https://test.pypi.org/simple/ sdb-debugger
 ```
 
 ### Publishing to PyPI
@@ -124,7 +124,7 @@ The script supports two authentication methods:
 
 ### "Project name already exists"
 
-The name `sdb` may already be taken on PyPI. Check [https://pypi.org/project/sdb/](https://pypi.org/project/sdb/). If it's taken by someone else, you'll need to choose a different name like `sdb-debugger`.
+The name `sdb-debugger` may already be taken on PyPI. Check [https://pypi.org/project/sdb-debugger/](https://pypi.org/project/sdb-debugger/).
 
 ### Trusted Publishing Not Working
 
@@ -155,7 +155,7 @@ pip install build
 python -m build
 
 # Install the built package
-pip install dist/sdb-*.whl
+pip install dist/sdb_debugger-*.whl
 
 # Test it works
 sdb --help
