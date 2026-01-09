@@ -22,6 +22,12 @@ can be used to implement commands for SDB and alternative
 CLI/consumer implementations.
 """
 
+# Version is set by setuptools_scm from git tags
+try:
+    from sdb._version import version as __version__
+except ImportError:
+    __version__ = "0.0.0.dev0"
+
 #
 # We are being very explicit of what this module exposes
 # so as to avoid any future cyclic-dependencies in how
@@ -44,6 +50,7 @@ from sdb.command import (Address, Cast, Command, InputHandler, Locator,
 from sdb.pipeline import execute_pipeline, get_first_type, invoke
 
 __all__ = [
+    '__version__',
     'Address',
     'All',
     'Cast',

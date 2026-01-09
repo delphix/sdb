@@ -1,0 +1,154 @@
+#
+# Release workflow - triggered on version tag push (e.g., v0.2.0)
+#
+# This workflow:
+# 1. Runs all CI checks (lint, type-check, tests)
+# 2. Builds the package (sdist + wheel)
+# 3. Publishes to PyPI using Trusted Publishing (OIDC)
+# 4. Creates a GitHub Release with auto-generated notes
+#
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Required for PyPI Trusted Publishing (OIDC)
+permissions:
+  contents: write  # For creating GitHub releases
+  id-token: write  # For PyPI OIDC authentication
+
+jobs:
+  #
+  # Run all CI checks before releasing
+  #
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: ./.github/scripts/install-drgn.sh
+      - run: python3 -m pip install pylint pytest ruff yapf
+      - run: pylint -d duplicate-code -d invalid-name sdb
+      - run: pylint -d duplicate-code -d invalid-name tests
+      - run: ruff check sdb tests
+      - run: yapf --diff --style google --recursive sdb
+      - run: yapf --diff --style google --recursive tests
+
+  type-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: ./.github/scripts/install-drgn.sh
+      - run: python3 -m pip install mypy pytest
+      - run: python3 -m mypy --strict --show-error-codes -p sdb
+      - run: python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests
+
+  test-unit:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python3 -m pip install pytest pytest-cov
+      - run: ./.github/scripts/install-drgn.sh
+      - run: pytest -v --cov sdb --cov-report xml tests/unit
+
+  test-integration:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.12']
+    env:
+      AWS_DEFAULT_REGION: 'us-west-2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python3 -m pip install pytest pytest-cov
+      - run: ./.github/scripts/install-libkdumpfile.sh
+      - run: ./.github/scripts/install-drgn.sh
+      - run: ./.github/scripts/download-dumps-from-gdrive.sh
+      - run: ./.github/scripts/extract-dump.sh dump.201912060006.tar.lzma
+      - run: ./.github/scripts/extract-dump.sh dump.202303131823.tar.gz
+      - run: pytest -v --cov sdb --cov-report xml tests/integration
+
+  #
+  # Build the package
+  #
+  build:
+    needs: [lint, type-check, test-unit, test-integration]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for setuptools_scm to get version from tags
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install build dependencies
+        run: python3 -m pip install build
+      - name: Build package
+        run: python3 -m build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  #
+  # Publish to PyPI using Trusted Publishing (OIDC)
+  #
+  publish-pypi:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: pypi
+      url: https://pypi.org/project/sdb/
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  #
+  # Create GitHub Release with auto-generated notes
+  #
+  github-release:
+    needs: publish-pypi
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for generating release notes
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Get version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: SDB ${{ steps.version.outputs.VERSION }}
+          generate_release_notes: true
+          files: |
+            dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

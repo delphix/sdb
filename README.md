@@ -6,25 +6,41 @@
     </picture>
 </p>
 
-![](https://github.com/sdimitro/sdb/workflows/.github/workflows/main.yml/badge.svg)
+<p align="center">
+    <a href="https://github.com/sdimitro/sdb/actions/workflows/main.yml"><img src="https://github.com/sdimitro/sdb/actions/workflows/main.yml/badge.svg" alt="CI"></a>
+    <a href="https://pypi.org/project/sdb/"><img src="https://img.shields.io/pypi/v/sdb" alt="PyPI"></a>
+    <a href="https://pypi.org/project/sdb/"><img src="https://img.shields.io/pypi/pyversions/sdb" alt="Python Versions"></a>
+    <a href="https://github.com/sdimitro/sdb/blob/master/LICENSE"><img src="https://img.shields.io/github/license/sdimitro/sdb" alt="License"></a>
+</p>
 
 ### Installation
 
+#### From PyPI (Recommended)
+
+```bash
+pip install sdb
+```
+
+#### From Source
+
 Ensure you have the following dependencies:
-* Python 3.6 or newer
+* Python 3.10 or newer
 * [libkdumpfile](https://github.com/ptesarik/libkdumpfile) (optional - needed for kdump-compressed crash dumps)
 * [drgn](https://github.com/osandov/drgn/)
 
 Note that in order for `drgn` to support kdump files it needs to be *compiled* with `libkdumpfile`. Unfortunately that means that users should always install `libkdumpfile` first before installing `drgn`.
 
-Finally run the following to install `sdb`:
-```
-$ git clone https://github.com/sdimitro/sdb.git
-$ cd sdb
-$ sudo python3 setup.py install
+Then install `sdb`:
+```bash
+git clone https://github.com/sdimitro/sdb.git
+cd sdb
+pip install .
 ```
 
-The above should install `sdb` under `/usr/local/bin/`.
+For development installation (editable mode with dev dependencies):
+```bash
+pip install -e ".[dev]"
+```
 
 ### Quickstart
 
@@ -57,72 +73,73 @@ sdb> addr modules | lxlist "struct module" list | member name ! sort | head -n 3
 
 ### Developer Testing
 
+First, install the development dependencies:
+```bash
+pip install -e ".[dev]"
+# Or using requirements file:
+pip install -r requirements-dev.txt
+```
+
 #### Linting
 
-```
-$ python3 -m pip install pylint pytest
-$ python3 -m pylint -d duplicate-code -d invalid-name sdb
-$ python3 -m pylint -d duplicate-code -d invalid-name tests
+```bash
+pylint -d duplicate-code -d invalid-name sdb
+pylint -d duplicate-code -d invalid-name tests
 ```
 
 #### Ruff (Fast Linting and Formatting)
 
 Ruff is a fast Python linter and formatter that combines multiple tools:
 
-```
-$ python3 -m pip install ruff
-$ ruff check sdb tests
+```bash
+ruff check sdb tests
 ```
 
 #### Type Checking
 
-```
-$ python3 -m pip install mypy pytest
-$ python3 -m mypy --strict --show-error-codes -p sdb
-$ python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests
+```bash
+mypy --strict --show-error-codes -p sdb
+mypy --strict --ignore-missing-imports --show-error-codes -p tests
 ```
 
 Note: pytest is required for mypy to properly type-check test decorators.
 
 #### Style Checks
 
-```
-$ python3 -m pip install yapf
-$ python3 -m yapf --diff --style google --recursive sdb
-$ python3 -m yapf --diff --style google --recursive tests
+```bash
+yapf --diff --style google --recursive sdb
+yapf --diff --style google --recursive tests
 ```
 
 If `yapf` has suggestions you can apply them automatically by substituting
 `--diff` with `-i` like this:
-```
-$ python3 -m yapf -i --style google --recursive sdb
-$ python3 -m yapf -i --style google --recursive tests
+```bash
+yapf -i --style google --recursive sdb
+yapf -i --style google --recursive tests
 ```
 
 #### Unit Testing
 
 Unit tests don't require crash dumps and can be run quickly:
 
-```
-$ python3 -m pip install pytest pytest-cov
-$ python3 -m pytest -v --cov sdb --cov-report xml tests/unit
+```bash
+pytest -v --cov sdb --cov-report xml tests/unit
 ```
 
 #### Integration Testing
 
 Integration tests require crash/core dumps to test against live debugging scenarios:
 
-```
-$ python3 -m pip install pytest pytest-cov
-$ .github/scripts/download-dumps-from-gdrive.sh
-$ .github/scripts/extract-dump.sh dump.201912060006.tar.lzma
-$ .github/scripts/extract-dump.sh dump.202303131823.tar.gz
-$ python3 -m pytest -v --cov sdb --cov-report xml tests/integration
+```bash
+.github/scripts/download-dumps-from-gdrive.sh
+.github/scripts/extract-dump.sh dump.201912060006.tar.lzma
+.github/scripts/extract-dump.sh dump.202303131823.tar.gz
+pytest -v --cov sdb --cov-report xml tests/integration
 ```
 
 To run all tests (unit + integration):
-```
-$ python3 -m pytest -v --cov sdb --cov-report xml tests
+```bash
+pytest -v --cov sdb --cov-report xml tests
 ```
 
 If you want `pytest` to stop on the first failure it encounters add
@@ -131,6 +148,6 @@ If you want `pytest` to stop on the first failure it encounters add
 If you've added new test commands or found mistakes in the current reference
 output and you want to (re)generate reference output, download all crash/core
 dumps (or the specific one you want to correct) and run the following:
-```
-$ PYTHONPATH=$(pwd) python3 tests/integration/gen_regression_output.py
+```bash
+PYTHONPATH=$(pwd) python3 tests/integration/gen_regression_output.py
 ```
