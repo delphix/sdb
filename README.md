@@ -1,3 +1,7 @@
+# DISCLAIMER: VENDOR-SPECIFIC REPO
+
+This is a divergent branch that is specific to Delphix, for the official upstream please refer to [this repo](https://github.com/sdimitro/sdb).
+
 # sdb
 The Slick Debugger
 
