@@ -1,5 +1,6 @@
 #
 # Copyright 2019 Delphix
+# Copyright 2025 CoreWeave
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +24,7 @@ registered commands during a session.
 
 import argparse
 import inspect
+import re
 import textwrap
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, TypeVar
 
@@ -50,11 +52,31 @@ def add_command(class_: Type["Command"]) -> None:
     all_commands.add(class_)
 
 
+# Regex pattern for valid C identifiers (used for command name validation)
+_VALID_COMMAND_NAME_PATTERN = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
+
+
+def is_valid_command_name(name: str) -> bool:
+    """
+    Validate that a command name follows C identifier rules.
+    Must start with a letter or underscore, followed by letters, digits,
+    or underscores. This prevents command names from starting with special
+    characters like ':', ';', ',', '.', '/', '%', etc. which could conflict
+    with mdb compatibility syntax or cause parsing issues.
+    """
+    return bool(_VALID_COMMAND_NAME_PATTERN.match(name))
+
+
 def register_command(name: str, class_: Type["Command"]) -> None:
     """
     Register the specified command name and command class, such that the
     command will be available from the SDB REPL.
     """
+    if not is_valid_command_name(name):
+        raise ValueError(
+            f"Invalid command name '{name}': must start with a letter or underscore "
+            f"and contain only letters, digits, and underscores (C identifier rules)"
+        )
     registered_commands[name] = class_
     if issubclass(class_, Walker):
         Walker.register_walker(class_)
@@ -624,7 +646,7 @@ class Locator(Command):
         return None
 
 
-T = TypeVar("T", bound=Locator)
+T = TypeVar("T", bound=Locator)  # pylint: disable=invalid-name
 IH = Callable[[T, drgn.Object], Iterable[drgn.Object]]
 
 
@@ -880,7 +902,7 @@ class Walk(Command):
             print(Walk._help_message())
 
 
-def InputHandler(typename: str) -> Callable[[IH[T]], IH[T]]:
+def InputHandler(typename: str) -> Callable[[IH[T]], IH[T]]:  # pylint: disable=invalid-name
     """
     This is a decorator which should be applied to methods of subclasses of
     Locator. The decorator causes this method to be called when the pipeline

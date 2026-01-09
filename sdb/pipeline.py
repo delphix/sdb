@@ -1,5 +1,6 @@
 #
 # Copyright 2019 Delphix
+# Copyright 2025 CoreWeave
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +28,7 @@ from sdb import parser
 from sdb import target
 from sdb.error import CommandArgumentsError, CommandNotFoundError
 from sdb.command import Address, Cast, Command, get_registered_commands
+from sdb.mdb_compat import preprocess_mdb_syntax
 
 
 def massage_input_and_call(
@@ -92,6 +94,11 @@ def invoke(first_input: Iterable[drgn.Object],
     function is responsible for converting that string into the
     appropriate pipeline of Command objects, and executing it.
     """
+
+    #
+    # Preprocess mdb-style syntax (e.g., 'symbol::cmd' -> 'addr symbol | cmd')
+    #
+    line = preprocess_mdb_syntax(line)
 
     #
     # Build the pipeline by constructing each of the commands we want to

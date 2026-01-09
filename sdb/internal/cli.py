@@ -1,5 +1,6 @@
 #
 # Copyright 2019 Delphix
+# Copyright 2025 CoreWeave
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +29,7 @@ from typing import List
 import drgn
 import sdb
 from sdb.internal.repl import REPL
+from sdb.mdb_compat import set_mdb_compat_enabled
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -93,6 +95,10 @@ def parse_arguments() -> argparse.Namespace:
                         "--quiet",
                         action="store_true",
                         help="don't print non-fatal warnings")
+    parser.add_argument("--no-mdb-compat",
+                        dest="mdb_compat",
+                        action="store_false",
+                        help="disable mdb compatibility syntax (symbol::cmd)")
     args = parser.parse_args()
 
     #
@@ -229,6 +235,9 @@ def setup_target(args: argparse.Namespace) -> drgn.Program:
 def main() -> None:
     """ The entry point of the sdb "executable" """
     args = parse_arguments()
+
+    # Configure mdb compatibility syntax preprocessing
+    set_mdb_compat_enabled(args.mdb_compat)
 
     try:
         prog = setup_target(args)

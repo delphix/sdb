@@ -1,0 +1,11 @@
+sdb encountered an internal error due to a bug. Here's the
+information you need to file the bug:
+----------------------------------------------------------
+Target Info:
+	ProgramFlags.IS_LINUX_KERNEL
+	Platform(<Architecture.X86_64: 1>, <PlatformFlags.IS_LITTLE_ENDIAN|IS_64_BIT: 3>)
+
+----------------------------------------------------------
+Link: https://github.com/delphix/sdb/issues/new
+@#$ EXIT CODE $#@
+1
