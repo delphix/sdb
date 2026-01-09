@@ -1,8 +1,8 @@
 <p align="center">
     <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="assets/img/sdb-logo_white.png">
-        <source media="(prefers-color-scheme: light)" srcset="assets/img/sdb-logo.png">
-        <img src="assets/img/sdb-logo.png" alt="SDB" width="350" height="300">
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sdimitro/sdb/master/assets/img/sdb-logo_white.png">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/sdimitro/sdb/master/assets/img/sdb-logo.png">
+        <img src="https://raw.githubusercontent.com/sdimitro/sdb/master/assets/img/sdb-logo.png" alt="SDB" width="350" height="300">
     </picture>
 </p>
 
