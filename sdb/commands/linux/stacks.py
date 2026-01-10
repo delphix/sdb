@@ -402,6 +402,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             stack_aggr[stack_key].append(task)
         return sorted(stack_aggr.items(), key=lambda x: len(x[1]), reverse=True)
 
+    # pylint: disable=too-many-locals,too-many-branches
     def print_stacks(self, objs: Iterable[drgn.Object]) -> None:
         self.print_header()
         for stack_key, tasks in KernelStacks.aggregate_stacks(objs):

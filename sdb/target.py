@@ -58,7 +58,6 @@ def set_thread(thread_: int) -> None:
 
 
 def get_thread() -> int:
-    global thread
     return thread
 
 
@@ -68,7 +67,6 @@ def set_frame(frame_: int) -> None:
 
 
 def get_frame() -> int:
-    global frame
     return frame
 
 
