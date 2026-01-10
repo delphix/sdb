@@ -19,7 +19,7 @@
 import argparse
 import os
 from textwrap import shorten
-from typing import Callable, Dict, Iterable, Optional, Union
+from typing import Callable, Dict, Iterable, List, Optional, Union
 
 import drgn
 from drgn.helpers.linux.pid import for_each_task
@@ -231,7 +231,7 @@ class KernelTrace(sdb.Locator, sdb.PrettyPrinter):
         return parser
 
     @classmethod
-    def help_text(cls):
+    def help_text(cls) -> List[str]:
         p1 = (
             "If this command is used to end a pipeline, it will print a" +
             " human-readable decoding of the execution state of threads." +
@@ -312,7 +312,7 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
         return parser
 
     @classmethod
-    def help_text(cls):
+    def help_text(cls) -> List[str]:
         p1 = (
             "This command is used to set the context for the 'locals' and 'registers'"
             +
@@ -339,14 +339,15 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
                 "No frame context set. Use 'frame' command to set frame")
         if self.islast:
             self.pretty_print(self.caller(objs))
-        else:
-            # return threads that have the requested frame number
-            for thread in self.caller(objs):
-                try:
-                    _frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
-                except IndexError:
-                    continue
-                yield thread
+            return None
+        # return threads that have the requested frame number
+        for thread in self.caller(objs):
+            try:
+                _frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
+            except IndexError:
+                continue
+            yield thread
+        return None
 
     def pretty_print(self, threads: Iterable[drgn.Object]) -> None:
         for thread in threads:
@@ -401,7 +402,7 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
         return parser
 
     @classmethod
-    def help_text(cls):
+    def help_text(cls) -> List[str]:
         p1 = (
             "This command is used to print the local variables for the frame" +
             " context set by the last 'frame' command." +
@@ -422,28 +423,29 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
                 "No frame context set. Use 'frame' command to set frame")
         if self.islast:
             self.pretty_print(self.caller(objs))
-        else:
-            # return all locals or variables requested
-            for thread in self.caller(objs):
-                try:
-                    frame = sdb.get_prog().stack_trace(thread)[frame_id]
-                    if self.args.variables:
-                        for variable in self.args.variables:
-                            try:
-                                yield frame[variable]
-                            except KeyError as err:
-                                raise SymbolNotFoundError(self.name,
-                                                          variable) from err
-                    else:
-                        for variable in frame.locals():
-                            if frame[variable].absent_:
-                                continue
-                            try:
-                                yield frame[variable]
-                            except drgn.ObjectAbsentError:
-                                continue
-                except IndexError:
-                    continue
+            return None
+        # return all locals or variables requested
+        for thread in self.caller(objs):
+            try:
+                frame = sdb.get_prog().stack_trace(thread)[frame_id]
+                if self.args.variables:
+                    for variable in self.args.variables:
+                        try:
+                            yield frame[variable]
+                        except KeyError as err:
+                            raise SymbolNotFoundError(self.name,
+                                                      variable) from err
+                else:
+                    for variable in frame.locals():
+                        if frame[variable].absent_:
+                            continue
+                        try:
+                            yield frame[variable]
+                        except drgn.ObjectAbsentError:
+                            continue
+            except IndexError:
+                continue
+        return None
 
     def pretty_print(self, stacks: Iterable[drgn.Object]) -> None:
         frame_id = sdb.get_frame()
@@ -509,7 +511,7 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
         return parser
 
     @classmethod
-    def help_text(cls):
+    def help_text(cls) -> List[str]:
         p1 = (
             "This command is used to print the registers for the frame" +
             " context set by the last 'frame' command." +
@@ -530,22 +532,22 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
                 "No frame context set. Use 'frame' command to set frame")
         if self.islast:
             self.pretty_print(self.caller(objs))
-        else:
-            frame_id = sdb.get_frame()
-            for stack in self.caller(objs):
-                frame = sdb.get_prog().stack_trace(stack)[frame_id]
-                if self.args.registers:
-                    for register in self.args.registers:
-                        try:
-                            yield sdb.target.create_object(
-                                "void *", frame.register(register))
-                        except ValueError as err:
-                            raise SymbolNotFoundError(self.name,
-                                                      register) from err
-                    continue
-                registers = frame.registers()
-                for value in registers.values():
-                    yield sdb.target.create_object("void *", value)
+            return None
+        frame_id = sdb.get_frame()
+        for stack in self.caller(objs):
+            frame = sdb.get_prog().stack_trace(stack)[frame_id]
+            if self.args.registers:
+                for register in self.args.registers:
+                    try:
+                        yield sdb.target.create_object(
+                            "void *", frame.register(register))
+                    except ValueError as err:
+                        raise SymbolNotFoundError(self.name, register) from err
+                continue
+            registers = frame.registers()
+            for value in registers.values():
+                yield sdb.target.create_object("void *", value)
+        return None
 
     def pretty_print(self, stacks: Iterable[drgn.Object]) -> None:
         frame_id = sdb.get_frame()

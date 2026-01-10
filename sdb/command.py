@@ -180,7 +180,7 @@ class Command:
         return argparse.ArgumentParser(prog=name, description=summary)
 
     @classmethod
-    def help_text(cls):
+    def help_text(cls) -> List[str]:
         """
         This method auto-generates help text for the command based off of sub-classes.
         """
