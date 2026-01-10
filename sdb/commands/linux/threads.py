@@ -17,6 +17,7 @@
 # pylint: disable=missing-docstring
 
 import argparse
+import os
 from textwrap import shorten
 from typing import Callable, Dict, Iterable, Optional, Union
 
@@ -148,7 +149,7 @@ def _framestr(frame_index: int, frame: drgn.StackFrame, args: bool) -> str:
     try:
         filename, line, column = frame.source()
         # Extract just the filename from the full path
-        filename_only = filename.split("/")[-1] if filename else "??"
+        filename_only = os.path.basename(filename) if filename else "??"
         location_str = f" at {filename_only}:{line}:{column}"
     except LookupError:
         # No source information available
