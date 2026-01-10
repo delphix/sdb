@@ -50,8 +50,7 @@ class Dbuf(sdb.Locator, sdb.PrettyPrinter):
             '-d',
             '--dataset',
             type=str,
-            help='filter: only dbufs of this dataset name (or "poolname/_MOS")'
-        )
+            help='filter: only dbufs of this dataset name (or "poolname/_MOS")')
         parser.add_argument('-H',
                             '--has-holds',
                             action='store_true',

@@ -67,8 +67,7 @@ class LxPerCpuPtr(sdb.SingleInputCommand):
             if cpu >= self.ncpus:
                 raise sdb.CommandError(
                     self.name,
-                    f"available CPUs [0-{self.ncpus -1}] - requested CPU {cpu}"
-                )
+                    f"available CPUs [0-{self.ncpus -1}] - requested CPU {cpu}")
             yield drgn_percpu.per_cpu_ptr(obj, cpu)
 
 

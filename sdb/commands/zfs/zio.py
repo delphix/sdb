@@ -136,8 +136,7 @@ class Zio(sdb.Locator, sdb.PrettyPrinter):
                 self.name, "command argument -p is not applicable " +
                 " when printing all parent ZIOs")
 
-        zio_cache = drgn.cast("spl_kmem_cache_t *",
-                              sdb.get_object("zio_cache"))
+        zio_cache = drgn.cast("spl_kmem_cache_t *", sdb.get_object("zio_cache"))
         zios = sdb.execute_pipeline(
             [zio_cache.skc_linux_cache],
             [sdb.Walk(), sdb.Cast(["zio_t *"])],

@@ -45,9 +45,9 @@ class Table:
         else:
             to_str: Callable[[Any], str] = str
             self.formatters = {
-                field:
-                (formatters[field] if field in formatters.keys() else to_str)
-                for field in fields
+                field: (
+                    formatters[field] if field in formatters.keys() else to_str
+                ) for field in fields
             }
 
         self.maxfieldlen = dict.fromkeys(fields, 0)

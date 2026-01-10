@@ -58,8 +58,7 @@ class RangeTree(sdb.PrettyPrinter):
         for rt in objs:
             print(f"{hex(rt)}: range tree of {int(rt.rt_root.bt_num_elems)} "
                   f"entries, {int(rt.rt_space)} bytes")
-            for _ in sdb.execute_pipeline(
-                [rt], [RangeSeg(), RangeTreeSeg(rt)]):
+            for _ in sdb.execute_pipeline([rt], [RangeSeg(), RangeTreeSeg(rt)]):
                 pass
 
 

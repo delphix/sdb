@@ -54,8 +54,7 @@ class WhatIs(sdb.Command):
         if cache is None:
             print(f"{addr} does not map to a kmem_cache")
         else:
-            assert sdb.type_canonical_name(
-                cache.type_) == 'struct kmem_cache *'
+            assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
             cache_nm = cache.name.string_().decode('utf-8')
             print(f"{addr} is allocated from {cache_nm}")
 

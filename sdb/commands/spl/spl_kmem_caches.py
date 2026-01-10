@@ -163,8 +163,8 @@ class SplKmemCaches(sdb.Locator, sdb.PrettyPrinter):
         if self.args.s:
             if self.args.s not in fields:
                 msg = f"'{self.args.s}' is not in field set ({', '.join(fields)})"
-                raise sdb.CommandInvalidInputError(
-                    self.name, textwrap.fill(msg, width=80))
+                raise sdb.CommandInvalidInputError(self.name,
+                                                   textwrap.fill(msg, width=80))
             sort_field = self.args.s
         else:
             #
@@ -193,8 +193,7 @@ class SplKmemCaches(sdb.Locator, sdb.PrettyPrinter):
         table = Table(fields, set(fields) - {"name"}, formatters)
         for obj in objs:
             row_dict = {
-                field: SplKmemCaches.FIELDS[field](obj)
-                for field in fields
+                field: SplKmemCaches.FIELDS[field](obj) for field in fields
             }
             table.add_row(row_dict[sort_field], row_dict)
         table.print_(print_headers=self.args.H,

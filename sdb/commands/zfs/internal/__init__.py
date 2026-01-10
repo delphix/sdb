@@ -136,13 +136,13 @@ def BP_USES_CRYPT(bp: drgn.Object) -> bool:
 
 
 def BP_IS_ENCRYPTED(bp: drgn.Object) -> bool:
-    return (BP_USES_CRYPT(bp) and BP_GET_LEVEL(bp) <= 0
-            and DMU_OT_IS_ENCRYPTED(BP_GET_TYPE(bp)))
+    return (BP_USES_CRYPT(bp) and BP_GET_LEVEL(bp) <= 0 and
+            DMU_OT_IS_ENCRYPTED(BP_GET_TYPE(bp)))
 
 
 def BP_IS_AUTHENTICATED(bp: drgn.Object) -> bool:
-    return (BP_USES_CRYPT(bp) and BP_GET_LEVEL(bp) <= 0
-            and not DMU_OT_IS_ENCRYPTED(BP_GET_TYPE(bp)))
+    return (BP_USES_CRYPT(bp) and BP_GET_LEVEL(bp) <= 0 and
+            not DMU_OT_IS_ENCRYPTED(BP_GET_TYPE(bp)))
 
 
 def BP_HAS_INDIRECT_MAC_CKSUM(bp: drgn.Object) -> bool:
@@ -202,8 +202,8 @@ def BP_IS_GANG(bp: drgn.Object) -> bool:
 
 
 def BP_IS_REDACTED(bp: drgn.Object) -> bool:
-    return (BP_IS_EMBEDDED(bp)
-            and BPE_GET_ETYPE(bp) == BP_EMBEDDED_TYPE_REDACTED)
+    return (BP_IS_EMBEDDED(bp) and
+            BPE_GET_ETYPE(bp) == BP_EMBEDDED_TYPE_REDACTED)
 
 
 def BP_IS_HOLE(bp: drgn.Object) -> bool:
@@ -265,8 +265,8 @@ METASLAB_WEIGHT_PRIMARY = int(1 << 63)
 METASLAB_WEIGHT_SECONDARY = int(1 << 62)
 METASLAB_WEIGHT_CLAIM = int(1 << 61)
 METASLAB_WEIGHT_TYPE = int(1 << 60)
-METASLAB_ACTIVE_MASK = (METASLAB_WEIGHT_PRIMARY | METASLAB_WEIGHT_SECONDARY
-                        | METASLAB_WEIGHT_CLAIM)
+METASLAB_ACTIVE_MASK = (METASLAB_WEIGHT_PRIMARY | METASLAB_WEIGHT_SECONDARY |
+                        METASLAB_WEIGHT_CLAIM)
 BTREE_LEAF_SIZE = 4096
 NANOSEC = 1_000_000_000
 MSEC = 1_000

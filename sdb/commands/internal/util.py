@@ -52,8 +52,8 @@ def get_valid_type_by_name(cmd: sdb.Command, tname: str) -> drgn.Type:
             # 2] Has a type keyword as its type name (also see
             #    comment below) - e.g. struct struct
             #
-            raise sdb.CommandError(
-                cmd.name, f"input '{tname}' is not a valid type name")
+            raise sdb.CommandError(cmd.name,
+                                   f"input '{tname}' is not a valid type name")
         try:
             return sdb.get_type(tname)
         except LookupError as err:
@@ -75,8 +75,7 @@ def get_valid_type_by_name(cmd: sdb.Command, tname: str) -> drgn.Type:
         #
         raise sdb.CommandError(
             cmd.name,
-            f"skip keyword '{tname}' or quote your type \"{tname} <typename>\""
-        )
+            f"skip keyword '{tname}' or quote your type \"{tname} <typename>\"")
 
     try:
         type_ = sdb.get_type(tname)

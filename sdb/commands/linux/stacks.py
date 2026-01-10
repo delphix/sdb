@@ -172,8 +172,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             "-l",
             "--locals",
             action="store_true",
-            help=
-            "print local variables in for each function in the stack trace",
+            help="print local variables in for each function in the stack trace",
         )
         parser.add_argument(
             "-c",
@@ -182,8 +181,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
         parser.add_argument(
             "-m",
             "--module",
-            help=
-            "only print threads whose stacks contain functions from MODULE",
+            help="only print threads whose stacks contain functions from MODULE",
         )
         parser.add_argument(
             "-t",
@@ -402,9 +400,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
                 tuple(KernelStacks.get_frame_pcs(task)),
             )
             stack_aggr[stack_key].append(task)
-        return sorted(stack_aggr.items(),
-                      key=lambda x: len(x[1]),
-                      reverse=True)
+        return sorted(stack_aggr.items(), key=lambda x: len(x[1]), reverse=True)
 
     def print_stacks(self, objs: Iterable[drgn.Object]) -> None:
         self.print_header()
