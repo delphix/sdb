@@ -29,9 +29,6 @@ from sdb.commands.internal.table import Table
 from sdb.commands.linux.stacks import KernelStacks
 from sdb.error import SymbolNotFoundError
 
-TraceContext = None
-FrameContext = None
-
 
 def _cmdline(obj: drgn.Object) -> str:
     try:
