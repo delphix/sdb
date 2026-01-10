@@ -166,8 +166,8 @@ def load_debug_info(prog: drgn.Program, dpaths: List[str], quiet: bool,
             kos = []
             for ppath, __, files in os.walk(path):
                 for i in files:
-                    if (i.endswith(".ko") or i.endswith(".debug")
-                            or re.match(r".+\.so(\.\d)?", i) or no_filter):
+                    if (i.endswith(".ko") or i.endswith(".debug") or
+                            re.match(r".+\.so(\.\d)?", i) or no_filter):
                         # matches:
                         #     kernel modules - .ko suffix
                         #     userland debug files - .debug suffix

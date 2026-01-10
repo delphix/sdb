@@ -16,11 +16,16 @@
 
 # pylint: disable=missing-docstring
 
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Tuple
 
 import drgn
 from drgn.helpers.linux.list import list_for_each_entry
-from drgn.helpers.linux.slab import find_containing_slab_cache, for_each_slab_cache
+from drgn.helpers.linux.slab import (
+    find_containing_slab_cache,
+    for_each_slab_cache,
+    slab_cache_objects_per_slab,
+    slab_cache_usage,
+)
 
 import sdb
 
@@ -72,20 +77,46 @@ def for_each_node(cache: drgn.Object) -> Iterable[drgn.Object]:
         yield cache.node[i]
 
 
-def nr_slabs(cache: drgn.Object) -> int:
+def get_aggregated_usage(cache: drgn.Object) -> Tuple[int, int, int, int]:
+    """
+    Get slab cache usage statistics, aggregating child caches if applicable.
+    Uses drgn's slab_cache_usage() helper internally.
+
+    Returns a tuple of (num_slabs, num_objs, free_objs, active_objs).
+
+    Note: For kernels < v5.9 with memcg enabled, this aggregates statistics
+    from child caches as well.
+    """
     assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
-    nslabs = 0
-    for node in for_each_node(cache):
-        nslabs += node.nr_slabs.counter.value_()
+    usage = slab_cache_usage(cache)
+    num_slabs = usage.num_slabs
+    num_objs = usage.num_objs
+    free_objs = usage.free_objs
+
+    # Aggregate child caches for pre-v5.9 kernels with memcg
     if is_root_cache(cache):
         for child in for_each_child_cache(cache):
-            nslabs += nr_slabs(child)
-    return nslabs
+            child_usage = slab_cache_usage(child)
+            num_slabs += child_usage.num_slabs
+            num_objs += child_usage.num_objs
+            free_objs += child_usage.free_objs
+
+    num_active_objs = num_objs - free_objs
+    return (num_slabs, num_objs, free_objs, num_active_objs)
+
+
+def nr_slabs(cache: drgn.Object) -> int:
+    assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
+    return get_aggregated_usage(cache)[0]
 
 
 def entries_per_slab(cache: drgn.Object) -> int:
+    """
+    Get the number of objects in each slab of the given slab cache.
+    Uses drgn's slab_cache_objects_per_slab() helper.
+    """
     assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
-    return int(cache.oo.x.value_()) & 0xffff
+    return slab_cache_objects_per_slab(cache)
 
 
 def entry_size(cache: drgn.Object) -> int:
@@ -108,32 +139,17 @@ def total_memory(cache: drgn.Object) -> int:
 
 def objs(cache: drgn.Object) -> int:
     assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
-    count = 0
-    for node in for_each_node(cache):
-        count += node.total_objects.counter.value_()
-    if is_root_cache(cache):
-        for child in for_each_child_cache(cache):
-            count += objs(child)
-    return count
+    return get_aggregated_usage(cache)[1]
 
 
 def inactive_objs(cache: drgn.Object) -> int:
     assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
-    free = 0
-    for node in for_each_node(cache):
-        node_partial = node.partial
-        for page in list_for_each_entry("struct page",
-                                        node_partial.address_of_(), "lru"):
-            free += page.objects.value_() - page.inuse.value_()
-    if is_root_cache(cache):
-        for child in for_each_child_cache(cache):
-            free += inactive_objs(child)
-    return free
+    return get_aggregated_usage(cache)[2]
 
 
 def active_objs(cache: drgn.Object) -> int:
     assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
-    return objs(cache) - inactive_objs(cache)
+    return get_aggregated_usage(cache)[3]
 
 
 def active_memory(cache: drgn.Object) -> int:
@@ -160,4 +176,3 @@ def lookup_cache_by_address(obj: drgn.Object) -> Optional[drgn.Object]:
         return cache
     except drgn.FaultError:
         return None
-    return cache
