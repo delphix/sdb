@@ -120,3 +120,4 @@ tests/integration/data/dumps/
 
 # Local development documentation (machine-specific)
 LOCAL_DEV.md
+LOCAL_DOCKER_DEV.md
