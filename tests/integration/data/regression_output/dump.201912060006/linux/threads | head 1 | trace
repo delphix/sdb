@@ -1,0 +1,15 @@
+TASK: 0xffffa089669edc00 INTERRUPTIBLE PID: 1
+#0  0xffffffff8bc423c0 in context_switch() at core.c:2845:0 (inlined)
+#1  0xffffffff8bc423c0 in __schedule() at core.c:3527:0
+#2  0xffffffff8bc4299c in schedule() at core.c:3571:0
+#3  0xffffffff8bc46f41 in schedule_hrtimeout_range_clock() at hrtimer.c:1926:0
+#4  0xffffffff8bc46f63 in schedule_hrtimeout_range() at hrtimer.c:1983:0
+#5  0xffffffff8b508b28 in ep_poll() at eventpoll.c:1837:0
+#6  0xffffffff8b508df0 in do_epoll_wait() at eventpoll.c:2216:0
+#7  0xffffffff8b508e1e in __do_sys_epoll_wait() at eventpoll.c:2226:0 (inlined)
+#8  0xffffffff8b508e1e in __se_sys_epoll_wait() at eventpoll.c:2223:0 (inlined)
+#9  0xffffffff8b508e1e in __x64_sys_epoll_wait() at eventpoll.c:2223:0
+#10 0xffffffff8b2043ba in do_syscall_64() at common.c:293:0
+#11 0xffffffff8be0008c in entry_SYSCALL_64() at entry_64.S:175:0
+@#$ EXIT CODE $#@
+0

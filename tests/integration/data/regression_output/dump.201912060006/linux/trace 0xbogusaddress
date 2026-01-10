@@ -1,0 +1,3 @@
+sdb: trace: Invalid task address: '0xbogusaddress'
+@#$ EXIT CODE $#@
+1

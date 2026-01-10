@@ -110,7 +110,23 @@ POS_CMDS = [
     "whatis 0xffffa089407ca870",
     "whatis 0xffffa0888c766000 0xffffa089407ca870",
     "whatis 0xffff",
-    "whatis 0xf987kkbbh"
+    "whatis 0xf987kkbbh",
+
+    # trace/bt
+    "threads | head 1 | trace",
+
+    # frame
+    "threads | head 1 | frame 0",
+    "threads | head 1 | frame 5",
+
+    # locals
+    "threads | head 1 | frame 1 | locals",
+    "threads | head 1 | frame 1 | locals -v",
+
+    # registers
+    "threads | head 1 | frame 1 | registers",
+    "threads | head 1 | frame 1 | registers -x",
+    "threads | head 1 | frame 1 | registers rbp rsp",
 ]
 
 STRIPPED_POS_CMDS = [
@@ -162,6 +178,18 @@ NEG_CMDS = [
     "stacks -c bogus",
     "stacks -t bogus",
     "stacks -m bogus | count",
+
+    # trace/bt
+    "trace 0xbogusaddress",
+
+    # frame
+    "threads | head 1 | frame 999",
+
+    # locals
+    "threads | head 1 | frame 1 | locals bogus_var",
+
+    # registers
+    "threads | head 1 | frame 1 | registers bogus_reg",
 ]
 
 CMD_TABLE = POS_CMDS + STRIPPED_POS_CMDS + NEG_CMDS + POS_CMDS_201912060006

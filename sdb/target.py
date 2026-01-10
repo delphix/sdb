@@ -48,8 +48,8 @@ import drgn
 # pylint: disable=missing-function-docstring
 # pylint: disable=global-statement
 prog: drgn.Program
-thread: int
-frame: int
+thread: int = 0
+frame: int = -1
 
 
 def set_thread(thread_: int) -> None:

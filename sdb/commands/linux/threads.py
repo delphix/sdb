@@ -343,10 +343,10 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
                 self.name,
                 "No frame context set. Use 'frame' command to set frame")
         if self.islast:
-            self.pretty_print(self.caller(objs))
+            self.pretty_print(objs)
             return None
         # return threads that have the requested frame number
-        for thread in self.caller(objs):
+        for thread in objs:
             try:
                 _frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
             except IndexError:
@@ -386,6 +386,7 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
 
     names = ["locals", "local"]
     input_type = "struct task_struct *"
+    output_type = "void *"
     load_on = [sdb.Kernel()]
 
     @classmethod
@@ -427,10 +428,10 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
                 self.name,
                 "No frame context set. Use 'frame' command to set frame")
         if self.islast:
-            self.pretty_print(self.caller(objs))
+            self.pretty_print(objs)
             return None
         # return all locals or variables requested
-        for thread in self.caller(objs):
+        for thread in objs:
             try:
                 frame = sdb.get_prog().stack_trace(thread)[frame_id]
                 if self.args.variables:
@@ -495,6 +496,7 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
 
     names = ["registers", "register"]
     input_type = "struct task_struct *"
+    output_type = "void *"
     load_on = [sdb.Kernel()]
 
     @classmethod
@@ -536,10 +538,10 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
                 self.name,
                 "No frame context set. Use 'frame' command to set frame")
         if self.islast:
-            self.pretty_print(self.caller(objs))
+            self.pretty_print(objs)
             return None
         frame_id = sdb.get_frame()
-        for stack in self.caller(objs):
+        for stack in objs:
             frame = sdb.get_prog().stack_trace(stack)[frame_id]
             if self.args.registers:
                 for register in self.args.registers:
