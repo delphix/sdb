@@ -58,7 +58,8 @@ class SizeOf(sdb.Command):
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for tname in self.args.type:
             type_ = util.get_valid_type_by_name(self, tname)
-            yield sdb.create_object('size_t', sdb.type_canonicalize_size(type_))
+            yield sdb.create_object('size_t',
+                                    sdb.type_canonicalize_size(type_))
         for obj in objs:
             yield sdb.create_object('size_t',
                                     sdb.type_canonicalize_size(obj.type_))

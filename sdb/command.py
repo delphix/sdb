@@ -174,11 +174,7 @@ class Command:
         if cls.__doc__:
             summary = (
                 inspect.getdoc(  # type: ignore[union-attr]
-                    cls
-                )
-                .splitlines()[0]
-                .strip()
-            )
+                    cls).splitlines()[0].strip())
         else:
             summary = None
         return argparse.ArgumentParser(prog=name, description=summary)
@@ -194,13 +190,11 @@ class Command:
                 f"If this command is used to end a pipeline, it will print a"
                 f" human-readable decoding of the '{cls.input_type}' objects."
                 f" For the 'raw' object contents, pipe the output of this"
-                f" command into 'echo'."
-            )
+                f" command into 'echo'.")
 
         if issubclass(cls, Walker):
             paragraphs.append(
-                f"This is a Walker for {cls.input_type}. See 'help walk'."
-            )
+                f"This is a Walker for {cls.input_type}. See 'help walk'.")
 
         if cls.input_type is not None:
             #
@@ -223,15 +217,13 @@ class Command:
             loc_text = (
                 f"This is a Locator for {cls.output_type}.  It finds objects"
                 f" of this type and outputs or pretty-prints them.  It accepts"
-                f" any Walkable type (run 'walk' for a list)."
-            )
+                f" any Walkable type (run 'walk' for a list).")
             if cls.no_input != Locator.no_input:
                 loc_text += (
                     f" This command can be used to start a pipeline, in which"
                     f" case it will consume no objects as input; instead it"
                     f" will locate all objects of type '{cls.output_type}',"
-                    f" and emit them as output."
-                )
+                    f" and emit them as output.")
             types = []
             for _, method in inspect.getmembers(cls, inspect.isroutine):
                 if hasattr(method, "input_typename_handled"):
@@ -240,8 +232,7 @@ class Command:
                 loc_text += (
                     f" Input of the following types is also accepted,"
                     f" in which case the objects of type {cls.output_type}"
-                    f" which are associated with them will be located:"
-                )
+                    f" which are associated with them will be located:")
             for type_name in types:
                 loc_text += f"{type_name}"
                 if type_name != types[-1]:
@@ -283,10 +274,9 @@ class Command:
         paragraphs = cls.help_text()
         for paragraph in paragraphs:
             print(
-                textwrap.fill(
-                    paragraph, initial_indent=indent, subsequent_indent=indent
-                )
-            )
+                textwrap.fill(paragraph,
+                              initial_indent=indent,
+                              subsequent_indent=indent))
             print()
 
         #
@@ -306,8 +296,7 @@ class Command:
             # line should be empty. Thus, we skip these two lines.
             #
             for line in inspect.getdoc(  # type: ignore[union-attr]
-                cls
-            ).splitlines()[2:]:
+                    cls).splitlines()[2:]:
                 print(f"{line}")
             print()
 
@@ -325,7 +314,9 @@ class Command:
 
     input_type: Optional[str] = None
 
-    def __init__(self, args: Optional[List[str]] = None, name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         self.name = name
         self.isfirst = False
         self.islast = False
@@ -376,15 +367,15 @@ class Command:
             return
         add_command(cls)
 
-    def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+    def _call(self,
+              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         """
         Implemented by the subclass.
         """
         raise NotImplementedError()
 
-    def __invalid_memory_objects_check(
-        self, objs: Iterable[drgn.Object], fatal: bool
-    ) -> Iterable[drgn.Object]:
+    def __invalid_memory_objects_check(self, objs: Iterable[drgn.Object],
+                                       fatal: bool) -> Iterable[drgn.Object]:
         """
         A filter method for objects passed through the pipeline that
         are backed by invalid memory. When `fatal` is set to True
@@ -403,20 +394,16 @@ class Command:
                 continue
             except TypeError as err:
                 obj_type = type_canonicalize(obj.type_)
-                if (
-                    obj_type.kind == drgn.TypeKind.ARRAY
-                    and not obj_type.is_complete()
-                    and not obj.absent_
-                ):
+                if (obj_type.kind == drgn.TypeKind.ARRAY
+                        and not obj_type.is_complete() and not obj.absent_):
                     #
                     # This is a zero-length array, let it go through.
                     #
                     yield obj
                     continue
                 if obj_type.kind == drgn.TypeKind.FUNCTION:
-                    cerr = CommandError(
-                        self.name, "cannot dereference function pointer"
-                    )
+                    cerr = CommandError(self.name,
+                                        "cannot dereference function pointer")
                     if fatal:
                         raise cerr from err
                     print(cerr.text)
@@ -430,7 +417,8 @@ class Command:
                     err_msg = str(err)
                 else:
                     err_msg = f"addresss {hex(obj.address_of_().value_())}"
-                err = CommandError(self.name, f"invalid memory access: {err_msg}")
+                err = CommandError(self.name,
+                                   f"invalid memory access: {err_msg}")
                 if fatal:
                     raise err
                 print(err.text)
@@ -463,10 +451,10 @@ class Command:
                 # accordinly.
                 #
                 yield from self.__invalid_memory_objects_check(
-                    result, not issubclass(self.__class__, SingleInputCommand)
-                )
+                    result, not issubclass(self.__class__, SingleInputCommand))
         except drgn.FaultError as err:
-            raise CommandError(self.name, f"invalid memory access: {str(err)}") from err
+            raise CommandError(self.name,
+                               f"invalid memory access: {str(err)}") from err
 
 
 class SingleInputCommand(Command):
@@ -574,7 +562,8 @@ class PrettyPrinter(Command):
         # pylint: disable=missing-docstring
         raise NotImplementedError
 
-    def check_input_type(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def check_input_type(self,
+                         objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         """
         This function acts as a generator, checking that each passed object
         matches the input type for the command
@@ -591,8 +580,8 @@ class PrettyPrinter(Command):
             yield obj
 
     def _call(  # type: ignore[return]
-        self, objs: Iterable[drgn.Object]
-    ) -> Optional[Iterable[drgn.Object]]:
+            self,
+            objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         """
         This function will call pretty_print() on each input object,
         verifying the types as we go.
@@ -630,7 +619,8 @@ class Locator(Command):
         for _, method in inspect.getmembers(self, inspect.ismethod):
             if not hasattr(method, "input_typename_handled"):
                 continue
-            baked[type_canonicalize_name(method.input_typename_handled)] = method
+            baked[type_canonicalize_name(
+                method.input_typename_handled)] = method
 
         if self.isfirst:
             assert not objs
@@ -668,9 +658,11 @@ class Locator(Command):
                     pass
 
             # error
-            raise CommandError(self.name, f"no handler for input of type {i.type_}")
+            raise CommandError(self.name,
+                               f"no handler for input of type {i.type_}")
 
-    def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+    def _call(self,
+              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         # pylint: disable=missing-docstring
         # If this is a hybrid locator/pretty printer, this is where that is
         # leveraged.
@@ -712,7 +704,9 @@ class Cast(Command):
         parser.add_argument("type", nargs=argparse.REMAINDER)
         return parser
 
-    def __init__(self, args: Optional[List[str]] = None, name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         super().__init__(args, name)
         if not self.args.type:
             self.parser.error("the following arguments are required: <type>")
@@ -721,7 +715,8 @@ class Cast(Command):
         try:
             self.type = target.get_type(tname)
         except LookupError as err:
-            raise CommandError(self.name, f"could not find type '{tname}'") from err
+            raise CommandError(self.name,
+                               f"could not find type '{tname}'") from err
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for obj in objs:
@@ -755,11 +750,14 @@ class Dereference(Command):
             obj_type = type_canonicalize(obj.type_)
             if obj_type.kind != drgn.TypeKind.POINTER:
                 raise CommandError(
-                    self.name, f"'{obj.type_.type_name()}' is not a valid pointer type"
-                )
+                    self.name,
+                    f"'{obj.type_.type_name()}' is not a valid pointer type")
             if obj_type.type.type_name() == "void":
-                raise CommandError(self.name, "cannot dereference a void pointer")
-            yield drgn.Object(get_prog(), type=obj.type_.type, address=obj.value_())
+                raise CommandError(self.name,
+                                   "cannot dereference a void pointer")
+            yield drgn.Object(get_prog(),
+                              type=obj.type_.type,
+                              address=obj.value_())
 
 
 class Address(Command):
@@ -916,7 +914,8 @@ class Walk(Command):
             obj_type = type_canonicalize(i.type_)
             # if type is foo_t change to foo_t *
             if obj_type.kind != drgn.TypeKind.POINTER:
-                i = target.create_object(target.get_pointer_type(obj_type), i.address_)
+                i = target.create_object(target.get_pointer_type(obj_type),
+                                         i.address_)
 
             this_type_name = type_canonical_name(i.type_)
             if this_type_name not in baked:

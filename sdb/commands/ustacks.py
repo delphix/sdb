@@ -205,7 +205,9 @@ class UserStacks(sdb.Locator, sdb.PrettyPrinter):
         for thread in objs:
             stack_key = tuple(UserStacks.get_frame_pcs(thread))
             stack_aggr[stack_key].append(thread)
-        return sorted(stack_aggr.items(), key=lambda x: len(x[1]), reverse=True)
+        return sorted(stack_aggr.items(),
+                      key=lambda x: len(x[1]),
+                      reverse=True)
 
     def print_stacks(self, objs: Iterable[Thread]) -> None:
         self.print_header()
@@ -237,8 +239,9 @@ class UserStacks(sdb.Locator, sdb.PrettyPrinter):
 
     def no_input(self) -> Iterable[drgn.Object]:
         self.validate_args()
-        yield from map(gettid, filter(self.match_stack,
-                                      sdb.get_prog().threads()))
+        yield from map(gettid,
+                       filter(self.match_stack,
+                              sdb.get_prog().threads()))
 
 
 class UserCrashedThread(sdb.Locator, sdb.PrettyPrinter):

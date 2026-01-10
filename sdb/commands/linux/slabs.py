@@ -163,8 +163,8 @@ class Slabs(sdb.Locator, sdb.PrettyPrinter):
         if self.args.s:
             if self.args.s not in fields:
                 msg = f"'{self.args.s}' is not in field set ({', '.join(fields)})"
-                raise sdb.CommandInvalidInputError(self.name,
-                                                   textwrap.fill(msg, width=80))
+                raise sdb.CommandInvalidInputError(
+                    self.name, textwrap.fill(msg, width=80))
             sort_field = self.args.s
         else:
             #

@@ -59,7 +59,8 @@ def for_each_child_cache(root_cache: drgn.Object) -> Iterable[drgn.Object]:
     #
     try:
         yield from list_for_each_entry(
-            "struct kmem_cache", root_cache.memcg_params.children.address_of_(),
+            "struct kmem_cache",
+            root_cache.memcg_params.children.address_of_(),
             "memcg_params.children_node")
     except AttributeError:
         yield from []

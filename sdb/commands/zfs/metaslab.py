@@ -107,9 +107,8 @@ class Metaslab(sdb.Locator, sdb.PrettyPrinter):
         if WEIGHT_IS_SPACEBASED(weight):
             print(
                 "",
-                nicenum(weight &
-                        ~(METASLAB_ACTIVE_MASK | METASLAB_WEIGHT_TYPE)).rjust(
-                            12),
+                nicenum(weight & ~(METASLAB_ACTIVE_MASK | METASLAB_WEIGHT_TYPE)
+                        ).rjust(12),
             )
         else:
             count = str(WEIGHT_GET_COUNT(weight))

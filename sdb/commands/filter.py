@@ -99,8 +99,8 @@ class Filter(sdb.SingleInputCommand):
         try:
             self.lhs_code = compile(" ".join(self.expr[:index]), "<string>",
                                     "eval")
-            self.rhs_code = compile(" ".join(self.expr[index + 1:]), "<string>",
-                                    "eval")
+            self.rhs_code = compile(" ".join(self.expr[index + 1:]),
+                                    "<string>", "eval")
         except SyntaxError as err:
             raise sdb.CommandEvalSyntaxError(self.name, err)
 

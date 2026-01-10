@@ -167,7 +167,8 @@ class Member(sdb.SingleInputCommand):
             if tokens[0] == "." or tokens[0] == "->":
                 if len(tokens) < 2:
                     raise sdb.CommandError(
-                        self.name, f"no identifier specified after {tokens[0]}")
+                        self.name,
+                        f"no identifier specified after {tokens[0]}")
                 sep = MemberExprSep(tokens[0])
                 identifier = tokens[1]
                 tokens = tokens[2:]

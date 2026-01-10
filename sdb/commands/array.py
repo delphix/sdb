@@ -119,7 +119,8 @@ class Array(sdb.SingleInputCommand):
         else:
             raise sdb.CommandError(
                 self.name,
-                f"'{obj.type_.type_name()}' is not an array nor a pointer type")
+                f"'{obj.type_.type_name()}' is not an array nor a pointer type"
+            )
 
         for i in range(nelems):
             yield obj[i]

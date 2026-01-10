@@ -30,7 +30,9 @@ class ARCStats(sdb.Locator, sdb.PrettyPrinter):
 
     @staticmethod
     def print_stats(obj: drgn.Object) -> None:
-        names = [memb.name for memb in sdb.get_type('struct arc_stats').members]
+        names = [
+            memb.name for memb in sdb.get_type('struct arc_stats').members
+        ]
 
         for name in names:
             print(f"{name:32} = {int(obj.member_(name).value.ui64)}")
