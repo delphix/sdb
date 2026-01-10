@@ -30,6 +30,9 @@ from sdb.commands.internal.table import Table
 from sdb.commands.linux.stacks import KernelStacks
 from sdb.error import SymbolNotFoundError
 
+# Maximum width for command line display in threads output
+CMDLINE_MAX_WIDTH = 50
+
 
 def _cmdline(obj: drgn.Object) -> str:
     try:
@@ -45,7 +48,7 @@ def _cmdline(obj: drgn.Object) -> str:
         # the cost of not always showing the full command line of a
         # thread.
         #
-        return shorten(s, width=50)
+        return shorten(s, width=CMDLINE_MAX_WIDTH)
     except drgn.FaultError:
         #
         # The command line information is contained in the user address
