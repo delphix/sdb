@@ -31,6 +31,12 @@ import sdb
 from sdb.internal.repl import REPL
 from sdb.mdb_compat import set_mdb_compat_enabled
 
+try:
+    from sdb._version import version, commit_id
+except ImportError:
+    version = "0.0.0.dev0"
+    commit_id = None
+
 
 def parse_arguments() -> argparse.Namespace:
     """
@@ -39,6 +45,14 @@ def parse_arguments() -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(prog="sdb",
                                      description="The Slick/Simple Debugger")
+
+    version_string = f"sdb {version}"
+    if commit_id:
+        version_string += f" ({commit_id})"
+    parser.add_argument("-V",
+                        "--version",
+                        action="version",
+                        version=version_string)
 
     dump_group = parser.add_argument_group("core/crash dump analysis")
     dump_group.add_argument(
@@ -152,8 +166,8 @@ def load_debug_info(prog: drgn.Program, dpaths: List[str], quiet: bool,
             kos = []
             for ppath, __, files in os.walk(path):
                 for i in files:
-                    if (i.endswith(".ko") or i.endswith(".debug") or
-                            re.match(r".+\.so(\.\d)?", i) or no_filter):
+                    if (i.endswith(".ko") or i.endswith(".debug")
+                            or re.match(r".+\.so(\.\d)?", i) or no_filter):
                         # matches:
                         #     kernel modules - .ko suffix
                         #     userland debug files - .debug suffix
