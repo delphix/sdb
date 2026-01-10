@@ -419,7 +419,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
                 stacktrace_info += f" {len(tasks):6d}\n"
 
             #
-            # XXX - Could also use:
+            # Note: Could also use:
             #    frame_pcs: Tuple[int, ...] = stack_key[1]
             #    sdb.get_prog().stack_trace_from_pcs(frame_pcs)
             #

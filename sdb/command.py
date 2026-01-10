@@ -424,7 +424,7 @@ class Command:
                 print(err.text)
                 continue
             except drgn.ObjectAbsentError as err:
-                # XXX - maybe just go ahead and yield the object?
+                # Note: maybe just go ahead and yield the object?
                 if fatal:
                     raise CommandError(self.name, str(err)) from err
                 print(str(err))
