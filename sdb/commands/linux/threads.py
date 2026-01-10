@@ -272,7 +272,7 @@ class KernelTrace(sdb.Locator, sdb.PrettyPrinter):
                                                int(self.args.task, 16))
             except ValueError:
                 raise sdb.CommandError(
-                    self.name, f"Invalid task address: {self.args.task}")
+                    self.name, f"Invalid task address: '{self.args.task}'")
         else:
             yield sdb.get_thread()
 
