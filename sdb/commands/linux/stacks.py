@@ -343,15 +343,13 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
                 )
 
         if self.args.module:
-            if KernelStacks.find_module_memory_segment(
-                    self.args.module)[0] == -1:
+            self.mod_start, mod_size = KernelStacks.find_module_memory_segment(
+                self.args.module)
+            if self.mod_start == -1:
                 raise sdb.CommandError(
                     self.name,
                     f"module '{self.args.module}' doesn't exist or isn't currently loaded",
                 )
-            self.mod_start, mod_size = KernelStacks.find_module_memory_segment(
-                self.args.module)
-            assert self.mod_start != -1
             self.mod_end = self.mod_start + mod_size
 
     def match_stack(self, task: drgn.Object) -> bool:
