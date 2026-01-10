@@ -310,7 +310,8 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             if self.match_state not in task_states:
                 valid_states = ", ".join(task_states)
                 raise sdb.CommandError(
-                    self.name, f"'{self.args.tstate}' is not a valid task state"
+                    self.name,
+                    f"'{self.args.tstate}' is not a valid task state"
                     f" (acceptable states: {valid_states})")
 
         if self.args.module:
@@ -367,7 +368,9 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             stack_key = (KernelStacks.task_struct_get_state(task),
                          tuple(KernelStacks.get_frame_pcs(task)))
             stack_aggr[stack_key].append(task)
-        return sorted(stack_aggr.items(), key=lambda x: len(x[1]), reverse=True)
+        return sorted(stack_aggr.items(),
+                      key=lambda x: len(x[1]),
+                      reverse=True)
 
     @staticmethod
     def frame_string(frame_info: str, count: int) -> str:
@@ -398,6 +401,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             last_frame_pc = 0x0
             last_offset = 0x0
             count = 0
+            frame_info = ""
             for frame_pc in frame_pcs:
                 try:
                     # ignore frames with a program counter of zero
@@ -411,7 +415,8 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
                         continue
                     # emit the last frame we have accumulated
                     if count > 0:
-                        stacktrace_info += KernelStacks.frame_string(frame_info, count)
+                        stacktrace_info += KernelStacks.frame_string(
+                            frame_info, count)
                     frame_info = f"{'':18s}{func}+0x{hex(offset)}"
                     last_frame_pc = frame_pc
                     last_offset = offset
@@ -422,7 +427,8 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
                         continue
                     # emit any previous frame info we have accumulated
                     if count > 0:
-                        stacktrace_info += KernelStacks.frame_string(frame_info, count)
+                        stacktrace_info += KernelStacks.frame_string(
+                            frame_info, count)
                     frame_info = f"{'':18s}{hex(frame_pc)}+0x0"
                     last_frame_pc = frame_pc
                     count = 1
