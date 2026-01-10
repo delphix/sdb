@@ -1,7 +1,8 @@
 TASK_STRUCT        STATE             COUNT
 ==========================================
 0xffffa0895684c500 INTERRUPTIBLE        13
-                  __schedule+0x2c0 (2)
+                  context_switch (inlined)
+                  __schedule+0x2c0
                   schedule+0x2c
                   cv_wait_common+0x11f
                   __cv_wait_sig+0x15
@@ -11,30 +12,33 @@ TASK_STRUCT        STATE             COUNT
                   ret_from_fork+0x1f
 
 0xffffa08957e3c500 INTERRUPTIBLE         3
-                  __schedule+0x2c0 (2)
+                  context_switch (inlined)
+                  __schedule+0x2c0
                   schedule+0x2c
                   cv_wait_common+0x11f
                   __cv_wait_sig+0x15
-                  txg_thread_wait.isra.5+0x1d
+                  txg_thread_wait+0x1d
                   txg_quiesce_thread+0x152
                   thread_generic_wrapper+0x74
                   kthread+0x121
                   ret_from_fork+0x1f
 
 0xffffa08957da9700 INTERRUPTIBLE         3
-                  __schedule+0x2c0 (2)
+                  context_switch (inlined)
+                  __schedule+0x2c0
                   schedule+0x2c
                   schedule_timeout+0x169
                   __cv_timedwait_common+0xdf
                   __cv_timedwait_sig+0x16
-                  txg_thread_wait.isra.5+0x31
+                  txg_thread_wait+0x31
                   txg_sync_thread+0x15e
                   thread_generic_wrapper+0x74
                   kthread+0x121
                   ret_from_fork+0x1f
 
 0xffffa08952e5ae00 INTERRUPTIBLE         3
-                  __schedule+0x2c0 (2)
+                  context_switch (inlined)
+                  __schedule+0x2c0
                   schedule+0x2c
                   schedule_hrtimeout_range_clock+0xb9
                   schedule_hrtimeout_range+0x13
@@ -47,7 +51,8 @@ TASK_STRUCT        STATE             COUNT
                   ret_from_fork+0x1f
 
 0xffffa08956849700 INTERRUPTIBLE         1
-                  __schedule+0x2c0 (2)
+                  context_switch (inlined)
+                  __schedule+0x2c0
                   schedule+0x2c
                   schedule_hrtimeout_range_clock+0xb9
                   schedule_hrtimeout_range+0x13
@@ -60,7 +65,8 @@ TASK_STRUCT        STATE             COUNT
                   ret_from_fork+0x1f
 
 0xffffa0895684dc00 INTERRUPTIBLE         1
-                  __schedule+0x2c0 (2)
+                  context_switch (inlined)
+                  __schedule+0x2c0
                   schedule+0x2c
                   schedule_hrtimeout_range_clock+0xb9
                   schedule_hrtimeout_range+0x13
@@ -73,7 +79,8 @@ TASK_STRUCT        STATE             COUNT
                   ret_from_fork+0x1f
 
 0xffffa089580b1700 INTERRUPTIBLE         1
-                  __schedule+0x2c0 (2)
+                  context_switch (inlined)
+                  __schedule+0x2c0
                   schedule+0x2c
                   schedule_timeout+0x169
                   __cv_timedwait_common+0xdf
@@ -84,7 +91,8 @@ TASK_STRUCT        STATE             COUNT
                   ret_from_fork+0x1f
 
 0xffffa089408fdc00 INTERRUPTIBLE         1
-                  __schedule+0x2c0 (2)
+                  context_switch (inlined)
+                  __schedule+0x2c0
                   schedule+0x2c
                   cv_wait_common+0x11f
                   __cv_wait_sig+0x15
@@ -92,17 +100,27 @@ TASK_STRUCT        STATE             COUNT
                   zfs_ioc_events_next+0x64
                   zfsdev_ioctl_common+0x529
                   zfsdev_ioctl+0x52
-                  do_vfs_ioctl+0xa9 (2)
+                  vfs_ioctl (inlined)
+                  do_vfs_ioctl+0xa9
                   ksys_ioctl+0x75
-                  __x64_sys_ioctl+0x1a (3)
+                  __do_sys_ioctl (inlined)
+                  __se_sys_ioctl (inlined)
+                  __x64_sys_ioctl+0x1a
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
 
 0xffffa0888cc62e00 RUNNING               1
-                  new_slab+0x240 (5)
-                  ___slab_alloc+0x393 (2)
+                  freelist_ptr (inlined)
+                  set_freepointer (inlined)
+                  shuffle_freelist (inlined)
+                  allocate_slab (inlined)
+                  new_slab+0x240
+                  new_slab_objects (inlined)
+                  ___slab_alloc+0x393
                   __slab_alloc+0x20
-                  kmem_cache_alloc+0x182 (3)
+                  slab_alloc_node (inlined)
+                  slab_alloc (inlined)
+                  kmem_cache_alloc+0x182
                   spl_kmem_cache_alloc+0x46
                   zio_data_buf_alloc+0x55
                   zil_itx_create+0x29
@@ -111,11 +129,14 @@ TASK_STRUCT        STATE             COUNT
                   zpl_write_common_iovec+0xa5
                   zpl_iter_write_common+0x81
                   zpl_iter_write+0x4f
-                  new_sync_write+0x10c (2)
+                  call_write_iter (inlined)
+                  new_sync_write+0x10c
                   __vfs_write+0x29
                   vfs_write+0xb1
                   ksys_write+0x5c
-                  __x64_sys_write+0x1a (3)
+                  __do_sys_write (inlined)
+                  __se_sys_write (inlined)
+                  __x64_sys_write+0x1a
                   do_syscall_64+0x5a
                   entry_SYSCALL_64+0x7c
 
