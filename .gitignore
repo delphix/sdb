@@ -121,3 +121,6 @@ tests/integration/data/dumps/
 # Local development documentation (machine-specific)
 LOCAL_DEV.md
 LOCAL_DOCKER_DEV.md
+
+# Auto-generated version file (created by setuptools-scm)
+sdb/_version.py
