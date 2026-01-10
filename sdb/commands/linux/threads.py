@@ -162,6 +162,7 @@ def _framestr(frame_index: int, frame: drgn.StackFrame, args: bool) -> str:
 
     return id_str + " " + addr + function_str + location_str + inline_str
 
+
 def _funcstr(frame: drgn.StackFrame) -> str:
     name = frame.name
     if name is None:
@@ -255,11 +256,9 @@ class KernelTrace(sdb.Locator, sdb.PrettyPrinter):
                 raise sdb.CommandError(
                     self.name, f"Thread with id {hex(thread)} not found")
             sdb.set_thread(thread)
-            print(
-                f"TASK: {hex(thread.value_())} "
-                + str(KernelStacks.task_struct_get_state(thread))
-                + f" PID: {int(thread.pid)}"
-            )
+            print(f"TASK: {hex(thread.value_())} " +
+                  str(KernelStacks.task_struct_get_state(thread)) +
+                  f" PID: {int(thread.pid)}")
             for frame_index, frame in enumerate(stack_trace):
                 if frame.pc == 0:
                     # Note: We filter out frames with zero program counter,
