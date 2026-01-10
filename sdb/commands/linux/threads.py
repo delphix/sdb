@@ -125,10 +125,8 @@ def _framestr(frame_index: int, frame: drgn.StackFrame, args: bool) -> str:
     Returns:
         Formatted frame string like: "#0  0xaddr in function() at file.c:line:col (inlined)"
     """
-    # Format frame index with padding for alignment
-    id_str = f"#{frame_index}"
-    if len(id_str) < 3:
-        id_str = id_str + " "
+    # Format frame index with padding for alignment (e.g., "#0 ", "#10")
+    id_str = f"#{frame_index:<2}"
 
     # Get program counter (address) - pc is always available as a Final[int] attribute
     addr = hex(frame.pc)
