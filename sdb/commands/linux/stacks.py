@@ -417,7 +417,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
                     if count > 0:
                         stacktrace_info += KernelStacks.frame_string(
                             frame_info, count)
-                    frame_info = f"{'':18s}{func}+0x{hex(offset)}"
+                    frame_info = f"{'':18s}{func}+{hex(offset)}"
                     last_frame_pc = frame_pc
                     last_offset = offset
                     count = 1
