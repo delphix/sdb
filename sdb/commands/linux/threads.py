@@ -365,8 +365,7 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
                 continue
 
     def no_input(self) -> Iterable[drgn.Object]:
-        threads = [sdb.get_thread()]
-        yield from threads
+        yield sdb.get_thread()
 
 
 class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
@@ -470,8 +469,7 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
                 )
 
     def no_input(self) -> Iterable[drgn.Object]:
-        threads = [sdb.get_thread()]
-        yield from threads
+        yield sdb.get_thread()
 
 
 class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
@@ -577,5 +575,4 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
                 print(f"{register} = {value}")
 
     def no_input(self) -> Iterable[drgn.Object]:
-        threads = [sdb.get_thread()]
-        yield from threads
+        yield sdb.get_thread()
