@@ -19,12 +19,14 @@
 import atexit
 import os
 import readline
+import shlex
 import traceback
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Tuple
 
 import drgn
 from sdb.error import Error, CommandArgumentsError
 from sdb.pipeline import invoke
+from sdb.session import get_trace_manager
 
 
 class REPL:
@@ -96,6 +98,167 @@ class REPL:
         readline.set_history_length(1000)
         atexit.register(readline.write_history_file, self.histfile)
 
+    def _parse_session_cmd(self, input_: str) -> Tuple[str, List[str]]:
+        """Parse session command input into subcmd and args."""
+        parts = shlex.split(input_)
+        if not parts or parts[0] != 'session':
+            return ('', parts)
+        if len(parts) < 2:
+            return ('', parts)
+        return (parts[1], parts[2:])
+
+    def _handle_session_record(self, args: List[str]) -> int:
+        """Handle %session record command."""
+        if not args:
+            print("Usage: %session record <file.sdb>")
+            return 2
+        output_path = args[0]
+        trace_mgr = get_trace_manager()
+        trace_mgr.start_recording(self.target, output_path)
+        print(f"Recording started. Output will be saved to: {output_path}")
+        return 0
+
+    def _handle_session_stop(self) -> int:
+        """Handle %session stop command."""
+        trace_mgr = get_trace_manager()
+        saved_path = trace_mgr.stop_recording(self.target)
+        status = trace_mgr.get_status()
+        print("Recording stopped.")
+        print(f"Saved to: {saved_path}")
+        print(f"  Memory segments: {status['memory_segments']}")
+        print(f"  Memory size: {status['memory_size']} bytes")
+        print(f"  Objects: {status['objects_count']}")
+        print(f"  Symbols: {status['symbols_count']}")
+        return 0
+
+    def _handle_session_status(self) -> int:
+        """Handle %session status command."""
+        trace_mgr = get_trace_manager()
+        status = trace_mgr.get_status()
+        if status['is_recording']:
+            print(f"Recording to: {status['output_path']}")
+            print(f"  Memory segments: {status['memory_segments']}")
+            print(f"  Memory size: {status['memory_size']} bytes")
+            print(f"  Objects: {status['objects_count']}")
+        elif status['is_replay']:
+            print("Replay mode active")
+            print(f"  Memory segments: {status['memory_segments']}")
+            print(f"  Memory size: {status['memory_size']} bytes")
+        else:
+            print("No recording or replay in progress")
+        return 0
+
+    def _handle_session_snapshot(self, args: List[str]) -> int:
+        """Handle %session snapshot command."""
+        if not args:
+            print("Usage: %session snapshot <variable> [--depth N]")
+            return 2
+        var_name = args[0]
+        depth = 1
+        if len(args) >= 3 and args[1] == '--depth':
+            try:
+                depth = int(args[2])
+            except ValueError:
+                print(f"Invalid depth: {args[2]}")
+                return 2
+
+        trace_mgr = get_trace_manager()
+        if not trace_mgr.is_recording:
+            print(
+                "Error: No recording in progress. Use '%session record <file>' first."
+            )
+            return 1
+
+        # Force read the variable to capture it
+        try:
+            import sdb.target as sdb_target  # pylint: disable=import-outside-toplevel
+            obj = sdb_target.get_object(var_name)
+            # Use capture_object for proper tracing
+            trace_mgr.capture_object(obj, depth)
+            # Also record the named object
+            trace_mgr.record_object(var_name, int(obj.address_of_()),
+                                    str(obj.type_))
+            status = trace_mgr.get_status()
+            print(f"Snapshot captured: {var_name}")
+            print(f"  Memory segments: {status['memory_segments']}")
+            print(f"  Memory size: {status['memory_size']} bytes")
+        except (drgn.FaultError, ValueError, TypeError, LookupError) as e:
+            print(f"Failed to snapshot {var_name}: {e}")
+            return 1
+        return 0
+
+    def _handle_session_load(self, args: List[str]) -> int:
+        """Handle %session load command."""
+        if not args:
+            print("Usage: %session load <file.sdb>")
+            return 2
+        # Note: Loading is primarily done via CLI --replay
+        # This command is for switching to a loaded session
+        print("Note: Use 'sdb --replay <file.sdb>' to load a recorded session")
+        print("      The %session load command is for advanced use cases")
+        return 0
+
+    # pylint: disable=too-many-return-statements
+    def eval_session_cmd(self, input_: str) -> int:
+        """
+        Evaluates a session command (commands starting with %).
+
+        Session commands control recording and replay functionality:
+        - %session record <file.sdb> - Start recording
+        - %session stop - Stop recording and save
+        - %session status - Show recording status
+        - %session snapshot <var> [--depth N] - Capture object graph
+        - %session load <file.sdb> - Load a recorded session
+
+        Returns:
+            0 for success
+            1 for error
+            2 for incorrect arguments
+        """
+        try:
+            # Parse the session command
+            parts = shlex.split(input_)
+            if not parts:
+                print("Usage: %session <command> [args]")
+                print("Commands: record, stop, status, snapshot, load")
+                return 2
+
+            if parts[0] != 'session':
+                print(f"Unknown meta-command: %{parts[0]}")
+                print("Available meta-commands: %session")
+                return 1
+
+            if len(parts) < 2:
+                print("Usage: %session <command> [args]")
+                print("Commands: record, stop, status, snapshot, load")
+                return 2
+
+            subcmd = parts[1]
+            args = parts[2:]
+
+            if subcmd == 'record':
+                return self._handle_session_record(args)
+            if subcmd == 'stop':
+                return self._handle_session_stop()
+            if subcmd == 'status':
+                return self._handle_session_status()
+            if subcmd == 'snapshot':
+                return self._handle_session_snapshot(args)
+            if subcmd == 'load':
+                return self._handle_session_load(args)
+
+            print(f"Unknown session command: {subcmd}")
+            print("Commands: record, stop, status, snapshot, load")
+            return 1
+
+        except RuntimeError as e:
+            print(f"Session error: {e}")
+            return 1
+        except (ValueError, TypeError, OSError) as e:
+            print(f"Session command failed: {e}")
+            return 1
+
+    # pylint: disable=too-many-return-statements
     def eval_cmd(self, input_: str) -> int:
         """
         Evaluates the SDB command/pipeline passed as input_
@@ -106,9 +269,24 @@ class REPL:
             1 for error
             2 for incorrect arguments passed
         """
+        # Check for session/meta commands (starting with %)
+        if input_.startswith('%'):
+            return self.eval_session_cmd(input_[1:])
+
+        # Check if recording is active
+        trace_mgr = get_trace_manager()
+        is_tracing = trace_mgr.is_recording
+
         # pylint: disable=broad-except
         try:
             for obj in invoke([], input_):
+                # If recording, capture the object's memory
+                if is_tracing and hasattr(obj, 'address_of_'):
+                    try:
+                        trace_mgr.capture_object(obj, depth=0)
+                    except Exception:
+                        pass  # Don't let tracing errors break commands
+
                 try:
                     print(obj.format_(dereference=False))
                 except AttributeError:

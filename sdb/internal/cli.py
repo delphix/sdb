@@ -23,6 +23,7 @@ import argparse
 import os
 import re
 import sys
+import zipfile
 
 from typing import List
 
@@ -30,6 +31,7 @@ import drgn
 import sdb
 from sdb.internal.repl import REPL
 from sdb.mdb_compat import set_mdb_compat_enabled
+from sdb.session import get_trace_manager, TraceManager
 
 try:
     from sdb._version import version, commit_id
@@ -117,6 +119,22 @@ def parse_arguments() -> argparse.Namespace:
         action="store_false",
         help="disable mdb compatibility syntax (symbol::cmd)",
     )
+
+    # Session recording and replay
+    session_group = parser.add_argument_group("session recording")
+    session_group.add_argument(
+        "--record",
+        metavar="FILE",
+        type=str,
+        help="record session to FILE.sdb (memory accesses, objects, symbols)",
+    )
+    session_group.add_argument(
+        "--replay",
+        metavar="FILE",
+        type=str,
+        help="replay a recorded session from FILE.sdb",
+    )
+
     args = parser.parse_args()
 
     #
@@ -147,6 +165,23 @@ def parse_arguments() -> argparse.Namespace:
     #
     if args.object and not args.core:
         parser.error("raw object file target is not supported yet")
+
+    #
+    # Replay mode is mutually exclusive with other target options
+    #
+    if args.replay:
+        if args.object or args.core:
+            parser.error("cannot specify object/core files with --replay")
+        if args.kernel:
+            parser.error("cannot specify --kernel with --replay")
+        if args.pid:
+            parser.error("cannot specify --pid with --replay")
+
+    #
+    # Recording requires a target (can't record nothing)
+    #
+    if args.record and args.replay:
+        parser.error("cannot use --record and --replay together")
 
     return args
 
@@ -250,13 +285,108 @@ def setup_target(args: argparse.Namespace) -> drgn.Program:
     return prog
 
 
-def main() -> None:
-    """The entry point of the sdb "executable" """
-    args = parse_arguments()
+def setup_replay_target(replay_path: str, symbol_search: List[str],
+                        quiet: bool) -> drgn.Program:
+    """
+    Setup a drgn.Program for replay mode from a recorded session bundle.
 
-    # Configure mdb compatibility syntax preprocessing
-    set_mdb_compat_enabled(args.mdb_compat)
+    The bundle provides memory contents, while debug info must still be
+    loaded from the original vmlinux/modules (specified via -s).
+    """
+    # Load the bundle
+    trace_mgr = get_trace_manager()
+    try:
+        # Load the bundle into the trace manager
+        loaded_mgr = TraceManager.load_bundle(replay_path)
+        # Copy state to global manager
+        trace_mgr.is_replay = True
+        trace_mgr.memory = loaded_mgr.memory
+        trace_mgr.objects = loaded_mgr.objects
+        trace_mgr.symbols = loaded_mgr.symbols
+        trace_mgr.threads = loaded_mgr.threads
+        trace_mgr.metadata = loaded_mgr.metadata
+    except FileNotFoundError:
+        print(f"sdb: no such file: '{replay_path}'")
+        sys.exit(2)
+    except (ValueError, OSError, zipfile.BadZipFile) as e:
+        print(f"sdb: failed to load replay bundle: {e}")
+        sys.exit(1)
 
+    # Set up platform from metadata
+    metadata = trace_mgr.metadata
+    arch_name = metadata.get('arch', 'unknown')
+    flags_value = metadata.get('flags', 0)
+
+    # Create the program with platform if available
+    platform = None
+    if arch_name != 'unknown':
+        try:
+            arch = getattr(drgn.Architecture, arch_name)
+            flags = drgn.PlatformFlags(flags_value)
+            platform = drgn.Platform(arch, flags)
+        except (AttributeError, ValueError) as e:
+            if not quiet:
+                print(
+                    f"sdb: warning: could not create platform from metadata: {e}",
+                    file=sys.stderr)
+
+    if platform:
+        prog = drgn.Program(platform)
+    else:
+        # Default to x86_64 Linux for kernel debugging
+        prog = drgn.Program(drgn.Platform(drgn.Architecture.X86_64))
+
+    # Load debug info first - this sets up types and platform info
+    if symbol_search:
+        try:
+            load_debug_info(prog, symbol_search, quiet, False)
+        except (drgn.MissingDebugInfoError, OSError) as debug_info_err:
+            if not quiet:
+                print("sdb: " + str(debug_info_err), file=sys.stderr)
+
+    # Set up the memory reader
+    def memory_reader(address: int, count: int, _offset: int,
+                      _physical: bool) -> bytes:
+        return trace_mgr.memory.read(address, count)
+
+    # Register for the full address space
+    prog.add_memory_segment(0, 0xFFFFFFFFFFFFFFFF, memory_reader)
+
+    return prog
+
+
+def _run_replay_mode(args: argparse.Namespace) -> None:
+    """Handle replay mode execution."""
+    try:
+        prog = setup_replay_target(args.replay, args.symbol_search, args.quiet)
+    except PermissionError as err:
+        print("sdb: " + str(err))
+        return
+
+    sdb.target.set_prog(prog)
+    # In replay mode, we don't have real threads
+    # Set a dummy thread value
+    sdb.target.set_thread(0)
+    sdb.target.set_frame(-1)
+    sdb.register_commands()
+
+    if not args.quiet:
+        trace_mgr = get_trace_manager()
+        status = trace_mgr.get_status()
+        print(f"Replay mode: loaded {status['memory_size']} bytes "
+              f"in {status['memory_segments']} segments")
+
+    repl = REPL(prog, list(sdb.get_registered_commands().keys()))
+    repl.enable_history(os.getenv("SDB_HISTORY_FILE", "~/.sdb_history"))
+    if args.eval:
+        exit_code = repl.eval_cmd(args.eval)
+        sys.exit(exit_code)
+    else:
+        repl.start_session()
+
+
+def _run_normal_mode(args: argparse.Namespace) -> None:
+    """Handle normal (live or crash dump) mode execution."""
     try:
         prog = setup_target(args)
     except PermissionError as err:
@@ -270,13 +400,59 @@ def main() -> None:
     sdb.target.set_frame(-1)
     sdb.register_commands()
 
+    # Handle recording mode
+    if args.record:
+        trace_mgr = get_trace_manager()
+        trace_mgr.start_recording(prog, args.record)
+        if not args.quiet:
+            print(f"Recording to: {args.record}")
+
     repl = REPL(prog, list(sdb.get_registered_commands().keys()))
     repl.enable_history(os.getenv("SDB_HISTORY_FILE", "~/.sdb_history"))
-    if args.eval:
-        exit_code = repl.eval_cmd(args.eval)
-        sys.exit(exit_code)
-    else:
-        repl.start_session()
+
+    try:
+        if args.eval:
+            exit_code = repl.eval_cmd(args.eval)
+            # If recording, stop and save
+            if args.record:
+                _stop_recording_if_active(prog, args.quiet)
+            sys.exit(exit_code)
+        else:
+            repl.start_session()
+    finally:
+        # If recording was active and we're exiting, save it
+        if args.record:
+            _stop_recording_if_active(prog, args.quiet, newline=True)
+
+
+def _stop_recording_if_active(prog: drgn.Program,
+                              quiet: bool,
+                              newline: bool = False) -> None:
+    """Stop recording if it's active and print status."""
+    trace_mgr = get_trace_manager()
+    if trace_mgr.is_recording:
+        saved_path = trace_mgr.stop_recording(prog)
+        if not quiet:
+            status = trace_mgr.get_status()
+            prefix = "\n" if newline else ""
+            print(f"{prefix}Recording saved to: {saved_path}")
+            print(f"  Memory: {status['memory_size']} bytes")
+
+
+def main() -> None:
+    """The entry point of the sdb "executable" """
+    args = parse_arguments()
+
+    # Configure mdb compatibility syntax preprocessing
+    set_mdb_compat_enabled(args.mdb_compat)
+
+    # Handle replay mode
+    if args.replay:
+        _run_replay_mode(args)
+        return
+
+    # Normal mode (live or crash dump)
+    _run_normal_mode(args)
 
 
 if __name__ == "__main__":
