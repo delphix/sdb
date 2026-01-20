@@ -399,8 +399,12 @@ class TraceManager:
             # Object is a value, not a reference - nothing to capture
             return
 
-        size = obj.type_.size
-        if size is None or size == 0:
+        # Use drgn.sizeof() which resolves typedefs to get the actual size
+        try:
+            size = drgn.sizeof(obj.type_)
+        except (TypeError, ValueError):
+            size = 0
+        if size == 0:
             return
 
         # Read and trace the memory
