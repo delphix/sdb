@@ -220,6 +220,43 @@ class REPL:
             )
         return 0
 
+    def _handle_session_record_memory(self, args: List[str]) -> int:
+        """Handle %session record-memory command."""
+        trace_mgr = get_trace_manager()
+        if not trace_mgr.is_recording:
+            print("Error: Not recording. Use '%session record <file>' first.")
+            return 1
+
+        # Parse arguments: <address> <size> [--physical]
+        physical = '--physical' in args
+        # Remove --physical from args for parsing address and size
+        args = [a for a in args if a != '--physical']
+
+        if len(args) < 2:
+            print("Usage: %session record-memory <address> <size> [--physical]")
+            return 2
+
+        try:
+            # Parse address (supports hex with 0x prefix)
+            address = int(args[0], 0)
+            size = int(args[1], 0)
+        except ValueError as e:
+            print(f"Invalid address or size: {e}")
+            return 2
+
+        if size <= 0:
+            print("Error: size must be positive")
+            return 2
+
+        try:
+            trace_mgr.trace_read(address, size, physical)
+            phys_str = " (physical)" if physical else ""
+            print(f"Recorded {size} bytes at {hex(address)}{phys_str}")
+            return 0
+        except drgn.FaultError as e:
+            print(f"Failed to read memory at {hex(address)}: {e}")
+            return 1
+
     # pylint: disable=too-many-return-statements
     def eval_session_cmd(self, input_: str) -> int:
         """
@@ -252,9 +289,8 @@ class REPL:
 
             if len(parts) < 2:
                 print("Usage: %session <command> [args]")
-                print(
-                    "Commands: record, stop, status, snapshot, capture-stacks, load"
-                )
+                print("Commands: record, stop, status, snapshot, "
+                      "capture-stacks, record-memory, load")
                 return 2
 
             subcmd = parts[1]
@@ -270,13 +306,14 @@ class REPL:
                 return self._handle_session_snapshot(args)
             if subcmd == 'capture-stacks':
                 return self._handle_session_capture_stacks(args)
+            if subcmd == 'record-memory':
+                return self._handle_session_record_memory(args)
             if subcmd == 'load':
                 return self._handle_session_load(args)
 
             print(f"Unknown session command: {subcmd}")
-            print(
-                "Commands: record, stop, status, snapshot, capture-stacks, load"
-            )
+            print("Commands: record, stop, status, snapshot, "
+                  "capture-stacks, record-memory, load")
             return 1
 
         except RuntimeError as e:

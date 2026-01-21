@@ -337,6 +337,34 @@ class TestSessionErrors:
         result = rdump.repl.eval_cmd("%session capture-stacks")
         assert result == 1  # Error
 
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_record_memory_without_recording(self, rdump: RefDump) -> None:
+        """Test that record-memory without recording gives an error."""
+        setup_test_env(rdump)
+
+        result = rdump.repl.eval_cmd("%session record-memory 0x1000 256")
+        assert result == 1  # Error
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_record_memory_missing_args(self, rdump: RefDump) -> None:
+        """Test that record-memory with missing args gives an error."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+            trace_mgr.start_recording(rdump.program, bundle_path)
+
+            # Missing size
+            result = rdump.repl.eval_cmd("%session record-memory 0x1000")
+            assert result == 2  # Incorrect args
+
+            # Missing both
+            result = rdump.repl.eval_cmd("%session record-memory")
+            assert result == 2  # Incorrect args
+
+            trace_mgr.stop_recording(rdump.program)
+
 
 @pytest.mark.skipif(
     len(get_crash_dump_dir_paths()) == 0,
@@ -584,3 +612,135 @@ class TestCaptureStacks:
                     for line in lines:
                         assert '#' in line
                         assert '0x' in line
+
+
+@pytest.mark.skipif(
+    len(get_crash_dump_dir_paths()) == 0,
+    reason="couldn't find any crash/core dumps to run tests against")
+class TestRecordMemory:
+    """Tests for the record-memory command."""
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_record_memory_basic(self, rdump: RefDump) -> None:
+        """Test basic record-memory command."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording
+            trace_mgr.start_recording(rdump.program, bundle_path)
+
+            # Get the address of init_task to record
+            # pylint: disable=import-outside-toplevel
+            from sdb import target as sdb_target
+            init_task = sdb_target.get_object("init_task")
+            addr = int(init_task.address_of_())
+
+            # Record memory at that address
+            result = rdump.repl.eval_cmd(
+                f"%session record-memory {hex(addr)} 256")
+            assert result == 0
+
+            # Verify memory was captured
+            assert trace_mgr.memory.get_total_size() >= 256
+
+            trace_mgr.stop_recording(rdump.program)
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_record_memory_hex_size(self, rdump: RefDump) -> None:
+        """Test record-memory with hex size."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording
+            trace_mgr.start_recording(rdump.program, bundle_path)
+
+            # Get the address of init_task
+            # pylint: disable=import-outside-toplevel
+            from sdb import target as sdb_target
+            init_task = sdb_target.get_object("init_task")
+            addr = int(init_task.address_of_())
+
+            # Record with hex size
+            result = rdump.repl.eval_cmd(
+                f"%session record-memory {hex(addr)} 0x100")
+            assert result == 0
+
+            # 0x100 = 256 bytes
+            assert trace_mgr.memory.get_total_size() >= 256
+
+            trace_mgr.stop_recording(rdump.program)
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_record_memory_accumulates(self, rdump: RefDump) -> None:
+        """Test that multiple record-memory calls accumulate."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording
+            trace_mgr.start_recording(rdump.program, bundle_path)
+
+            # Get addresses
+            # pylint: disable=import-outside-toplevel
+            from sdb import target as sdb_target
+            init_task = sdb_target.get_object("init_task")
+            addr1 = int(init_task.address_of_())
+
+            jiffies = sdb_target.get_object("jiffies")
+            addr2 = int(jiffies.address_of_())
+
+            # Record first region
+            rdump.repl.eval_cmd(f"%session record-memory {hex(addr1)} 256")
+            size1 = trace_mgr.memory.get_total_size()
+
+            # Record second region (different address)
+            rdump.repl.eval_cmd(f"%session record-memory {hex(addr2)} 256")
+            size2 = trace_mgr.memory.get_total_size()
+
+            # Memory should have grown
+            assert size2 >= size1
+
+            trace_mgr.stop_recording(rdump.program)
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_record_memory_in_bundle(self, rdump: RefDump) -> None:
+        """Test that record-memory data survives save/load."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording
+            trace_mgr.start_recording(rdump.program, bundle_path)
+
+            # Get address and record
+            # pylint: disable=import-outside-toplevel
+            from sdb import target as sdb_target
+            init_task = sdb_target.get_object("init_task")
+            addr = int(init_task.address_of_())
+
+            rdump.repl.eval_cmd(f"%session record-memory {hex(addr)} 512")
+            original_size = trace_mgr.memory.get_total_size()
+
+            saved_path = trace_mgr.stop_recording(rdump.program)
+
+            # Load and verify
+            loaded_mgr = TraceManager.load_bundle(saved_path)
+            assert loaded_mgr.memory.get_total_size() == original_size
+
+            # Verify we can read the recorded memory
+            data = loaded_mgr.memory.read(addr & ~0xFF, 256)
+            assert len(data) == 256
