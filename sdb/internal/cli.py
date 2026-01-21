@@ -25,7 +25,7 @@ import re
 import sys
 import zipfile
 
-from typing import List
+from typing import Any, Dict, List
 
 import drgn
 import sdb
@@ -285,6 +285,107 @@ def setup_target(args: argparse.Namespace) -> drgn.Program:
     return prog
 
 
+def _get_kernel_text_address(metadata: Dict[str, Any]) -> int:
+    """
+    Get the recorded kernel _text address from metadata.
+
+    Priority: kernel_text_address > kernel_stext_address > 0
+    """
+    if 'kernel_text_address' in metadata:
+        return metadata['kernel_text_address']
+    if 'kernel_stext_address' in metadata:
+        return metadata['kernel_stext_address']
+    return 0
+
+
+def _print_replay_info(metadata: Dict[str, Any], kernel_text: int) -> None:
+    """Print replay metadata info to stderr."""
+    if kernel_text != 0:
+        print(f"sdb: kernel _text at {hex(kernel_text)}", file=sys.stderr)
+    if 'kernel_release' in metadata:
+        print(f"sdb: kernel release: {metadata['kernel_release']}",
+              file=sys.stderr)
+    if 'kernel_build_id' in metadata:
+        print(f"sdb: expected build ID: {metadata['kernel_build_id']}",
+              file=sys.stderr)
+
+
+class _ReplayDebugLoader:
+    """Helper class for loading debug info in replay mode."""
+
+    def __init__(self, prog: drgn.Program, kernel_text_addr: int, quiet: bool):
+        self.prog = prog
+        self.kernel_text_addr = kernel_text_addr
+        self.quiet = quiet
+        self.module_id = 0
+
+    def load_file(self, path: str, name: str) -> bool:
+        """
+        Load a single debug file.
+
+        Sets address_ranges to start at the recorded kernel _text address.
+        drgn automatically calculates the correct bias by comparing file
+        addresses with our address range.
+        """
+        try:
+            extra_mod = self.prog.extra_module(name,
+                                               self.module_id,
+                                               create=True)
+            # Set address range starting at recorded _text address.
+            # drgn calculates debug_file_bias = our_start - file_text_address
+            # This properly handles KASLR without hardcoding any offsets.
+            kernel_size = 0x40000000  # 1GB - covers typical kernel size
+            extra_mod.address_ranges = [(self.kernel_text_addr,
+                                         self.kernel_text_addr + kernel_size)]
+            extra_mod.try_file(path, force=True)
+            self.module_id += 1
+            return True
+        except OSError as e:
+            if self.quiet is False:
+                print(f"sdb: warning: failed to load {path}: {e}",
+                      file=sys.stderr)
+            return False
+
+    def load_directory(self, dirpath: str) -> None:
+        """Load all debug files from a directory."""
+        for ppath, __, files in os.walk(dirpath):
+            for fname in files:
+                if fname.endswith((".ko", ".debug")):
+                    self.load_file(os.path.join(ppath, fname), fname)
+
+
+def _load_replay_debug_info(prog: drgn.Program, dpaths: List[str], quiet: bool,
+                            metadata: Dict[str, Any]) -> None:
+    """
+    Load debug info for replay mode using extra_module.
+
+    In replay mode, we don't have a core dump to match modules against,
+    so we use extra_module with force=True to load debug info directly.
+
+    The key to KASLR handling: we set address_ranges to start at the
+    recorded kernel_text_address. drgn then automatically calculates
+    the correct debug_file_bias by comparing with the vmlinux's _text.
+    """
+    kernel_text = _get_kernel_text_address(metadata)
+
+    if not quiet:
+        _print_replay_info(metadata, kernel_text)
+
+    if kernel_text == 0:
+        if not quiet:
+            print(
+                "sdb: warning: no kernel_text_address in recording, "
+                "symbols may not resolve correctly",
+                file=sys.stderr)
+
+    loader = _ReplayDebugLoader(prog, kernel_text, quiet)
+    for path in dpaths:
+        if os.path.isfile(path):
+            loader.load_file(path, os.path.basename(path))
+        elif os.path.isdir(path):
+            loader.load_directory(path)
+
+
 def setup_replay_target(replay_path: str, symbol_search: List[str],
                         quiet: bool) -> drgn.Program:
     """
@@ -336,13 +437,9 @@ def setup_replay_target(replay_path: str, symbol_search: List[str],
         # Default to x86_64 Linux for kernel debugging
         prog = drgn.Program(drgn.Platform(drgn.Architecture.X86_64))
 
-    # Load debug info first - this sets up types and platform info
+    # Load debug info using extra_module (works without a core dump)
     if symbol_search:
-        try:
-            load_debug_info(prog, symbol_search, quiet, False)
-        except (drgn.MissingDebugInfoError, OSError) as debug_info_err:
-            if not quiet:
-                print("sdb: " + str(debug_info_err), file=sys.stderr)
+        _load_replay_debug_info(prog, symbol_search, quiet, metadata)
 
     # Set up the memory reader
     def memory_reader(address: int, count: int, _offset: int,

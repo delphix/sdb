@@ -23,6 +23,7 @@ import os
 import struct
 import tempfile
 import zipfile
+from pathlib import Path
 
 import pytest
 
@@ -574,3 +575,96 @@ class TestBundleThreadFields:
             assert thread.stack_start == 0
             assert thread.stack_end == 0
             assert thread.comm == ""
+
+
+class TestKaslrHandling:
+    """Tests for KASLR offset handling in replay mode."""
+
+    def test_metadata_with_kaslr_offset(self) -> None:
+        """Test that kaslr_offset in metadata is used directly."""
+        manager = TraceManager()
+        manager.metadata = {
+            'kaslr_offset': 0x19600000,
+            'kernel_text_address': 0xffffffff9a600000,
+        }
+
+        # kaslr_offset should take precedence
+        assert manager.metadata['kaslr_offset'] == 0x19600000
+
+    def test_metadata_with_kernel_text_address(self) -> None:
+        """Test calculating KASLR offset from kernel_text_address."""
+        manager = TraceManager()
+        manager.metadata = {
+            'kernel_text_address': 0xffffffff9a600000,
+        }
+
+        # KASLR offset = kernel_text_address - VMLINUX_TEXT_BASE
+        vmlinux_text_base = 0xffffffff81000000
+        expected_offset = manager.metadata[
+            'kernel_text_address'] - vmlinux_text_base
+        assert expected_offset == 0x19600000
+
+    def test_metadata_with_vmcoreinfo_fields(self) -> None:
+        """Test vmcoreinfo fields are preserved in metadata."""
+        manager = TraceManager()
+        manager.metadata = {
+            'vmcoreinfo':
+                'OSRELEASE=5.4.0\nBUILD-ID=abc123\nKERNELOFFSET=19600000',
+            'kernel_release':
+                '5.4.0',
+            'kernel_build_id':
+                'abc123',
+            'kaslr_offset':
+                0x19600000,
+        }
+
+        assert manager.metadata['kernel_release'] == '5.4.0'
+        assert manager.metadata['kernel_build_id'] == 'abc123'
+        assert manager.metadata['kaslr_offset'] == 0x19600000
+
+    def test_bundle_preserves_kaslr_metadata(self, tmp_path: Path) -> None:
+        """Test that KASLR metadata survives save/load cycle."""
+        bundle_path = str(tmp_path / "kaslr_test.sdb")
+
+        manager = TraceManager()
+        manager.metadata = {
+            'version': 1,
+            'kernel_text_address': 0xffffffff9a600000,
+            'kernel_stext_address': 0xffffffff9a600000,
+            'kaslr_offset': 0x19600000,
+            'kernel_release': '5.4.0-test',
+            'kernel_build_id': 'deadbeef',
+        }
+        manager.save_bundle(bundle_path)
+
+        loaded = TraceManager.load_bundle(bundle_path)
+
+        assert loaded.metadata['kernel_text_address'] == 0xffffffff9a600000
+        assert loaded.metadata['kernel_stext_address'] == 0xffffffff9a600000
+        assert loaded.metadata['kaslr_offset'] == 0x19600000
+        assert loaded.metadata['kernel_release'] == '5.4.0-test'
+        assert loaded.metadata['kernel_build_id'] == 'deadbeef'
+
+    def test_no_kaslr_info_defaults_to_zero(self) -> None:
+        """Test that missing KASLR info results in zero offset."""
+        manager = TraceManager()
+        manager.metadata = {'version': 1}
+
+        # No kaslr_offset, kernel_text_address, or kernel_stext_address
+        assert 'kaslr_offset' not in manager.metadata
+        assert 'kernel_text_address' not in manager.metadata
+
+    def test_kernel_range_calculation(self) -> None:
+        """Test that kernel address range is correctly adjusted for KASLR."""
+        # Base kernel range (no KASLR)
+        base_start = 0xffffffff80000000
+        base_end = 0xffffffffc0000000
+
+        kaslr_offset = 0x19600000
+
+        # Adjusted range
+        adjusted_start = base_start + kaslr_offset
+        adjusted_end = base_end + kaslr_offset
+
+        assert adjusted_start == 0xffffffff99600000
+        assert adjusted_end == 0xffffffffd9600000

@@ -292,8 +292,63 @@ class TraceManager:
             'flags': platform.flags.value if platform else 0,
         }
 
+        # Try to capture kernel info for KASLR handling during replay
+        self._capture_kernel_info(prog)
+
         # Install the memory read hook
         self._install_read_hook(prog)
+
+    def _capture_kernel_info(self, prog: drgn.Program) -> None:
+        """
+        Capture kernel information for KASLR handling during replay.
+
+        Tries multiple approaches in order of preference:
+        1. vmcoreinfo_data - most comprehensive (includes build ID, KASLR offset, etc.)
+        2. _text symbol address - for KASLR offset calculation
+        3. _stext symbol address - alternative for KASLR offset
+
+        The vmcoreinfo contains:
+        - OSRELEASE: kernel version
+        - BUILD-ID: for vmlinux verification
+        - KERNELOFFSET: KASLR offset (if KASLR enabled)
+        - Various struct offsets and sizes
+        """
+        # Try to capture vmcoreinfo_data first (most comprehensive)
+        try:
+            vmcoreinfo_ptr = prog['vmcoreinfo_data']
+            vmcoreinfo_size = int(prog['vmcoreinfo_size'])
+            if 0 < vmcoreinfo_size < 65536:  # Sanity check
+                vmcoreinfo_data = vmcoreinfo_ptr.string_().decode(
+                    'utf-8', errors='replace')
+                self.metadata['vmcoreinfo'] = vmcoreinfo_data
+
+                # Parse out useful fields
+                for line in vmcoreinfo_data.split('\n'):
+                    if line.startswith('OSRELEASE='):
+                        self.metadata['kernel_release'] = line.split('=', 1)[1]
+                    elif line.startswith('BUILD-ID='):
+                        self.metadata['kernel_build_id'] = line.split('=', 1)[1]
+                    elif line.startswith('KERNELOFFSET='):
+                        # KASLR offset in hex
+                        offset_str = line.split('=', 1)[1]
+                        self.metadata['kaslr_offset'] = int(offset_str, 16)
+        except (LookupError, ValueError, drgn.FaultError):
+            # vmcoreinfo not available (filtered dump, not a kernel, etc.)
+            pass
+
+        # Always try to capture _text address as fallback/verification
+        try:
+            text_sym = prog.symbol('_text')
+            self.metadata['kernel_text_address'] = text_sym.address
+        except (LookupError, ValueError):
+            pass
+
+        # Also try _stext as alternative
+        try:
+            stext_sym = prog.symbol('_stext')
+            self.metadata['kernel_stext_address'] = stext_sym.address
+        except (LookupError, ValueError):
+            pass
 
     def stop_recording(self, prog: drgn.Program) -> str:
         """

@@ -593,10 +593,59 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
 
     def no_input(self) -> Iterable[drgn.Object]:
         self.validate_context()
+
+        # In replay mode, print recorded stacks directly
+        if is_replay_mode():
+            self._print_replay_stacks()
+            return  # Empty iterator - stacks already printed
+
         # The pylint error disabled below is a false positive
         # triggered by some updates to drgn's function signatures.
         # pylint: disable=no-value-for-parameter
         yield from filter(self.match_stack, for_each_task(sdb.get_prog()))
+
+    def _print_replay_stacks(self) -> None:
+        """Print stacks from recorded thread data in replay mode."""
+        trace_mgr = get_trace_manager()
+        if not trace_mgr.threads:
+            print("No recorded thread stacks available.")
+            return
+
+        self.print_header()
+
+        # Group threads by stack signature for aggregation
+        stack_groups: Dict[Tuple[int, ...],
+                           List[Tuple[int, str]]] = defaultdict(list)
+        for tid, thread_rec in trace_mgr.threads.items():
+            stack_key = tuple(thread_rec.pcs)
+            stack_groups[stack_key].append((tid, thread_rec.comm))
+
+        # Sort by count (descending)
+        sorted_groups = sorted(stack_groups.items(),
+                               key=lambda x: len(x[1]),
+                               reverse=True)
+
+        for pcs, threads in sorted_groups:
+            if not pcs:
+                continue
+
+            # Get first thread info for display
+            first_tid, first_comm = threads[0]
+            count = len(threads)
+
+            # Format header with thread info
+            # Note: In replay mode we don't have task_struct addresses
+            stacktrace_info = f"TID {first_tid:<10d} {first_comm:<16s}"
+            if self.args.all:
+                stacktrace_info += "\n"
+                for tid, comm in threads[1:]:
+                    stacktrace_info += f"TID {tid:<10d} {comm:<16s}\n"
+            else:
+                stacktrace_info += f" {count:6d}\n"
+
+            # Format stack frames using hybrid approach
+            stacktrace_info += self._format_stack_from_pcs(list(pcs))
+            print(stacktrace_info)
 
 
 class KernelCrashedThread(sdb.Locator, sdb.PrettyPrinter):

@@ -361,27 +361,48 @@ class RefDump:
                 self.generate_output_for_test_module(modname)
 
 
+# Module-level caches for loaded dumps to avoid reloading during test collection
+_crash_dumps_cache: Optional[List[RefDump]] = None
+_core_dumps_cache: Optional[List[RefDump]] = None
+
+
 def get_all_reference_crash_dumps() -> List[RefDump]:
     """
     Returns all discoverable kernel crash dumps as RefDump objects.
+
+    Results are cached to avoid reloading dumps multiple times during
+    test collection (which can cause OOM with large vmlinux files).
     """
+    global _crash_dumps_cache  # pylint: disable=global-statement
+    if _crash_dumps_cache is not None:
+        return _crash_dumps_cache
+
     rdumps = []
     for dump_dir_path in get_crash_dump_dir_paths():
         rdump = RefDump(dump_dir_path, setup_crash_dump_target)
         rdump.setup_target()
         rdumps.append(rdump)
+    _crash_dumps_cache = rdumps
     return rdumps
 
 
 def get_all_reference_core_dumps() -> List[RefDump]:
     """
     Returns all discoverable userland core dumps as RefDump objects.
+
+    Results are cached to avoid reloading dumps multiple times during
+    test collection.
     """
+    global _core_dumps_cache  # pylint: disable=global-statement
+    if _core_dumps_cache is not None:
+        return _core_dumps_cache
+
     rdumps = []
     for dump_dir_path in get_core_dump_dir_paths():
         rdump = RefDump(dump_dir_path, setup_userland_core_target)
         rdump.setup_target()
         rdumps.append(rdump)
+    _core_dumps_cache = rdumps
     return rdumps
 
 
