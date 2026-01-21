@@ -292,9 +292,9 @@ def _get_kernel_text_address(metadata: Dict[str, Any]) -> int:
     Priority: kernel_text_address > kernel_stext_address > 0
     """
     if 'kernel_text_address' in metadata:
-        return metadata['kernel_text_address']
+        return int(metadata['kernel_text_address'])
     if 'kernel_stext_address' in metadata:
-        return metadata['kernel_stext_address']
+        return int(metadata['kernel_stext_address'])
     return 0
 
 

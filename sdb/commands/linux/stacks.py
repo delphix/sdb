@@ -599,21 +599,24 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         self.validate_context()
-        # In replay mode, we need to consume the iterator to trigger no_input()
-        # which prints the stacks directly
         if is_replay_mode():
-            list(objs)  # Consume iterator to execute no_input()
+            self._print_replay_stacks()
             return
         self.print_stacks(filter(self.match_stack, objs))
 
     def no_input(self) -> Iterable[drgn.Object]:
         self.validate_context()
 
-        # In replay mode, print recorded stacks directly and return empty
+        # In replay mode, return recorded task_struct addresses for pipelines.
         if is_replay_mode():
-            self._print_replay_stacks()
-            # Return empty list (not using yield to avoid generator behavior)
-            return []
+            trace_mgr = get_trace_manager()
+            tasks = []
+            for _tid, thread in sorted(trace_mgr.threads.items()):
+                if thread.task_addr:
+                    tasks.append(
+                        sdb.target.create_object("struct task_struct *",
+                                                 thread.task_addr))
+            return tasks
 
         # The pylint error disabled below is a false positive
         # triggered by some updates to drgn's function signatures.

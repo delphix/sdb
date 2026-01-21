@@ -84,6 +84,7 @@ class ThreadRecord:
     stack_start: int = 0  # Stack memory start address
     stack_end: int = 0  # Stack memory end address
     comm: str = ""  # Thread comm name (for display)
+    task_addr: int = 0  # task_struct address (for replay pipelines)
 
 
 class SparseMemory:
@@ -538,9 +539,12 @@ class TraceManager:
                                              address=address,
                                              size=size)
 
-    def record_thread_stack(self, tid: int, pcs: List[int]) -> None:
+    def record_thread_stack(self,
+                            tid: int,
+                            pcs: List[int],
+                            task_addr: int = 0) -> None:
         """Record a thread's stack trace as a list of program counters."""
-        self.threads[tid] = ThreadRecord(tid=tid, pcs=pcs)
+        self.threads[tid] = ThreadRecord(tid=tid, pcs=pcs, task_addr=task_addr)
 
     def _get_task_stack_bounds(self, task: drgn.Object) -> Tuple[int, int]:
         """
@@ -595,6 +599,15 @@ class TraceManager:
             except (AttributeError, ValueError):
                 comm = ""
             pcs: List[int] = []
+            task_addr = 0
+            try:
+                task_addr = int(task.value_())
+            except (AttributeError, ValueError, TypeError):
+                task_addr = 0
+
+            if include_locals and task_addr:
+                # Capture task_struct memory for replay stack unwinding.
+                self.capture_object(task, depth=0)
 
             try:
                 for frame in prog.stack_trace(task):
@@ -621,6 +634,7 @@ class TraceManager:
                         stack_start=stack_start,
                         stack_end=stack_end,
                         comm=comm,
+                        task_addr=task_addr,
                     )
                     captured += 1
 
@@ -667,6 +681,7 @@ class TraceManager:
                     'stack_start': rec.stack_start,
                     'stack_end': rec.stack_end,
                     'comm': rec.comm,
+                    'task_addr': rec.task_addr,
                 } for tid, rec in self.threads.items()
             }
             zf.writestr('threads.json',
@@ -730,6 +745,7 @@ class TraceManager:
                     stack_start=thread.get('stack_start', 0),
                     stack_end=thread.get('stack_end', 0),
                     comm=thread.get('comm', ''),
+                    task_addr=thread.get('task_addr', 0),
                 )
 
             # Load memory

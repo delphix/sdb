@@ -191,10 +191,11 @@ class TestTraceManager:
         """Test recording thread stack."""
         mgr = TraceManager()
         pcs = [0x1000, 0x2000, 0x3000]
-        mgr.record_thread_stack(1234, pcs)
+        mgr.record_thread_stack(1234, pcs, task_addr=0xbeef)
 
         assert 1234 in mgr.threads
         assert mgr.threads[1234].pcs == pcs
+        assert mgr.threads[1234].task_addr == 0xbeef
 
     def test_get_status(self) -> None:
         """Test status reporting."""
@@ -377,9 +378,10 @@ class TestDataclasses:
 
     def test_thread_record(self) -> None:
         """Test ThreadRecord dataclass."""
-        rec = ThreadRecord(tid=42, pcs=[0x1000, 0x2000])
+        rec = ThreadRecord(tid=42, pcs=[0x1000, 0x2000], task_addr=0xdeadbeef)
         assert rec.tid == 42
         assert rec.pcs == [0x1000, 0x2000]
+        assert rec.task_addr == 0xdeadbeef
 
     def test_thread_record_default_pcs(self) -> None:
         """Test ThreadRecord default pcs."""
@@ -407,6 +409,7 @@ class TestDataclasses:
         assert rec.stack_start == 0
         assert rec.stack_end == 0
         assert rec.comm == ""
+        assert rec.task_addr == 0
 
 
 class TestSymbolizePc:
@@ -531,6 +534,7 @@ class TestBundleThreadFields:
             stack_start=0xffff8000,
             stack_end=0xffffc000,
             comm="test_comm",
+            task_addr=0xdeadbeef,
         )
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -545,6 +549,7 @@ class TestBundleThreadFields:
             assert thread.stack_start == 0xffff8000
             assert thread.stack_end == 0xffffc000
             assert thread.comm == "test_comm"
+            assert thread.task_addr == 0xdeadbeef
 
     def test_load_legacy_bundle_without_stack_fields(self) -> None:
         """Test loading a bundle without the new stack fields (backwards compat)."""
@@ -575,6 +580,7 @@ class TestBundleThreadFields:
             assert thread.stack_start == 0
             assert thread.stack_end == 0
             assert thread.comm == ""
+            assert thread.task_addr == 0
 
 
 class TestKaslrHandling:

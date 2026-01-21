@@ -30,9 +30,9 @@ import tempfile
 from typing import Any, Generator
 import zipfile
 
-import drgn
-
 import pytest
+
+import drgn
 
 import sdb
 from sdb.internal.cli import setup_replay_target
@@ -1227,7 +1227,7 @@ class TestStacksReplay:
     @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
     def test_stacks_returns_empty_iterator_in_replay(self, rdump: RefDump) \
             -> None:
-        """Test that stacks command returns empty iterator in replay mode."""
+        """Test that stacks command returns task pointers in replay mode."""
         setup_test_env(rdump)
         trace_mgr = get_trace_manager()
 
@@ -1256,10 +1256,53 @@ class TestStacksReplay:
             stacks_cmd = KernelStacks()
             result = list(stacks_cmd.no_input())
 
-            # In replay mode, no_input should return an empty list
-            # (stacks are printed directly, not yielded)
-            assert not result, \
-                f"no_input should return empty list in replay, got {result}"
+            # In replay mode, no_input should return recorded task_struct pointers
+            assert result, "no_input should return task_struct pointers in replay"
+            assert all(int(obj) != 0 for obj in result), \
+                "All replay task pointers should be non-zero"
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    @pytest.mark.parametrize('cmd', [
+        "stacks | head 1 | frame 1 | locals",
+        "stacks | head 1 | frame 1 | registers",
+        "stacks | head 1 | frame 1 | registers -x",
+    ])
+    def test_locals_registers_in_replay_mode(self, rdump: RefDump, cmd: str,
+                                             capsys: Any) -> None:
+        """Verify locals/registers produce output in replay."""
+        setup_test_env(rdump)
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "locals_replay.sdb")
+
+            # Record stacks with locals so replay can unwind frames
+            trace_mgr.start_recording(rdump.program, bundle_path)
+            rdump.repl.eval_cmd("%session capture-stacks")
+            saved_path = trace_mgr.stop_recording(rdump.program)
+
+            # Reset and setup replay mode
+            reset_trace_manager()
+            replay_prog = setup_replay_target(
+                saved_path, [get_vmlinux_path(rdump.dump_dir_path)], quiet=True)
+            sdb.target.set_prog(replay_prog)
+            sdb.target.set_thread(0)
+            sdb.target.set_frame(-1)
+            sdb.register_commands()
+
+            replay_repl = REPL(replay_prog,
+                               list(sdb.get_registered_commands().keys()))
+
+            capsys.readouterr()
+            result = replay_repl.eval_cmd(cmd)
+            captured = capsys.readouterr()
+
+            assert result == 0
+            assert captured.out.strip()
+            if "locals" in cmd:
+                assert "=" in captured.out
+            else:
+                assert "registers unavailable in replay" in captured.out
 
 
 @pytest.mark.skipif(
