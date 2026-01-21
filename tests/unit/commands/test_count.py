@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
 import drgn
 
 from tests.unit import invoke, MOCK_PROGRAM

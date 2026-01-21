@@ -97,7 +97,6 @@ def get_registered_commands() -> Dict[str, Type["Command"]]:
     return registered_commands
 
 
-# pylint: disable=too-many-branches
 def register_commands() -> None:
     """
     Iterate over the set of all commands and register the ones appropriate for the
@@ -250,7 +249,6 @@ class Command:
         command class that it's called on. The docstring and parser for
         the class is used to populate the contents of the message.
         """
-        # pylint: disable=too-many-branches
         parser = cls._init_parser(name)
 
         print("SUMMARY")
@@ -432,7 +430,6 @@ class Command:
             yield obj
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        # pylint: disable=missing-docstring
         #
         # Even though we have __invalid_memory_objects_check() to
         # ensure that the objects returned are valid, we still
@@ -518,7 +515,6 @@ class Walker(Command):
         Walker.allWalkers[class_.input_type] = class_
 
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
-        # pylint: disable=missing-docstring
         raise NotImplementedError
 
     # Iterate over the inputs and call the walk command on each of them,
@@ -559,7 +555,6 @@ class PrettyPrinter(Command):
         PrettyPrinter.all_printers[class_.input_type] = class_
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
-        # pylint: disable=missing-docstring
         raise NotImplementedError
 
     def check_input_type(self,
@@ -603,7 +598,6 @@ class Locator(Command):
     output_type: Optional[str] = None
 
     def no_input(self) -> Iterable[drgn.Object]:
-        # pylint: disable=missing-docstring
         raise CommandError(self.name, "command requires an input")
 
     def caller(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
@@ -663,7 +657,6 @@ class Locator(Command):
 
     def _call(self,
               objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
-        # pylint: disable=missing-docstring
         # If this is a hybrid locator/pretty printer, this is where that is
         # leveraged.
         if self.islast and isinstance(self, PrettyPrinter):
@@ -816,7 +809,6 @@ class Address(Command):
 
     @staticmethod
     def is_hex(arg: str) -> bool:
-        # pylint: disable=missing-docstring
         try:
             int(arg, 16)
             return True
@@ -825,7 +817,6 @@ class Address(Command):
 
     @staticmethod
     def resolve_for_address(arg: str) -> drgn.Object:
-        # pylint: disable=missing-docstring
         if Address.is_hex(arg):
             return target.create_object("void *", int(arg, 16))
         return target.get_object(arg).address_of_()

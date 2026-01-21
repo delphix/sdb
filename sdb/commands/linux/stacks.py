@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
 import argparse
 from typing import Dict, Iterable, List, Optional, Tuple
 from collections import defaultdict
@@ -425,7 +423,8 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             stack_aggr[stack_key].append(task)
         return sorted(stack_aggr.items(), key=lambda x: len(x[1]), reverse=True)
 
-    # pylint: disable=too-many-branches,too-many-statements
+# pylint: disable=too-many-statements
+
     def _format_stack_from_pcs(self, pcs: List[int]) -> str:
         """
         Format a stack trace from recorded PCs using hybrid approach.
@@ -521,7 +520,9 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
 
         return stacktrace_info
 
-    # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+
+# pylint: disable=too-many-locals, too-many-statements
+
     def print_stacks(self, objs: Iterable[drgn.Object]) -> None:
         self.print_header()
         replay = is_replay_mode()

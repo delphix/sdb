@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
 import argparse
 import textwrap
 from typing import Any, Dict, Iterable, List, Tuple

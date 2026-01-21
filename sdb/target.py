@@ -45,7 +45,6 @@ from typing import Any, List, Tuple, Union
 
 import drgn
 
-# pylint: disable=missing-function-docstring
 # pylint: disable=global-statement
 prog: drgn.Program
 thread: int = 0
@@ -234,7 +233,7 @@ def get_runtimes() -> Tuple[bool, List[str]]:
     are made from kernel debugging sessions.
     """
     # Import here to avoid circular dependency
-    from sdb.session import is_replay_mode  # pylint: disable=import-outside-toplevel
+    from sdb.session import is_replay_mode
 
     is_kernel = bool(get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL)
     # In replay mode, treat as kernel session

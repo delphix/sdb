@@ -19,7 +19,6 @@
 # added in slub_cache command.
 #
 # pylint: disable=line-too-long
-# pylint: disable=missing-docstring
 
 import argparse
 import textwrap

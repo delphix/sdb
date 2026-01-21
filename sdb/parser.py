@@ -153,7 +153,6 @@ def tokenize(line: str) -> Iterable[Tuple[List[str], ExpressionType]]:
     example).
     """
     # pylint: disable=too-many-statements
-    # pylint: disable=too-many-branches
 
     token_list: List[str] = []
     idx: Optional[int] = 0

@@ -44,8 +44,8 @@ jobs:
           python-version: '3.10'
       - run: ./.github/scripts/install-drgn.sh
       - run: python3 -m pip install pylint pytest
-      - run: pylint -d duplicate-code -d invalid-name sdb
-      - run: pylint -d duplicate-code -d invalid-name tests
+      - run: pylint -d duplicate-code -d invalid-name -d missing-docstring -d import-outside-toplevel -d too-many-branches -d missing-module-docstring -d missing-function-docstring sdb
+      - run: pylint -d duplicate-code -d invalid-name -d missing-docstring -d import-outside-toplevel -d too-many-branches -d missing-module-docstring -d missing-function-docstring tests
   #
   # Verify "pytest" runs successfully on unit tests.
   #

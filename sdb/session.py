@@ -430,7 +430,6 @@ class TraceManager:
             self._log_read(address, data)
             return data
 
-    # pylint: disable=too-many-branches
     def capture_object(self, obj: drgn.Object, depth: int = 1) -> None:
         """
         Capture an object's memory into the trace.
@@ -587,7 +586,6 @@ class TraceManager:
             Number of threads captured.
         """
         # Import here to avoid circular imports and allow use outside kernel context
-        # pylint: disable=import-outside-toplevel
         from drgn.helpers.linux.pid import for_each_task
 
         captured = 0

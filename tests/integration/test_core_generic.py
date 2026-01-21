@@ -14,9 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-function-docstring
-
 from typing import Any
 
 import pytest

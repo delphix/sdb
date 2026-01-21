@@ -642,7 +642,6 @@ class TestRecordMemory:
             trace_mgr.start_recording(rdump.program, bundle_path)
 
             # Get the address of init_task to record
-            # pylint: disable=import-outside-toplevel
             from sdb import target as sdb_target
             init_task = sdb_target.get_object("init_task")
             addr = int(init_task.address_of_())
@@ -671,7 +670,6 @@ class TestRecordMemory:
             trace_mgr.start_recording(rdump.program, bundle_path)
 
             # Get the address of init_task
-            # pylint: disable=import-outside-toplevel
             from sdb import target as sdb_target
             init_task = sdb_target.get_object("init_task")
             addr = int(init_task.address_of_())
@@ -700,7 +698,6 @@ class TestRecordMemory:
             trace_mgr.start_recording(rdump.program, bundle_path)
 
             # Get addresses
-            # pylint: disable=import-outside-toplevel
             from sdb import target as sdb_target
             init_task = sdb_target.get_object("init_task")
             addr1 = int(init_task.address_of_())
@@ -735,7 +732,6 @@ class TestRecordMemory:
             trace_mgr.start_recording(rdump.program, bundle_path)
 
             # Get address and record
-            # pylint: disable=import-outside-toplevel
             from sdb import target as sdb_target
             init_task = sdb_target.get_object("init_task")
             addr = int(init_task.address_of_())
@@ -905,7 +901,6 @@ class TestRecordReplayEndToEnd:
 
             # Start recording and capture some objects
             trace_mgr.start_recording(rdump.program, bundle_path)
-            # pylint: disable=import-outside-toplevel
             from sdb import target as sdb_target
             init_task = sdb_target.get_object("init_task")
             trace_mgr.capture_object(init_task, depth=0)
@@ -939,7 +934,6 @@ class TestRecordReplayEndToEnd:
             bundle_path = os.path.join(tmpdir, "e2e_symbol.sdb")
 
             # Get jiffies address during live mode
-            # pylint: disable=import-outside-toplevel
             from sdb import target as sdb_target
             jiffies = sdb_target.get_object("jiffies")
             live_jiffies_addr = int(jiffies.address_of_())
@@ -969,7 +963,6 @@ class TestRecordReplayEndToEnd:
         trace_mgr = get_trace_manager()
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            # pylint: disable=import-outside-toplevel
             from sdb import target as sdb_target
             init_task = sdb_target.get_object("init_task")
             addr = int(init_task.address_of_())
@@ -1055,7 +1048,6 @@ class TestRecordReplayEndToEnd:
         trace_mgr = get_trace_manager()
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            # pylint: disable=import-outside-toplevel
             from sdb import target as sdb_target
 
             # Get jiffies value and address during live mode
@@ -1094,7 +1086,6 @@ class TestRecordReplayEndToEnd:
         trace_mgr = get_trace_manager()
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            # pylint: disable=import-outside-toplevel
             from sdb import target as sdb_target
 
             # Get init_task.comm during live mode
@@ -1250,7 +1241,6 @@ class TestStacksReplay:
             sdb.register_commands()
 
             # Import and test the stacks command directly
-            # pylint: disable=import-outside-toplevel
             from sdb.commands.linux.stacks import KernelStacks
 
             stacks_cmd = KernelStacks()
@@ -1357,7 +1347,6 @@ class TestModuleCommandsReplay:
 
             # Try to access spa_namespace_avl and capture it
             try:
-                # pylint: disable=import-outside-toplevel
                 from sdb import target as sdb_target
                 spa_avl = sdb_target.get_object("spa_namespace_avl")
                 trace_mgr.capture_object(spa_avl, depth=0)
@@ -1397,7 +1386,6 @@ class TestModuleCommandsReplay:
 
             avl_addr = None
             try:
-                # pylint: disable=import-outside-toplevel
                 from sdb import target as sdb_target
                 spa_avl = sdb_target.get_object("spa_namespace_avl")
                 avl_addr = int(spa_avl.address_of_())

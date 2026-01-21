@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
 import pytest
 
 from sdb.mdb_compat import (preprocess_mdb_syntax, set_mdb_compat_enabled,

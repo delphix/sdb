@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
 import atexit
 import os
 import readline
@@ -171,7 +169,7 @@ class REPL:
 
         # Force read the variable to capture it
         try:
-            import sdb.target as sdb_target  # pylint: disable=import-outside-toplevel
+            import sdb.target as sdb_target
             obj = sdb_target.get_object(var_name)
             # Use capture_object for proper tracing
             trace_mgr.capture_object(obj, depth)

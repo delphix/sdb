@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
 import pytest
 
 from sdb.command import is_valid_command_name

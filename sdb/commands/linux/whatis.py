@@ -15,8 +15,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
 import argparse
 from typing import Iterable
 
