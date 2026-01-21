@@ -318,6 +318,12 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
         # refactor the kernel code into its own function and switch to the correct
         # codepath depending on the target.
         #
+        # In replay mode, we allow the command even without IS_LINUX_KERNEL flag
+        # since the recorded data is from a kernel session.
+        #
+        if is_replay_mode():
+            self.validate_args()
+            return
         if not sdb.get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL:
             raise sdb.CommandError(self.name,
                                    "userland targets are not supported yet")
@@ -384,7 +390,11 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
         return False
 
     def print_header(self) -> None:
-        header = f"{'TASK_STRUCT':<18} {'STATE':<16s}"
+        if is_replay_mode():
+            # In replay mode, we show TID and COMM instead of task_struct address
+            header = f"{'TID':<12} {'COMM':<16s}"
+        else:
+            header = f"{'TASK_STRUCT':<18} {'STATE':<16s}"
         if not self.args.all:
             header += f" {'COUNT':>6s}"
         print(header)
@@ -589,18 +599,29 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         self.validate_context()
+        # In replay mode, we need to consume the iterator to trigger no_input()
+        # which prints the stacks directly
+        if is_replay_mode():
+            list(objs)  # Consume iterator to execute no_input()
+            return
         self.print_stacks(filter(self.match_stack, objs))
 
     def no_input(self) -> Iterable[drgn.Object]:
         self.validate_context()
 
-        # In replay mode, print recorded stacks directly
+        # In replay mode, print recorded stacks directly and return empty
         if is_replay_mode():
             self._print_replay_stacks()
-            return  # Empty iterator - stacks already printed
+            # Return empty list (not using yield to avoid generator behavior)
+            return []
 
         # The pylint error disabled below is a false positive
         # triggered by some updates to drgn's function signatures.
+        # pylint: disable=no-value-for-parameter
+        return self._no_input_live()
+
+    def _no_input_live(self) -> Iterable[drgn.Object]:
+        """Generator for live kernel mode - iterates tasks."""
         # pylint: disable=no-value-for-parameter
         yield from filter(self.match_stack, for_each_task(sdb.get_prog()))
 

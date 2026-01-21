@@ -284,12 +284,14 @@ class TraceManager:
 
         # Store metadata about the session
         platform = prog.platform
+        is_kernel = bool(prog.flags & drgn.ProgramFlags.IS_LINUX_KERNEL)
         self.metadata = {
             'version': BUNDLE_VERSION,
             'timestamp': datetime.now().isoformat(),
             'platform': str(platform) if platform else 'unknown',
             'arch': platform.arch.name if platform else 'unknown',
             'flags': platform.flags.value if platform else 0,
+            'session_type': 'kernel' if is_kernel else 'userland',
         }
 
         # Try to capture kernel info for KASLR handling during replay

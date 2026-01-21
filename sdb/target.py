@@ -229,5 +229,15 @@ def get_runtimes() -> Tuple[bool, List[str]]:
     """
     Returns whether we are in kernel or user mode, and the list of loaded
     modules or libraries.
+
+    In replay mode, we treat the session as a kernel session since recordings
+    are made from kernel debugging sessions.
     """
-    return (get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL, [])
+    # Import here to avoid circular dependency
+    from sdb.session import is_replay_mode  # pylint: disable=import-outside-toplevel
+
+    is_kernel = bool(get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL)
+    # In replay mode, treat as kernel session
+    if is_replay_mode():
+        is_kernel = True
+    return (is_kernel, [])

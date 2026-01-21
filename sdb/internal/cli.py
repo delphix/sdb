@@ -319,39 +319,52 @@ class _ReplayDebugLoader:
         self.quiet = quiet
         self.module_id = 0
 
-    def load_file(self, path: str, name: str) -> bool:
+    def load_file(self, path: str, name: str, is_vmlinux: bool = False) -> bool:
         """
         Load a single debug file.
 
-        Sets address_ranges to start at the recorded kernel _text address.
-        drgn automatically calculates the correct bias by comparing file
-        addresses with our address range.
+        For vmlinux, sets address_ranges to the recorded kernel _text address
+        so drgn can calculate the correct KASLR bias.
+        For modules (.ko), we skip address_ranges since we don't track
+        individual module load addresses.
         """
         try:
             extra_mod = self.prog.extra_module(name,
                                                self.module_id,
                                                create=True)
-            # Set address range starting at recorded _text address.
-            # drgn calculates debug_file_bias = our_start - file_text_address
-            # This properly handles KASLR without hardcoding any offsets.
-            kernel_size = 0x40000000  # 1GB - covers typical kernel size
-            extra_mod.address_ranges = [(self.kernel_text_addr,
-                                         self.kernel_text_addr + kernel_size)]
+
+            # Only set address_ranges for vmlinux (for KASLR handling)
+            # Kernel modules would need their own recorded load addresses
+            if is_vmlinux and self.kernel_text_addr > 0:
+                kernel_size = 0x40000000  # 1GB - covers typical kernel size
+                extra_mod.address_ranges = [
+                    (self.kernel_text_addr, self.kernel_text_addr + kernel_size)
+                ]
+
             extra_mod.try_file(path, force=True)
             self.module_id += 1
             return True
-        except OSError as e:
+        except (OSError, ValueError) as e:
             if self.quiet is False:
                 print(f"sdb: warning: failed to load {path}: {e}",
                       file=sys.stderr)
             return False
 
     def load_directory(self, dirpath: str) -> None:
-        """Load all debug files from a directory."""
+        """Load all debug files from a directory.
+
+        Note: Kernel modules (.ko) are skipped because we don't record
+        their individual load addresses. Only vmlinux debug files are
+        loaded when walking directories.
+        """
         for ppath, __, files in os.walk(dirpath):
             for fname in files:
-                if fname.endswith((".ko", ".debug")):
-                    self.load_file(os.path.join(ppath, fname), fname)
+                # Only load vmlinux files from directories
+                # .ko files need recorded module addresses to work properly
+                if 'vmlinux' in fname.lower():
+                    self.load_file(os.path.join(ppath, fname),
+                                   fname,
+                                   is_vmlinux=True)
 
 
 def _load_replay_debug_info(prog: drgn.Program, dpaths: List[str], quiet: bool,
@@ -381,7 +394,9 @@ def _load_replay_debug_info(prog: drgn.Program, dpaths: List[str], quiet: bool,
     loader = _ReplayDebugLoader(prog, kernel_text, quiet)
     for path in dpaths:
         if os.path.isfile(path):
-            loader.load_file(path, os.path.basename(path))
+            basename = os.path.basename(path)
+            is_vmlinux = 'vmlinux' in basename.lower()
+            loader.load_file(path, basename, is_vmlinux=is_vmlinux)
         elif os.path.isdir(path):
             loader.load_directory(path)
 

@@ -27,20 +27,27 @@ These tests verify that:
 import json
 import os
 import tempfile
-from typing import Generator
+from typing import Any, Generator
 import zipfile
+
+import drgn
 
 import pytest
 
 import sdb
+from sdb.internal.cli import setup_replay_target
+from sdb.internal.repl import REPL
 from sdb.session import (
     TraceManager,
     get_trace_manager,
     reset_trace_manager,
+    is_replay_mode,
 )
 from tests.integration.infra import (
     get_crash_dump_dir_paths,
     get_all_reference_crash_dumps,
+    get_modules_dir,
+    get_vmlinux_path,
     RefDump,
 )
 
@@ -1114,3 +1121,265 @@ class TestRecordReplayEndToEnd:
             # The comm string "swapper/0" or "swapper" should be in the memory
             assert live_comm.encode('utf-8') in replay_mem, \
                 f"init_task.comm '{live_comm}' not found in replay memory"
+
+
+@pytest.mark.skipif(
+    len(get_crash_dump_dir_paths()) == 0,
+    reason="couldn't find any crash/core dumps to run tests against")
+class TestStacksReplay:
+    """Tests for the stacks command in replay mode."""
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_stacks_command_works_in_replay_mode(self, rdump: RefDump,
+                                                 capsys: Any) -> None:
+        """Test that the stacks command works in replay mode."""
+        setup_test_env(rdump)
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "stacks_replay.sdb")
+
+            # Record a session with stacks
+            trace_mgr.start_recording(rdump.program, bundle_path)
+            rdump.repl.eval_cmd("%session capture-stacks --no-locals")
+            saved_path = trace_mgr.stop_recording(rdump.program)
+
+            # Verify we captured some threads
+            assert len(trace_mgr.threads) > 0, "Should have captured threads"
+
+            # Reset trace manager and load bundle in replay mode
+            reset_trace_manager()
+
+            # Get vmlinux path for debug info
+            # Setup replay target
+            replay_prog = setup_replay_target(
+                saved_path, [get_vmlinux_path(rdump.dump_dir_path)], quiet=True)
+            sdb.target.set_prog(replay_prog)
+            sdb.target.set_thread(0)
+            sdb.target.set_frame(-1)
+            sdb.register_commands()
+
+            # Verify we're in replay mode
+            assert is_replay_mode(), "Should be in replay mode"
+
+            # Create REPL for replay mode
+            replay_repl = REPL(replay_prog,
+                               list(sdb.get_registered_commands().keys()))
+
+            # Clear any prior output
+            capsys.readouterr()
+
+            # Run stacks command in replay mode
+            result = replay_repl.eval_cmd("stacks")
+            assert result == 0, "stacks command should succeed in replay mode"
+
+            # Capture output
+            captured = capsys.readouterr()
+            output = captured.out
+
+            # Verify output contains expected elements
+            assert 'TID' in output, "Output should contain TID header"
+            assert 'COMM' in output, "Output should contain COMM header"
+            # Output should have some actual stack frames (functions)
+            assert len(output.splitlines()) > 3, \
+                f"Output should have multiple lines: {output}"
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_stacks_output_contains_recorded_threads(self, rdump: RefDump,
+                                                     capsys: Any) -> None:
+        """Verify stacks output contains info from recorded threads."""
+        setup_test_env(rdump)
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Record a session with stacks
+            trace_mgr.start_recording(rdump.program,
+                                      os.path.join(tmpdir, "stacks_verify.sdb"))
+            rdump.repl.eval_cmd("%session capture-stacks --no-locals")
+            saved_path = trace_mgr.stop_recording(rdump.program)
+
+            # Get a sample of recorded thread comms
+            sample_comms = {
+                t.comm for t in list(trace_mgr.threads.values())[:5] if t.comm
+            }
+
+            # Reset and setup replay mode
+            reset_trace_manager()
+
+            replay_prog = setup_replay_target(
+                saved_path, [get_vmlinux_path(rdump.dump_dir_path)], quiet=True)
+            sdb.target.set_prog(replay_prog)
+            sdb.target.set_thread(0)
+            sdb.target.set_frame(-1)
+            sdb.register_commands()
+
+            capsys.readouterr()
+            REPL(replay_prog,
+                 list(sdb.get_registered_commands().keys())).eval_cmd("stacks")
+            output = capsys.readouterr().out
+
+            # At least some recorded thread names should appear in output
+            found_comms = sum(1 for comm in sample_comms if comm in output)
+            assert found_comms > 0, \
+                f"Output should contain recorded thread names. " \
+                f"Sample comms: {sample_comms}, Output: {output[:500]}"
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_stacks_returns_empty_iterator_in_replay(self, rdump: RefDump) \
+            -> None:
+        """Test that stacks command returns empty iterator in replay mode."""
+        setup_test_env(rdump)
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "stacks_iter.sdb")
+
+            # Record a session with stacks
+            trace_mgr.start_recording(rdump.program, bundle_path)
+            rdump.repl.eval_cmd("%session capture-stacks --no-locals")
+            saved_path = trace_mgr.stop_recording(rdump.program)
+
+            # Reset and setup replay mode
+            reset_trace_manager()
+
+            replay_prog = setup_replay_target(
+                saved_path, [get_vmlinux_path(rdump.dump_dir_path)], quiet=True)
+            sdb.target.set_prog(replay_prog)
+            sdb.target.set_thread(0)
+            sdb.target.set_frame(-1)
+            sdb.register_commands()
+
+            # Import and test the stacks command directly
+            # pylint: disable=import-outside-toplevel
+            from sdb.commands.linux.stacks import KernelStacks
+
+            stacks_cmd = KernelStacks()
+            result = list(stacks_cmd.no_input())
+
+            # In replay mode, no_input should return an empty list
+            # (stacks are printed directly, not yielded)
+            assert not result, \
+                f"no_input should return empty list in replay, got {result}"
+
+
+@pytest.mark.skipif(
+    len(get_crash_dump_dir_paths()) == 0,
+    reason="couldn't find any crash/core dumps to run tests against")
+class TestModuleCommandsReplay:
+    """Tests for module-dependent commands (spa, vdev, etc.) in replay mode."""
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_spa_command_registered_in_replay_mode(self, rdump: RefDump) \
+            -> None:
+        """Test that spa command is registered in replay mode."""
+        setup_test_env(rdump)
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "spa_replay.sdb")
+
+            # Record a minimal session
+            trace_mgr.start_recording(rdump.program, bundle_path)
+            saved_path = trace_mgr.stop_recording(rdump.program)
+
+            # Reset and setup replay mode
+            reset_trace_manager()
+
+            replay_prog = setup_replay_target(saved_path, [
+                get_vmlinux_path(rdump.dump_dir_path),
+                get_modules_dir(rdump.dump_dir_path)
+            ],
+                                              quiet=True)
+            sdb.target.set_prog(replay_prog)
+            sdb.target.set_thread(0)
+            sdb.target.set_frame(-1)
+            sdb.register_commands()
+
+            # Verify spa command is registered in replay mode
+            registered_cmds = sdb.get_registered_commands()
+            assert 'spa' in registered_cmds, \
+                "spa command should be registered in replay mode"
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_spa_namespace_avl_recordable(self, rdump: RefDump) -> None:
+        """Test that spa_namespace_avl can be recorded for replay."""
+        setup_test_env(rdump)
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "spa_avl.sdb")
+
+            # Record spa_namespace_avl
+            trace_mgr.start_recording(rdump.program, bundle_path)
+
+            # Try to access spa_namespace_avl and capture it
+            try:
+                # pylint: disable=import-outside-toplevel
+                from sdb import target as sdb_target
+                spa_avl = sdb_target.get_object("spa_namespace_avl")
+                trace_mgr.capture_object(spa_avl, depth=0)
+
+                # Record the object info
+                avl_addr = int(spa_avl.address_of_())
+                trace_mgr.record_object("spa_namespace_avl", avl_addr,
+                                        str(spa_avl.type_))
+                recorded = True
+            except (LookupError, drgn.FaultError):
+                # ZFS might not be loaded in this dump
+                recorded = False
+
+            trace_mgr.stop_recording(rdump.program)
+
+            if recorded:
+                # Verify the object was captured
+                assert 'spa_namespace_avl' in trace_mgr.objects, \
+                    "spa_namespace_avl should be recorded"
+
+                # Verify memory was captured
+                status = trace_mgr.get_status()
+                assert status['memory_size'] > 0, \
+                    "Memory should be captured for spa_namespace_avl"
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_spa_data_survives_roundtrip(self, rdump: RefDump) -> None:
+        """Test that recorded spa data survives save/load roundtrip."""
+        setup_test_env(rdump)
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "spa_roundtrip.sdb")
+
+            # Record spa_namespace_avl if ZFS is loaded
+            trace_mgr.start_recording(rdump.program, bundle_path)
+
+            avl_addr = None
+            try:
+                # pylint: disable=import-outside-toplevel
+                from sdb import target as sdb_target
+                spa_avl = sdb_target.get_object("spa_namespace_avl")
+                avl_addr = int(spa_avl.address_of_())
+                trace_mgr.capture_object(spa_avl, depth=0)
+                trace_mgr.record_object("spa_namespace_avl", avl_addr,
+                                        str(spa_avl.type_))
+            except (LookupError, drgn.FaultError):
+                pass
+
+            saved_path = trace_mgr.stop_recording(rdump.program)
+
+            if avl_addr is None:
+                # ZFS not loaded, skip the rest
+                return
+
+            # Load the bundle and verify data
+            loaded_mgr = TraceManager.load_bundle(saved_path)
+
+            assert 'spa_namespace_avl' in loaded_mgr.objects, \
+                "spa_namespace_avl should survive roundtrip"
+            assert loaded_mgr.objects['spa_namespace_avl'].address == avl_addr, \
+                "spa_namespace_avl address should be preserved"
+
+            # Verify memory is readable at the recorded address
+            aligned_addr = avl_addr & ~0xFF
+            mem = loaded_mgr.memory.read(aligned_addr, 256)
+            assert len(mem) == 256, \
+                "Should be able to read memory at spa_namespace_avl"
