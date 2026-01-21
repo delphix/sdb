@@ -25,6 +25,7 @@ from drgn.helpers.linux.pid import for_each_task
 from drgn.helpers.linux.sched import task_state_to_char
 
 import sdb
+from sdb.session import get_trace_manager, is_replay_mode
 
 
 class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
@@ -234,6 +235,18 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
 
     @staticmethod
     def get_frame_pcs(task: drgn.Object) -> List[int]:
+        """
+        Get the program counters for a task's stack trace.
+
+        In replay mode, uses recorded PCs if available.
+        """
+        # Check for replay mode first
+        if is_replay_mode():
+            trace_mgr = get_trace_manager()
+            tid = int(task.pid)
+            if tid in trace_mgr.threads:
+                return trace_mgr.threads[tid].pcs
+
         frame_pcs = []
         try:
             for frame in sdb.get_prog().stack_trace(task):
@@ -402,13 +415,112 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             stack_aggr[stack_key].append(task)
         return sorted(stack_aggr.items(), key=lambda x: len(x[1]), reverse=True)
 
-    # pylint: disable=too-many-locals,too-many-branches
+    # pylint: disable=too-many-branches,too-many-statements
+    def _format_stack_from_pcs(self, pcs: List[int]) -> str:
+        """
+        Format a stack trace from recorded PCs using hybrid approach.
+
+        Tries drgn stack_trace_from_pcs first (for locals support),
+        falls back to recorded symbol lookup.
+        """
+        trace_mgr = get_trace_manager()
+        stacktrace_info = ""
+
+        # First try using drgn's stack_trace_from_pcs if available
+        # This provides richer info including potential locals support
+        try:
+            last_frame_name = ""
+            last_offset = 0x0
+            count = 0
+            frame_info = ""
+
+            for frame in sdb.get_prog().stack_trace_from_pcs(pcs):
+                name = frame.name
+                if frame.is_inline:
+                    if count > 0:
+                        stacktrace_info += KernelStacks.frame_string(
+                            frame_info, count)
+                        count = 0
+                    stacktrace_info += f"{'':18s}{name} (inlined)\n"
+                    continue
+                pc = frame.pc
+                if pc == 0x0:
+                    continue
+                try:
+                    sym = frame.symbol()
+                    if name is None:
+                        name = sym.name
+                    offset = pc - sym.address
+                except LookupError:
+                    if name is None:
+                        name = hex(pc)
+                    offset = 0x0
+
+                if name == last_frame_name and offset == last_offset:
+                    count += 1
+                    continue
+                if count > 0:
+                    stacktrace_info += KernelStacks.frame_string(
+                        frame_info, count)
+                frame_info = f"{'':18s}{name}+{hex(offset)}"
+                last_frame_name = name
+                last_offset = offset
+                count = 1
+
+            if count > 0:
+                stacktrace_info += KernelStacks.frame_string(frame_info, count)
+
+            return stacktrace_info
+        except (ValueError, LookupError, TypeError):
+            pass  # Fall through to symbol lookup
+
+        # Fallback: use recorded symbols
+        last_frame_name = ""
+        last_offset = 0x0
+        count = 0
+        frame_info = ""
+
+        for pc in pcs:
+            if pc == 0x0:
+                continue
+
+            sym_str = trace_mgr.symbolize_pc(pc)
+            # Parse the symbol string to get name and offset
+            if '+' in sym_str:
+                name, offset_str = sym_str.rsplit('+', 1)
+                try:
+                    offset = int(offset_str, 16)
+                except ValueError:
+                    offset = 0x0
+            else:
+                name = sym_str
+                offset = 0x0
+
+            if name == last_frame_name and offset == last_offset:
+                count += 1
+                continue
+            if count > 0:
+                stacktrace_info += KernelStacks.frame_string(frame_info, count)
+            frame_info = f"{'':18s}{name}+{hex(offset)}"
+            last_frame_name = name
+            last_offset = offset
+            count = 1
+
+        if count > 0:
+            stacktrace_info += KernelStacks.frame_string(frame_info, count)
+
+        return stacktrace_info
+
+    # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     def print_stacks(self, objs: Iterable[drgn.Object]) -> None:
         self.print_header()
+        replay = is_replay_mode()
+
         for stack_key, tasks in KernelStacks.aggregate_stacks(objs):
             stacktrace_info = ""
             task_state = stack_key[0]
             task_ptr = tasks[0]
+            frame_pcs = stack_key[1]
 
             stacktrace_info += f"{hex(task_ptr.value_()):<18s} {task_state:<16s}"
             if self.args.all:
@@ -418,7 +530,14 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             else:
                 stacktrace_info += f" {len(tasks):6d}\n"
 
+            # In replay mode with recorded PCs, use hybrid approach
+            if replay and frame_pcs:
+                stacktrace_info += self._format_stack_from_pcs(list(frame_pcs))
+                print(stacktrace_info)
+                continue
+
             #
+            # Normal mode: use drgn stack_trace directly
             # Note: Could also use:
             #    frame_pcs: Tuple[int, ...] = stack_key[1]
             #    sdb.get_prog().stack_trace_from_pcs(frame_pcs)

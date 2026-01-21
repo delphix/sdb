@@ -328,3 +328,259 @@ class TestSessionErrors:
 
         result = rdump.repl.eval_cmd("%bogus")
         assert result == 1  # Error
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_capture_stacks_without_recording(self, rdump: RefDump) -> None:
+        """Test that capture-stacks without recording gives an error."""
+        setup_test_env(rdump)
+
+        result = rdump.repl.eval_cmd("%session capture-stacks")
+        assert result == 1  # Error
+
+
+@pytest.mark.skipif(
+    len(get_crash_dump_dir_paths()) == 0,
+    reason="couldn't find any crash/core dumps to run tests against")
+class TestCaptureStacks:
+    """Tests for the capture-stacks command and stack trace recording."""
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_capture_stacks_command(self, rdump: RefDump) -> None:
+        """Test the %session capture-stacks command."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording
+            trace_mgr.start_recording(rdump.program, bundle_path)
+
+            # Capture all stacks
+            result = rdump.repl.eval_cmd("%session capture-stacks")
+            assert result == 0
+
+            # Verify threads were captured
+            assert len(trace_mgr.threads) > 0
+
+            # Verify symbols were captured
+            assert len(trace_mgr.symbols) > 0
+
+            # Verify memory was captured (for stack memory)
+            assert trace_mgr.memory.get_total_size() > 0
+
+            trace_mgr.stop_recording(rdump.program)
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_capture_stacks_no_locals(self, rdump: RefDump) -> None:
+        """Test the %session capture-stacks --no-locals command."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording
+            trace_mgr.start_recording(rdump.program, bundle_path)
+
+            # Capture stacks without locals
+            result = rdump.repl.eval_cmd("%session capture-stacks --no-locals")
+            assert result == 0
+
+            # Verify threads were captured
+            assert len(trace_mgr.threads) > 0
+
+            # Verify symbols were captured
+            assert len(trace_mgr.symbols) > 0
+
+            # Memory should be much smaller without stack memory
+            size_no_locals = trace_mgr.memory.get_total_size()
+
+            trace_mgr.stop_recording(rdump.program)
+
+            # Reset and do with locals
+            reset_trace_manager()
+            trace_mgr2 = get_trace_manager()
+
+            bundle_path2 = os.path.join(tmpdir, "test2.sdb")
+            trace_mgr2.start_recording(rdump.program, bundle_path2)
+            rdump.repl.eval_cmd("%session capture-stacks")
+            size_with_locals = trace_mgr2.memory.get_total_size()
+            trace_mgr2.stop_recording(rdump.program)
+
+            # With locals should capture more memory
+            # (stack memory is ~16KB per thread)
+            assert size_with_locals >= size_no_locals
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_thread_record_has_stack_bounds(self, rdump: RefDump) -> None:
+        """Test that thread records include stack bounds."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording and capture stacks
+            trace_mgr.start_recording(rdump.program, bundle_path)
+            rdump.repl.eval_cmd("%session capture-stacks")
+            trace_mgr.stop_recording(rdump.program)
+
+            # Check that at least some threads have stack bounds
+            threads_with_bounds = sum(1 for t in trace_mgr.threads.values()
+                                      if t.stack_start > 0 and t.stack_end > 0)
+            assert threads_with_bounds > 0
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_thread_record_has_comm(self, rdump: RefDump) -> None:
+        """Test that thread records include comm name."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording and capture stacks
+            trace_mgr.start_recording(rdump.program, bundle_path)
+            rdump.repl.eval_cmd("%session capture-stacks")
+            trace_mgr.stop_recording(rdump.program)
+
+            # Check that at least some threads have comm names
+            threads_with_comm = sum(
+                1 for t in trace_mgr.threads.values() if t.comm)
+            assert threads_with_comm > 0
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_symbols_recorded_for_pcs(self, rdump: RefDump) -> None:
+        """Test that symbols are recorded for stack PCs."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording and capture stacks
+            trace_mgr.start_recording(rdump.program, bundle_path)
+            rdump.repl.eval_cmd("%session capture-stacks")
+            trace_mgr.stop_recording(rdump.program)
+
+            # Get all PCs from threads
+            all_pcs = set()
+            for thread in trace_mgr.threads.values():
+                all_pcs.update(thread.pcs)
+
+            # Some PCs should have symbols recorded
+            pcs_with_symbols = 0
+            for pc in all_pcs:
+                for addr, sym in trace_mgr.symbols.items():
+                    if sym.size > 0 and addr <= pc < addr + sym.size:
+                        pcs_with_symbols += 1
+                        break
+                    if addr == pc:
+                        pcs_with_symbols += 1
+                        break
+
+            # At least some PCs should be symbolized
+            assert pcs_with_symbols > 0
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_bundle_stack_roundtrip(self, rdump: RefDump) -> None:
+        """Test that stack data survives save/load roundtrip."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording and capture stacks
+            trace_mgr.start_recording(rdump.program, bundle_path)
+            rdump.repl.eval_cmd("%session capture-stacks")
+            saved_path = trace_mgr.stop_recording(rdump.program)
+
+            # Save counts before loading
+            original_threads = len(trace_mgr.threads)
+            original_symbols = len(trace_mgr.symbols)
+
+            # Get one thread's data for comparison
+            tid = None
+            original_thread = None
+            if trace_mgr.threads:
+                tid = next(iter(trace_mgr.threads.keys()))
+                original_thread = trace_mgr.threads[tid]
+
+            # Load the bundle
+            loaded_mgr = TraceManager.load_bundle(saved_path)
+
+            # Verify counts match
+            assert len(loaded_mgr.threads) == original_threads
+            assert len(loaded_mgr.symbols) == original_symbols
+
+            # Verify thread data matches
+            if tid is not None and original_thread is not None:
+                loaded_thread = loaded_mgr.threads[tid]
+                assert loaded_thread.tid == original_thread.tid
+                assert loaded_thread.pcs == original_thread.pcs
+                assert loaded_thread.stack_start == original_thread.stack_start
+                assert loaded_thread.stack_end == original_thread.stack_end
+                assert loaded_thread.comm == original_thread.comm
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_symbolize_pc_works(self, rdump: RefDump) -> None:
+        """Test that symbolize_pc returns meaningful results."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording and capture stacks
+            trace_mgr.start_recording(rdump.program, bundle_path)
+            rdump.repl.eval_cmd("%session capture-stacks")
+            trace_mgr.stop_recording(rdump.program)
+
+            # Get a PC that has a symbol
+            for thread in trace_mgr.threads.values():
+                for pc in thread.pcs:
+                    result = trace_mgr.symbolize_pc(pc)
+                    # Result should be either hex or a function name
+                    assert result.startswith('0x') or '+' in result or any(
+                        c.isalpha() for c in result)
+                    # Test first few PCs
+                    break
+                break
+
+    @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+    def test_format_recorded_stack(self, rdump: RefDump) -> None:
+        """Test that format_recorded_stack produces output."""
+        setup_test_env(rdump)
+
+        trace_mgr = get_trace_manager()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, "test.sdb")
+
+            # Start recording and capture stacks
+            trace_mgr.start_recording(rdump.program, bundle_path)
+            rdump.repl.eval_cmd("%session capture-stacks")
+            trace_mgr.stop_recording(rdump.program)
+
+            # Format one thread's stack
+            if trace_mgr.threads:
+                tid = next(iter(trace_mgr.threads.keys()))
+                lines = trace_mgr.format_recorded_stack(tid)
+
+                # Should have some lines if thread has PCs
+                thread = trace_mgr.threads[tid]
+                if thread.pcs:
+                    assert len(lines) > 0
+                    # Each line should have frame number and address
+                    for line in lines:
+                        assert '#' in line
+                        assert '0x' in line

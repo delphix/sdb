@@ -17,6 +17,8 @@
 Unit tests for the session recording and replay functionality.
 """
 
+import gzip
+import json
 import os
 import struct
 import tempfile
@@ -39,6 +41,7 @@ from sdb.session import (
     FAT_READ_MASK,
     get_trace_manager,
     reset_trace_manager,
+    is_replay_mode,
 )
 
 
@@ -381,3 +384,193 @@ class TestDataclasses:
         """Test ThreadRecord default pcs."""
         rec = ThreadRecord(tid=1)
         assert rec.pcs == []
+
+    def test_thread_record_stack_bounds(self) -> None:
+        """Test ThreadRecord with stack bounds."""
+        rec = ThreadRecord(
+            tid=123,
+            pcs=[0x1000, 0x2000],
+            stack_start=0xffff8000,
+            stack_end=0xffffc000,
+            comm="test_thread",
+        )
+        assert rec.tid == 123
+        assert rec.pcs == [0x1000, 0x2000]
+        assert rec.stack_start == 0xffff8000
+        assert rec.stack_end == 0xffffc000
+        assert rec.comm == "test_thread"
+
+    def test_thread_record_default_stack_bounds(self) -> None:
+        """Test ThreadRecord default stack bounds."""
+        rec = ThreadRecord(tid=1)
+        assert rec.stack_start == 0
+        assert rec.stack_end == 0
+        assert rec.comm == ""
+
+
+class TestSymbolizePc:
+    """Tests for PC symbolization."""
+
+    def setup_method(self) -> None:
+        """Reset trace manager before each test."""
+        reset_trace_manager()
+
+    def test_symbolize_pc_exact_match(self) -> None:
+        """Test symbolizing a PC that exactly matches a symbol address."""
+        mgr = TraceManager()
+        mgr.record_symbol(0x1000, "my_function", 100)
+
+        result = mgr.symbolize_pc(0x1000)
+        # Exact match at start of function returns +0x0
+        assert result == "my_function+0x0"
+
+    def test_symbolize_pc_with_offset(self) -> None:
+        """Test symbolizing a PC within a symbol's range."""
+        mgr = TraceManager()
+        mgr.record_symbol(0x1000, "my_function", 100)
+
+        result = mgr.symbolize_pc(0x1010)
+        assert result == "my_function+0x10"
+
+    def test_symbolize_pc_not_found(self) -> None:
+        """Test symbolizing a PC not in any symbol range."""
+        mgr = TraceManager()
+        mgr.record_symbol(0x1000, "my_function", 100)
+
+        result = mgr.symbolize_pc(0x2000)
+        assert result == "0x2000"
+
+    def test_symbolize_pc_multiple_symbols(self) -> None:
+        """Test symbolizing with multiple symbols."""
+        mgr = TraceManager()
+        mgr.record_symbol(0x1000, "func_a", 50)
+        mgr.record_symbol(0x2000, "func_b", 100)
+        mgr.record_symbol(0x3000, "func_c", 200)
+
+        assert mgr.symbolize_pc(0x1020) == "func_a+0x20"
+        assert mgr.symbolize_pc(0x2050) == "func_b+0x50"
+        # 0x3050 = 0x3000 + 0x50 (offset 80, within size 200)
+        assert mgr.symbolize_pc(0x3050) == "func_c+0x50"
+
+
+class TestFormatRecordedStack:
+    """Tests for formatting recorded stack traces."""
+
+    def setup_method(self) -> None:
+        """Reset trace manager before each test."""
+        reset_trace_manager()
+
+    def test_format_recorded_stack_basic(self) -> None:
+        """Test basic stack formatting."""
+        mgr = TraceManager()
+        mgr.record_symbol(0x1000, "func_a", 100)
+        mgr.record_symbol(0x2000, "func_b", 100)
+        mgr.threads[42] = ThreadRecord(tid=42, pcs=[0x1000, 0x2010])
+
+        lines = mgr.format_recorded_stack(42)
+        assert len(lines) == 2
+        assert "func_a" in lines[0]
+        assert "func_b+0x10" in lines[1]
+
+    def test_format_recorded_stack_not_found(self) -> None:
+        """Test formatting non-existent thread."""
+        mgr = TraceManager()
+        lines = mgr.format_recorded_stack(999)
+        assert not lines
+
+    def test_format_recorded_stack_empty_pcs(self) -> None:
+        """Test formatting thread with empty PCs."""
+        mgr = TraceManager()
+        mgr.threads[42] = ThreadRecord(tid=42, pcs=[])
+
+        lines = mgr.format_recorded_stack(42)
+        assert not lines
+
+
+class TestIsReplayMode:
+    """Tests for is_replay_mode function."""
+
+    def setup_method(self) -> None:
+        """Reset trace manager before each test."""
+        reset_trace_manager()
+
+    def test_not_replay_by_default(self) -> None:
+        """Test that is_replay_mode returns False by default."""
+        assert is_replay_mode() is False
+
+    def test_replay_after_load(self) -> None:
+        """Test that is_replay_mode returns True after loading bundle."""
+        mgr = TraceManager()
+        mgr.memory.write(0x1000, b'test')
+        mgr.metadata = {'version': 1}
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, 'test.sdb')
+            mgr.save_bundle(bundle_path)
+
+            # Reset and load
+            reset_trace_manager()
+            loaded = TraceManager.load_bundle(bundle_path)
+
+            # The loaded manager has is_replay=True, but the global one doesn't
+            assert loaded.is_replay is True
+
+
+class TestBundleThreadFields:
+    """Tests for bundle serialization of new ThreadRecord fields."""
+
+    def test_save_and_load_thread_with_stack_bounds(self) -> None:
+        """Test saving and loading threads with stack bounds."""
+        mgr = TraceManager()
+        mgr.memory.write(0x1000, b'test')
+        mgr.metadata = {'version': 1}
+        mgr.threads[123] = ThreadRecord(
+            tid=123,
+            pcs=[0x1000, 0x2000],
+            stack_start=0xffff8000,
+            stack_end=0xffffc000,
+            comm="test_comm",
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, 'test.sdb')
+            mgr.save_bundle(bundle_path)
+
+            loaded = TraceManager.load_bundle(bundle_path)
+            thread = loaded.threads[123]
+
+            assert thread.tid == 123
+            assert thread.pcs == [0x1000, 0x2000]
+            assert thread.stack_start == 0xffff8000
+            assert thread.stack_end == 0xffffc000
+            assert thread.comm == "test_comm"
+
+    def test_load_legacy_bundle_without_stack_fields(self) -> None:
+        """Test loading a bundle without the new stack fields (backwards compat)."""
+        # Create a bundle manually with old format (no stack_start/stack_end/comm)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            bundle_path = os.path.join(tmpdir, 'legacy.sdb')
+
+            with zipfile.ZipFile(bundle_path, 'w') as zf:
+                zf.writestr('metadata.json', json.dumps({'version': 1}))
+                zf.writestr('objects.json', json.dumps({}))
+                zf.writestr('symbols.json', json.dumps({}))
+                # Old format: only pcs, no stack_start/stack_end/comm
+                zf.writestr('threads.json',
+                            json.dumps({'42': {
+                                'pcs': [0x1000]
+                            }}))
+
+                # Minimal memory data
+                mem_data = b'SMEM' + struct.pack('<I', 1)
+                zf.writestr('memory.bin.gz', gzip.compress(mem_data))
+
+            loaded = TraceManager.load_bundle(bundle_path)
+            thread = loaded.threads[42]
+
+            assert thread.tid == 42
+            assert thread.pcs == [0x1000]
+            # Defaults for missing fields
+            assert thread.stack_start == 0
+            assert thread.stack_end == 0
+            assert thread.comm == ""

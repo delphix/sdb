@@ -198,6 +198,28 @@ class REPL:
         print("      The %session load command is for advanced use cases")
         return 0
 
+    def _handle_session_capture_stacks(self, args: List[str]) -> int:
+        """Handle %session capture-stacks command."""
+        trace_mgr = get_trace_manager()
+        if not trace_mgr.is_recording:
+            print("Error: Not recording. Use '%session record <file>' first.")
+            return 1
+
+        include_locals = '--no-locals' not in args
+        count = trace_mgr.capture_all_stacks(self.target, include_locals)
+
+        status = trace_mgr.get_status()
+        print(f"Captured {count} thread stacks")
+        print(f"  Memory segments: {status['memory_segments']}")
+        print(f"  Memory size: {status['memory_size']} bytes")
+        print(f"  Symbols: {status['symbols_count']}")
+        print(f"  Threads: {status['threads_count']}")
+        if not include_locals:
+            print(
+                "  (stack memory not captured - locals unavailable during replay)"
+            )
+        return 0
+
     # pylint: disable=too-many-return-statements
     def eval_session_cmd(self, input_: str) -> int:
         """
@@ -230,7 +252,9 @@ class REPL:
 
             if len(parts) < 2:
                 print("Usage: %session <command> [args]")
-                print("Commands: record, stop, status, snapshot, load")
+                print(
+                    "Commands: record, stop, status, snapshot, capture-stacks, load"
+                )
                 return 2
 
             subcmd = parts[1]
@@ -244,11 +268,15 @@ class REPL:
                 return self._handle_session_status()
             if subcmd == 'snapshot':
                 return self._handle_session_snapshot(args)
+            if subcmd == 'capture-stacks':
+                return self._handle_session_capture_stacks(args)
             if subcmd == 'load':
                 return self._handle_session_load(args)
 
             print(f"Unknown session command: {subcmd}")
-            print("Commands: record, stop, status, snapshot, load")
+            print(
+                "Commands: record, stop, status, snapshot, capture-stacks, load"
+            )
             return 1
 
         except RuntimeError as e:

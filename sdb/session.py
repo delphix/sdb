@@ -78,9 +78,12 @@ class SymbolRecord:
 
 @dataclass
 class ThreadRecord:
-    """A recorded thread's stack trace as program counters."""
+    """A recorded thread's stack trace with optional stack memory."""
     tid: int
     pcs: List[int] = field(default_factory=list)
+    stack_start: int = 0  # Stack memory start address
+    stack_end: int = 0  # Stack memory end address
+    comm: str = ""  # Thread comm name (for display)
 
 
 class SparseMemory:
@@ -482,6 +485,93 @@ class TraceManager:
         """Record a thread's stack trace as a list of program counters."""
         self.threads[tid] = ThreadRecord(tid=tid, pcs=pcs)
 
+    def _get_task_stack_bounds(self, task: drgn.Object) -> Tuple[int, int]:
+        """
+        Get stack memory bounds for a task.
+
+        Returns (stack_start, stack_end) tuple.
+        """
+        # Linux kernel stack is at task->stack with size THREAD_SIZE
+        # THREAD_SIZE is typically 16384 (4 pages) on x86_64
+        try:
+            stack_base = int(task.stack)
+            # Default to 16KB, common on x86_64
+            thread_size = 16384
+            return (stack_base, stack_base + thread_size)
+        except (AttributeError, ValueError):
+            return (0, 0)
+
+    def _capture_task_stack_memory(self, task: drgn.Object) -> None:
+        """Capture the stack memory for a task."""
+        stack_start, stack_end = self._get_task_stack_bounds(task)
+        if stack_start and stack_end and self.original_read:
+            try:
+                stack_data = self.original_read(stack_start,
+                                                stack_end - stack_start, False)
+                self.memory.write(stack_start, stack_data)
+            except drgn.FaultError:
+                pass  # Stack memory not readable
+
+    def capture_all_stacks(self,
+                           prog: drgn.Program,
+                           include_locals: bool = True) -> int:
+        """
+        Capture all kernel thread stacks with symbols and optionally stack memory.
+
+        Args:
+            prog: The drgn.Program to capture stacks from.
+            include_locals: If True, capture stack memory for local variable access.
+
+        Returns:
+            Number of threads captured.
+        """
+        # Import here to avoid circular imports and allow use outside kernel context
+        # pylint: disable=import-outside-toplevel
+        from drgn.helpers.linux.pid import for_each_task
+
+        captured = 0
+        # pylint: disable=no-value-for-parameter
+        for task in for_each_task(prog):
+            tid = int(task.pid)
+            try:
+                comm = task.comm.string_().decode(errors='replace')
+            except (AttributeError, ValueError):
+                comm = ""
+            pcs: List[int] = []
+
+            try:
+                for frame in prog.stack_trace(task):
+                    pc = frame.pc
+                    if pc == 0:
+                        continue
+                    pcs.append(pc)
+                    # Record symbol for this PC
+                    try:
+                        sym = frame.symbol()
+                        self.record_symbol(sym.address, sym.name, sym.size)
+                    except LookupError:
+                        pass
+
+                if pcs and include_locals:
+                    # Capture stack memory for local variable access
+                    self._capture_task_stack_memory(task)
+
+                if pcs:
+                    stack_start, stack_end = self._get_task_stack_bounds(task)
+                    self.threads[tid] = ThreadRecord(
+                        tid=tid,
+                        pcs=pcs,
+                        stack_start=stack_start,
+                        stack_end=stack_end,
+                        comm=comm,
+                    )
+                    captured += 1
+
+            except (ValueError, LookupError):
+                pass  # Running task or unwinding failed
+
+        return captured
+
     def save_bundle(self, path: str) -> None:
         """Save the recorded session to a .sdb bundle file."""
         # Ensure .sdb extension
@@ -516,7 +606,10 @@ class TraceManager:
             # Write threads
             threads_data = {
                 str(tid): {
-                    'pcs': rec.pcs
+                    'pcs': rec.pcs,
+                    'stack_start': rec.stack_start,
+                    'stack_end': rec.stack_end,
+                    'comm': rec.comm,
                 } for tid, rec in self.threads.items()
             }
             zf.writestr('threads.json',
@@ -574,7 +667,13 @@ class TraceManager:
             threads_data = json.loads(zf.read('threads.json').decode('utf-8'))
             for tid_str, thread in threads_data.items():
                 tid = int(tid_str)
-                manager.threads[tid] = ThreadRecord(tid=tid, pcs=thread['pcs'])
+                manager.threads[tid] = ThreadRecord(
+                    tid=tid,
+                    pcs=thread['pcs'],
+                    stack_start=thread.get('stack_start', 0),
+                    stack_end=thread.get('stack_end', 0),
+                    comm=thread.get('comm', ''),
+                )
 
             # Load memory
             compressed = zf.read('memory.bin.gz')
@@ -648,6 +747,50 @@ class TraceManager:
             'threads_count': len(self.threads),
         }
 
+    def symbolize_pc(self, pc: int) -> str:
+        """
+        Convert a PC to symbol+offset string using recorded symbols.
+
+        Args:
+            pc: Program counter to symbolize.
+
+        Returns:
+            String like "function_name+0x10" or just hex(pc) if no symbol found.
+        """
+        # Find symbol containing this PC
+        for addr, sym_rec in self.symbols.items():
+            if sym_rec.size > 0 and addr <= pc < addr + sym_rec.size:
+                offset = pc - addr
+                return f"{sym_rec.name}+{hex(offset)}"
+            if addr == pc:
+                # Exact match, even if size is 0
+                return sym_rec.name
+        return hex(pc)
+
+    def format_recorded_stack(self, tid: int) -> List[str]:
+        """
+        Format a recorded thread's stack trace for display.
+
+        Args:
+            tid: Thread ID to format stack for.
+
+        Returns:
+            List of formatted stack frame strings.
+        """
+        if tid not in self.threads:
+            return []
+
+        lines = []
+        thread = self.threads[tid]
+        for i, pc in enumerate(thread.pcs):
+            sym_str = self.symbolize_pc(pc)
+            lines.append(f"#{i:<2} {hex(pc)} {sym_str}")
+        return lines
+
+    def get_recorded_threads(self) -> Dict[int, ThreadRecord]:
+        """Get all recorded threads."""
+        return self.threads
+
 
 # Global trace manager instance
 _trace_manager: Optional[TraceManager] = None
@@ -665,3 +808,14 @@ def reset_trace_manager() -> None:
     """Reset the global trace manager (for testing)."""
     global _trace_manager  # pylint: disable=global-statement
     _trace_manager = None
+
+
+def is_replay_mode() -> bool:
+    """
+    Check if we're in replay mode (loaded from bundle).
+
+    Returns:
+        True if the trace manager is in replay mode, False otherwise.
+    """
+    mgr = get_trace_manager()
+    return mgr.is_replay
