@@ -66,9 +66,13 @@ jobs:
       - run: python3 -m pip install pytest pytest-cov
       - run: ./.github/scripts/install-drgn.sh
       - run: pytest -v --cov sdb --cov-report xml tests/unit
-      - uses: codecov/codecov-action@v4
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: false
+          verbose: true
   #
   # Verify "pytest" runs successfully on integration tests with crash dumps.
   #
@@ -94,9 +98,13 @@ jobs:
       - run: ./.github/scripts/extract-dump.sh dump.201912060006.tar.lzma
       - run: ./.github/scripts/extract-dump.sh dump.202303131823.tar.gz
       - run: pytest -v --cov sdb --cov-report xml tests/integration
-      - uses: codecov/codecov-action@v4
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: false
+          verbose: true
   #
   # Verify "yapf" runs successfully.
   #
