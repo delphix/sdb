@@ -471,7 +471,7 @@ class TestRecordReplayEndToEnd:
                 prog.set_core_dump(saved_path)
                 # If we get here, the vmcore was loaded successfully
                 assert prog.platform is not None
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 pytest.fail(f"Failed to load recorded vmcore: {e}")
 
     @pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())

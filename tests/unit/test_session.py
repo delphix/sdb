@@ -130,7 +130,7 @@ class TestSparseMemory:
         assert segments[0] == (0x1000, b'BBBB')
 
 
-class TestMemorySegment:
+class TestMemorySegment:  # pylint: disable=too-few-public-methods
     """Tests for the MemorySegment dataclass."""
 
     def test_memory_segment(self) -> None:
