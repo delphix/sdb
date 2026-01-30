@@ -26,6 +26,8 @@ classifiers = [
 ]
 dependencies = [
     "drgn",
+    "kdumpling>=0.2.0",
+    "pyelftools>=0.29",
 ]
 dynamic = ["version"]
 
@@ -110,6 +112,14 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "drgn.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "kdumpling.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "elftools.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]

@@ -23,7 +23,6 @@ from drgn.helpers.linux.pid import for_each_task
 from drgn.helpers.linux.sched import task_state_to_char
 
 import sdb
-from sdb.session import get_trace_manager, is_replay_mode
 
 
 class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
@@ -235,16 +234,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
     def get_frame_pcs(task: drgn.Object) -> List[int]:
         """
         Get the program counters for a task's stack trace.
-
-        In replay mode, uses recorded PCs if available.
         """
-        # Check for replay mode first
-        if is_replay_mode():
-            trace_mgr = get_trace_manager()
-            tid = int(task.pid)
-            if tid in trace_mgr.threads:
-                return trace_mgr.threads[tid].pcs
-
         frame_pcs = []
         try:
             for frame in sdb.get_prog().stack_trace(task):
@@ -315,13 +305,6 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
         # (crash dumps or live systems). When support for userland is added we can
         # refactor the kernel code into its own function and switch to the correct
         # codepath depending on the target.
-        #
-        # In replay mode, we allow the command even without IS_LINUX_KERNEL flag
-        # since the recorded data is from a kernel session.
-        #
-        if is_replay_mode():
-            self.validate_args()
-            return
         if not sdb.get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL:
             raise sdb.CommandError(self.name,
                                    "userland targets are not supported yet")
@@ -388,11 +371,7 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
         return False
 
     def print_header(self) -> None:
-        if is_replay_mode():
-            # In replay mode, we show TID and COMM instead of task_struct address
-            header = f"{'TID':<12} {'COMM':<16s}"
-        else:
-            header = f"{'TASK_STRUCT':<18} {'STATE':<16s}"
+        header = f"{'TASK_STRUCT':<18} {'STATE':<16s}"
         if not self.args.all:
             header += f" {'COUNT':>6s}"
         print(header)
@@ -423,115 +402,14 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             stack_aggr[stack_key].append(task)
         return sorted(stack_aggr.items(), key=lambda x: len(x[1]), reverse=True)
 
-# pylint: disable=too-many-statements
-
-    def _format_stack_from_pcs(self, pcs: List[int]) -> str:
-        """
-        Format a stack trace from recorded PCs using hybrid approach.
-
-        Tries drgn stack_trace_from_pcs first (for locals support),
-        falls back to recorded symbol lookup.
-        """
-        trace_mgr = get_trace_manager()
-        stacktrace_info = ""
-
-        # First try using drgn's stack_trace_from_pcs if available
-        # This provides richer info including potential locals support
-        try:
-            last_frame_name = ""
-            last_offset = 0x0
-            count = 0
-            frame_info = ""
-
-            for frame in sdb.get_prog().stack_trace_from_pcs(pcs):
-                name = frame.name
-                if frame.is_inline:
-                    if count > 0:
-                        stacktrace_info += KernelStacks.frame_string(
-                            frame_info, count)
-                        count = 0
-                    stacktrace_info += f"{'':18s}{name} (inlined)\n"
-                    continue
-                pc = frame.pc
-                if pc == 0x0:
-                    continue
-                try:
-                    sym = frame.symbol()
-                    if name is None:
-                        name = sym.name
-                    offset = pc - sym.address
-                except LookupError:
-                    if name is None:
-                        name = hex(pc)
-                    offset = 0x0
-
-                if name == last_frame_name and offset == last_offset:
-                    count += 1
-                    continue
-                if count > 0:
-                    stacktrace_info += KernelStacks.frame_string(
-                        frame_info, count)
-                frame_info = f"{'':18s}{name}+{hex(offset)}"
-                last_frame_name = name
-                last_offset = offset
-                count = 1
-
-            if count > 0:
-                stacktrace_info += KernelStacks.frame_string(frame_info, count)
-
-            return stacktrace_info
-        except (ValueError, LookupError, TypeError):
-            pass  # Fall through to symbol lookup
-
-        # Fallback: use recorded symbols
-        last_frame_name = ""
-        last_offset = 0x0
-        count = 0
-        frame_info = ""
-
-        for pc in pcs:
-            if pc == 0x0:
-                continue
-
-            sym_str = trace_mgr.symbolize_pc(pc)
-            # Parse the symbol string to get name and offset
-            if '+' in sym_str:
-                name, offset_str = sym_str.rsplit('+', 1)
-                try:
-                    offset = int(offset_str, 16)
-                except ValueError:
-                    offset = 0x0
-            else:
-                name = sym_str
-                offset = 0x0
-
-            if name == last_frame_name and offset == last_offset:
-                count += 1
-                continue
-            if count > 0:
-                stacktrace_info += KernelStacks.frame_string(frame_info, count)
-            frame_info = f"{'':18s}{name}+{hex(offset)}"
-            last_frame_name = name
-            last_offset = offset
-            count = 1
-
-        if count > 0:
-            stacktrace_info += KernelStacks.frame_string(frame_info, count)
-
-        return stacktrace_info
-
-
-# pylint: disable=too-many-locals, too-many-statements
-
+    # pylint: disable=too-many-locals, too-many-statements
     def print_stacks(self, objs: Iterable[drgn.Object]) -> None:
         self.print_header()
-        replay = is_replay_mode()
 
         for stack_key, tasks in KernelStacks.aggregate_stacks(objs):
             stacktrace_info = ""
             task_state = stack_key[0]
             task_ptr = tasks[0]
-            frame_pcs = stack_key[1]
 
             stacktrace_info += f"{hex(task_ptr.value_()):<18s} {task_state:<16s}"
             if self.args.all:
@@ -541,20 +419,8 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             else:
                 stacktrace_info += f" {len(tasks):6d}\n"
 
-            # In replay mode with recorded PCs, use hybrid approach
-            if replay and frame_pcs:
-                stacktrace_info += self._format_stack_from_pcs(list(frame_pcs))
-                print(stacktrace_info)
-                continue
-
-            #
-            # Normal mode: use drgn stack_trace directly
-            # Note: Could also use:
-            #    frame_pcs: Tuple[int, ...] = stack_key[1]
-            #    sdb.get_prog().stack_trace_from_pcs(frame_pcs)
-            #
+            # Use drgn stack_trace directly
             # Aggregate frames with the same name and offset.
-            #
             last_frame_name = ""
             last_offset = 0x0
             count = 0
@@ -600,25 +466,10 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         self.validate_context()
-        if is_replay_mode():
-            self._print_replay_stacks()
-            return
         self.print_stacks(filter(self.match_stack, objs))
 
     def no_input(self) -> Iterable[drgn.Object]:
         self.validate_context()
-
-        # In replay mode, return recorded task_struct addresses for pipelines.
-        if is_replay_mode():
-            trace_mgr = get_trace_manager()
-            tasks = []
-            for _tid, thread in sorted(trace_mgr.threads.items()):
-                if thread.task_addr:
-                    tasks.append(
-                        sdb.target.create_object("struct task_struct *",
-                                                 thread.task_addr))
-            return tasks
-
         # The pylint error disabled below is a false positive
         # triggered by some updates to drgn's function signatures.
         # pylint: disable=no-value-for-parameter
@@ -628,49 +479,6 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
         """Generator for live kernel mode - iterates tasks."""
         # pylint: disable=no-value-for-parameter
         yield from filter(self.match_stack, for_each_task(sdb.get_prog()))
-
-    def _print_replay_stacks(self) -> None:
-        """Print stacks from recorded thread data in replay mode."""
-        trace_mgr = get_trace_manager()
-        if not trace_mgr.threads:
-            print("No recorded thread stacks available.")
-            return
-
-        self.print_header()
-
-        # Group threads by stack signature for aggregation
-        stack_groups: Dict[Tuple[int, ...],
-                           List[Tuple[int, str]]] = defaultdict(list)
-        for tid, thread_rec in trace_mgr.threads.items():
-            stack_key = tuple(thread_rec.pcs)
-            stack_groups[stack_key].append((tid, thread_rec.comm))
-
-        # Sort by count (descending)
-        sorted_groups = sorted(stack_groups.items(),
-                               key=lambda x: len(x[1]),
-                               reverse=True)
-
-        for pcs, threads in sorted_groups:
-            if not pcs:
-                continue
-
-            # Get first thread info for display
-            first_tid, first_comm = threads[0]
-            count = len(threads)
-
-            # Format header with thread info
-            # Note: In replay mode we don't have task_struct addresses
-            stacktrace_info = f"TID {first_tid:<10d} {first_comm:<16s}"
-            if self.args.all:
-                stacktrace_info += "\n"
-                for tid, comm in threads[1:]:
-                    stacktrace_info += f"TID {tid:<10d} {comm:<16s}\n"
-            else:
-                stacktrace_info += f" {count:6d}\n"
-
-            # Format stack frames using hybrid approach
-            stacktrace_info += self._format_stack_from_pcs(list(pcs))
-            print(stacktrace_info)
 
 
 class KernelCrashedThread(sdb.Locator, sdb.PrettyPrinter):

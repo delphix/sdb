@@ -108,12 +108,13 @@ class REPL:
     def _handle_session_record(self, args: List[str]) -> int:
         """Handle %session record command."""
         if not args:
-            print("Usage: %session record <file.sdb>")
+            print("Usage: %session record <file>")
+            print("       Output will be saved as <file>.vmcore.recorded")
             return 2
         output_path = args[0]
         trace_mgr = get_trace_manager()
         trace_mgr.start_recording(self.target, output_path)
-        print(f"Recording started. Output will be saved to: {output_path}")
+        print(f"Recording started. Output: {trace_mgr.output_path}")
         return 0
 
     def _handle_session_stop(self) -> int:
@@ -125,8 +126,6 @@ class REPL:
         print(f"Saved to: {saved_path}")
         print(f"  Memory segments: {status['memory_segments']}")
         print(f"  Memory size: {status['memory_size']} bytes")
-        print(f"  Objects: {status['objects_count']}")
-        print(f"  Symbols: {status['symbols_count']}")
         return 0
 
     def _handle_session_status(self) -> int:
@@ -137,11 +136,8 @@ class REPL:
             print(f"Recording to: {status['output_path']}")
             print(f"  Memory segments: {status['memory_segments']}")
             print(f"  Memory size: {status['memory_size']} bytes")
-            print(f"  Objects: {status['objects_count']}")
         elif status['is_replay']:
             print("Replay mode active")
-            print(f"  Memory segments: {status['memory_segments']}")
-            print(f"  Memory size: {status['memory_size']} bytes")
         else:
             print("No recording or replay in progress")
         return 0
@@ -173,9 +169,6 @@ class REPL:
             obj = sdb_target.get_object(var_name)
             # Use capture_object for proper tracing
             trace_mgr.capture_object(obj, depth)
-            # Also record the named object
-            trace_mgr.record_object(var_name, int(obj.address_of_()),
-                                    str(obj.type_))
             status = trace_mgr.get_status()
             print(f"Snapshot captured: {var_name}")
             print(f"  Memory segments: {status['memory_segments']}")
@@ -188,34 +181,11 @@ class REPL:
     def _handle_session_load(self, args: List[str]) -> int:
         """Handle %session load command."""
         if not args:
-            print("Usage: %session load <file.sdb>")
+            print("Usage: %session load <file.vmcore.recorded>")
             return 2
         # Note: Loading is primarily done via CLI --replay
-        # This command is for switching to a loaded session
-        print("Note: Use 'sdb --replay <file.sdb>' to load a recorded session")
+        print("Note: Use 'sdb --replay <file>' to load a recorded session")
         print("      The %session load command is for advanced use cases")
-        return 0
-
-    def _handle_session_capture_stacks(self, args: List[str]) -> int:
-        """Handle %session capture-stacks command."""
-        trace_mgr = get_trace_manager()
-        if not trace_mgr.is_recording:
-            print("Error: Not recording. Use '%session record <file>' first.")
-            return 1
-
-        include_locals = '--no-locals' not in args
-        count = trace_mgr.capture_all_stacks(self.target, include_locals)
-
-        status = trace_mgr.get_status()
-        print(f"Captured {count} thread stacks")
-        print(f"  Memory segments: {status['memory_segments']}")
-        print(f"  Memory size: {status['memory_size']} bytes")
-        print(f"  Symbols: {status['symbols_count']}")
-        print(f"  Threads: {status['threads_count']}")
-        if not include_locals:
-            print(
-                "  (stack memory not captured - locals unavailable during replay)"
-            )
         return 0
 
     def _handle_session_record_memory(self, args: List[str]) -> int:
@@ -261,11 +231,12 @@ class REPL:
         Evaluates a session command (commands starting with %).
 
         Session commands control recording and replay functionality:
-        - %session record <file.sdb> - Start recording
+        - %session record <file> - Start recording (saves as .vmcore.recorded)
         - %session stop - Stop recording and save
         - %session status - Show recording status
         - %session snapshot <var> [--depth N] - Capture object graph
-        - %session load <file.sdb> - Load a recorded session
+        - %session record-memory <addr> <size> - Capture memory region
+        - %session load <file> - Load a recorded session
 
         Returns:
             0 for success
@@ -277,7 +248,7 @@ class REPL:
             parts = shlex.split(input_)
             if not parts:
                 print("Usage: %session <command> [args]")
-                print("Commands: record, stop, status, snapshot, load")
+                print("Commands: record, stop, status, snapshot, record-memory, load")
                 return 2
 
             if parts[0] != 'session':
@@ -287,8 +258,7 @@ class REPL:
 
             if len(parts) < 2:
                 print("Usage: %session <command> [args]")
-                print("Commands: record, stop, status, snapshot, "
-                      "capture-stacks, record-memory, load")
+                print("Commands: record, stop, status, snapshot, record-memory, load")
                 return 2
 
             subcmd = parts[1]
@@ -302,16 +272,13 @@ class REPL:
                 return self._handle_session_status()
             if subcmd == 'snapshot':
                 return self._handle_session_snapshot(args)
-            if subcmd == 'capture-stacks':
-                return self._handle_session_capture_stacks(args)
             if subcmd == 'record-memory':
                 return self._handle_session_record_memory(args)
             if subcmd == 'load':
                 return self._handle_session_load(args)
 
             print(f"Unknown session command: {subcmd}")
-            print("Commands: record, stop, status, snapshot, "
-                  "capture-stacks, record-memory, load")
+            print("Commands: record, stop, status, snapshot, record-memory, load")
             return 1
 
         except RuntimeError as e:
