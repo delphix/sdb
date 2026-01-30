@@ -311,7 +311,7 @@ def setup_replay_target(replay_path: str, symbol_search: List[str],
     except FileNotFoundError:
         print(f"sdb: no such file: '{replay_path}'")
         sys.exit(2)
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         print(f"sdb: failed to load vmcore: {e}")
         sys.exit(1)
 

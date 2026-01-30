@@ -30,9 +30,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
+from kdumpling import CompressionType, KdumpBuilder, OutputFormat
+
 import drgn
 from drgn import TypeKind
-from kdumpling import KdumpBuilder, OutputFormat, CompressionType
 
 # Fat read alignment (256 bytes as per design decision)
 FAT_READ_ALIGNMENT = 256
@@ -141,7 +142,7 @@ class SparseMemory:
         return len(self._segments)
 
 
-class TraceManager:
+class TraceManager:  # pylint: disable=too-many-instance-attributes
     """
     Manages session recording state and memory tracing.
 
@@ -252,7 +253,7 @@ class TraceManager:
 
         return output_path
 
-    def _save_vmcore(self, path: str, prog: drgn.Program) -> None:
+    def _save_vmcore(self, path: str, _prog: drgn.Program) -> None:
         """Save the recorded session as a kdumpling vmcore."""
         # Get architecture from program
         arch = self.metadata.get('arch', 'x86_64')
@@ -501,7 +502,7 @@ def extract_sdb_notes(vmcore_path: str) -> Optional[Dict[str, Any]]:
                                 result: Dict[str, Any] = json.loads(
                                     data.decode('utf-8'))
                                 return result
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         pass
     return None
 

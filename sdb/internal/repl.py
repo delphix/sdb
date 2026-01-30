@@ -235,7 +235,7 @@ class REPL:
             print(f"Failed to read memory at {hex(address)}: {e}")
             return 1
 
-    def _handle_session_config(self, args: List[str]) -> int:
+    def _handle_session_config(self, args: List[str]) -> int:  # pylint: disable=too-many-return-statements
         """Handle %session config command."""
         trace_mgr = get_trace_manager()
 
