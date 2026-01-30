@@ -134,12 +134,22 @@ class REPL:
         status = trace_mgr.get_status()
         if status['is_recording']:
             print(f"Recording to: {status['output_path']}")
+            print(f"  Format: {status['output_format']}")
+            if status['output_format'] == 'kdump':
+                print(
+                    f"  Compression: {status['compression']} (level {status['compression_level']})"
+                )
             print(f"  Memory segments: {status['memory_segments']}")
             print(f"  Memory size: {status['memory_size']} bytes")
         elif status['is_replay']:
             print("Replay mode active")
         else:
             print("No recording or replay in progress")
+            print(f"Default format: {status['output_format']}")
+            if status['output_format'] == 'kdump':
+                compression = status['compression']
+                level = status['compression_level']
+                print(f"Default compression: {compression} (level {level})")
         return 0
 
     def _handle_session_snapshot(self, args: List[str]) -> int:
@@ -225,6 +235,83 @@ class REPL:
             print(f"Failed to read memory at {hex(address)}: {e}")
             return 1
 
+    def _handle_session_config(self, args: List[str]) -> int:
+        """Handle %session config command."""
+        trace_mgr = get_trace_manager()
+
+        if not args:
+            # Show current config
+            print("Current session configuration:")
+            print(f"  Format: {trace_mgr.output_format}")
+            if trace_mgr.output_format == 'kdump':
+                print(f"  Compression: {trace_mgr.compression}")
+                print(f"  Compression level: {trace_mgr.compression_level}")
+            else:
+                print(
+                    "  Compression: n/a (ELF format does not use compression)")
+            print()
+            print("Usage: %session config <option> <value>")
+            print("Options:")
+            print("  format <elf|kdump>        - Set output format")
+            print("  compression <type>        - Set compression (kdump only)")
+            print(
+                "                              Types: none, zlib, lzo, snappy, zstd"
+            )
+            print(
+                "  compression-level <1-9>   - Set compression level (kdump only)"
+            )
+            return 0
+
+        option = args[0].lower()
+
+        if option == 'format':
+            if len(args) < 2:
+                print("Usage: %session config format <elf|kdump>")
+                return 2
+            try:
+                trace_mgr.set_output_format(args[1])
+                print(f"Output format set to: {trace_mgr.output_format}")
+                if trace_mgr.output_format == 'kdump':
+                    print(f"  Compression: {trace_mgr.compression}")
+                return 0
+            except ValueError as e:
+                print(f"Error: {e}")
+                return 1
+
+        if option == 'compression':
+            if len(args) < 2:
+                print(
+                    "Usage: %session config compression <none|zlib|lzo|snappy|zstd>"
+                )
+                return 2
+            try:
+                trace_mgr.set_compression(args[1])
+                print(f"Compression set to: {trace_mgr.compression}")
+                if trace_mgr.output_format != 'kdump':
+                    print("Note: Compression only applies to kdump format")
+                return 0
+            except ValueError as e:
+                print(f"Error: {e}")
+                return 1
+
+        if option in ('compression-level', 'level'):
+            if len(args) < 2:
+                print("Usage: %session config compression-level <1-9>")
+                return 2
+            try:
+                level = int(args[1])
+                trace_mgr.set_compression(trace_mgr.compression, level)
+                print(
+                    f"Compression level set to: {trace_mgr.compression_level}")
+                return 0
+            except ValueError as e:
+                print(f"Error: {e}")
+                return 1
+
+        print(f"Unknown config option: {option}")
+        print("Options: format, compression, compression-level")
+        return 1
+
     # pylint: disable=too-many-return-statements
     def eval_session_cmd(self, input_: str) -> int:
         """
@@ -234,6 +321,7 @@ class REPL:
         - %session record <file> - Start recording (saves as .vmcore.recorded)
         - %session stop - Stop recording and save
         - %session status - Show recording status
+        - %session config [option] [value] - Configure format/compression
         - %session snapshot <var> [--depth N] - Capture object graph
         - %session record-memory <addr> <size> - Capture memory region
         - %session load <file> - Load a recorded session
@@ -248,7 +336,9 @@ class REPL:
             parts = shlex.split(input_)
             if not parts:
                 print("Usage: %session <command> [args]")
-                print("Commands: record, stop, status, snapshot, record-memory, load")
+                print(
+                    "Commands: record, stop, status, config, snapshot, record-memory, load"
+                )
                 return 2
 
             if parts[0] != 'session':
@@ -258,7 +348,9 @@ class REPL:
 
             if len(parts) < 2:
                 print("Usage: %session <command> [args]")
-                print("Commands: record, stop, status, snapshot, record-memory, load")
+                print(
+                    "Commands: record, stop, status, config, snapshot, record-memory, load"
+                )
                 return 2
 
             subcmd = parts[1]
@@ -270,6 +362,8 @@ class REPL:
                 return self._handle_session_stop()
             if subcmd == 'status':
                 return self._handle_session_status()
+            if subcmd == 'config':
+                return self._handle_session_config(args)
             if subcmd == 'snapshot':
                 return self._handle_session_snapshot(args)
             if subcmd == 'record-memory':
@@ -278,7 +372,9 @@ class REPL:
                 return self._handle_session_load(args)
 
             print(f"Unknown session command: {subcmd}")
-            print("Commands: record, stop, status, snapshot, record-memory, load")
+            print(
+                "Commands: record, stop, status, config, snapshot, record-memory, load"
+            )
             return 1
 
         except RuntimeError as e:

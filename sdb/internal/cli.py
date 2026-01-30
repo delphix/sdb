@@ -30,7 +30,7 @@ import drgn
 import sdb
 from sdb.internal.repl import REPL
 from sdb.mdb_compat import set_mdb_compat_enabled
-from sdb.session import get_trace_manager, extract_sdb_notes, VMCORE_EXTENSION
+from sdb.session import get_trace_manager, extract_sdb_notes
 
 try:
     from sdb._version import version, commit_id

@@ -24,7 +24,6 @@ from drgn.helpers.linux.pid import for_each_task
 from drgn.helpers.linux.mm import cmdline
 
 import sdb
-from sdb.session import get_trace_manager, is_replay_mode
 from sdb.commands.internal.table import Table
 from sdb.commands.linux.stacks import KernelStacks
 from sdb.error import SymbolNotFoundError
@@ -349,12 +348,7 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
         # return threads that have the requested frame number
         for thread in objs:
             try:
-                if is_replay_mode():
-                    frames = _get_replay_frames(thread)
-                    if self.frame_id >= len(frames):
-                        continue
-                else:
-                    _frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
+                _frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
             except IndexError:
                 continue
             yield thread
@@ -365,13 +359,7 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
         objs: Iterable[drgn.Object]) -> None:
         for thread in objs:
             try:
-                if is_replay_mode():
-                    frames = _get_replay_frames(thread)
-                    if self.frame_id >= len(frames):
-                        raise IndexError
-                    frame = frames[self.frame_id]
-                else:
-                    frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
+                frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
                 if self.args.verbose:
                     print(frame)
                 else:
@@ -448,13 +436,7 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
         # return all locals or variables requested
         for thread in objs:
             try:
-                if is_replay_mode():
-                    frames = _get_replay_frames(thread)
-                    if frame_id >= len(frames):
-                        continue
-                    frame = frames[frame_id]
-                else:
-                    frame = sdb.get_prog().stack_trace(thread)[frame_id]
+                frame = sdb.get_prog().stack_trace(thread)[frame_id]
                 if self.args.variables:
                     for variable in self.args.variables:
                         try:
@@ -477,13 +459,10 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:  # pylint: disable=too-many-branches
         frame_id = sdb.get_frame()
         for stack in objs:
-            if is_replay_mode():
-                frames = _get_replay_frames(stack)
-                if frame_id >= len(frames):
-                    continue
-                frame = frames[frame_id]
-            else:
+            try:
                 frame = sdb.get_prog().stack_trace(stack)[frame_id]
+            except IndexError:
+                continue
             if self.args.variables:
                 for variable in self.args.variables:
                     try:
@@ -568,13 +547,10 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
             self.pretty_print(objs)
             return None
         for stack in objs:
-            if is_replay_mode():
-                frames = _get_replay_frames(stack)
-                if frame_id >= len(frames):
-                    continue
-                frame = frames[frame_id]
-            else:
+            try:
                 frame = sdb.get_prog().stack_trace(stack)[frame_id]
+            except IndexError:
+                continue
             if self.args.registers:
                 for register in self.args.registers:
                     try:
@@ -593,13 +569,7 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
         frame_id = sdb.get_frame()
         for stack in objs:
             try:
-                if is_replay_mode():
-                    frames = _get_replay_frames(stack)
-                    if frame_id >= len(frames):
-                        raise IndexError
-                    frame = frames[frame_id]
-                else:
-                    frame = sdb.get_prog().stack_trace(stack)[frame_id]
+                frame = sdb.get_prog().stack_trace(stack)[frame_id]
             except IndexError as err:
                 raise sdb.CommandError(
                     self.name,
@@ -618,9 +588,6 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
                         raise SymbolNotFoundError(self.name, register) from err
                 continue
             registers = frame.registers()
-            if not registers and is_replay_mode():
-                print("registers unavailable in replay")
-                continue
             for register, value in registers.items():
                 if self.args.hex:
                     value = hex(value)
@@ -628,12 +595,3 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
 
     def no_input(self) -> Iterable[drgn.Object]:
         yield sdb.get_thread()
-
-
-def _get_replay_frames(thread: drgn.Object) -> List[drgn.StackFrame]:
-    trace_mgr = get_trace_manager()
-    task_addr = int(thread)
-    for rec in trace_mgr.threads.values():
-        if rec.task_addr == task_addr:
-            return list(sdb.get_prog().stack_trace_from_pcs(rec.pcs))
-    return []

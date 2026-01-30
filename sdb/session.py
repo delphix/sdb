@@ -32,7 +32,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import drgn
 from drgn import TypeKind
-from kdumpling import KdumpBuilder
+from kdumpling import KdumpBuilder, OutputFormat, CompressionType
 
 # Fat read alignment (256 bytes as per design decision)
 FAT_READ_ALIGNMENT = 256
@@ -43,6 +43,26 @@ SDB_NOTE_SESSION = 259
 
 # File extension for recorded vmcores
 VMCORE_EXTENSION = '.vmcore.recorded'
+
+# Valid format options
+VALID_FORMATS = ('elf', 'kdump')
+
+# Valid compression options (for kdump format)
+VALID_COMPRESSIONS = ('none', 'zlib', 'lzo', 'snappy', 'zstd')
+
+# Mapping from string names to kdumpling enums
+FORMAT_MAP = {
+    'elf': OutputFormat.ELF,
+    'kdump': OutputFormat.KDUMP_COMPRESSED,
+}
+
+COMPRESSION_MAP = {
+    'none': CompressionType.NONE,
+    'zlib': CompressionType.ZLIB,
+    'lzo': CompressionType.LZO,
+    'snappy': CompressionType.SNAPPY,
+    'zstd': CompressionType.ZSTD,
+}
 
 
 @dataclass
@@ -144,8 +164,10 @@ class TraceManager:
         # Metadata
         self.metadata: Dict[str, Any] = {}
 
-        # Compression settings (can be set before stop_recording)
-        self.compression: Optional[str] = None  # None = default, or 'none', 'zstd', etc.
+        # Output format settings (can be set before stop_recording)
+        self.output_format: str = 'elf'  # 'elf' or 'kdump'
+        self.compression: str = 'zlib'  # For kdump: 'none', 'zlib', 'lzo', 'snappy', 'zstd'
+        self.compression_level: int = 6  # 1-9, only used for kdump format
 
     def start_recording(self, prog: drgn.Program, output_path: str) -> None:
         """
@@ -254,11 +276,9 @@ class TraceManager:
 
         # Add memory segments
         for vaddr, data in self.memory.get_segments():
-            builder.add_memory_segment(
-                phys_addr=vaddr,
-                data=data,
-                virt_addr=vaddr
-            )
+            builder.add_memory_segment(phys_addr=vaddr,
+                                       data=data,
+                                       virt_addr=vaddr)
 
         # Add SDB session metadata as custom note
         session_metadata = {
@@ -269,8 +289,15 @@ class TraceManager:
         builder.add_custom_note("SDB", SDB_NOTE_SESSION,
                                 json.dumps(session_metadata).encode())
 
-        # Write the vmcore
-        builder.write(path)
+        # Write the vmcore with configured format and compression
+        output_fmt = FORMAT_MAP.get(self.output_format, OutputFormat.ELF)
+        compression = COMPRESSION_MAP.get(self.compression,
+                                          CompressionType.ZLIB)
+
+        builder.write(path,
+                      format=output_fmt,
+                      compression=compression,
+                      compression_level=self.compression_level)
 
     def _install_read_hook(self, prog: drgn.Program) -> None:
         """
@@ -393,14 +420,59 @@ class TraceManager:
                 except (drgn.FaultError, ValueError, TypeError):
                     pass
 
+    def set_output_format(self, fmt: str) -> None:
+        """
+        Set the output format for the recorded vmcore.
+
+        Args:
+            fmt: 'elf' for standard ELF vmcore, 'kdump' for kdump compressed format
+        """
+        fmt = fmt.lower()
+        if fmt not in VALID_FORMATS:
+            raise ValueError(
+                f"Invalid format: {fmt}. Valid formats: {VALID_FORMATS}")
+        self.output_format = fmt
+
+    def set_compression(self, compression: str, level: int = 6) -> None:
+        """
+        Set compression for kdump format.
+
+        Args:
+            compression: 'none', 'zlib', 'lzo', 'snappy', or 'zstd'
+            level: Compression level 1-9 (default 6)
+
+        Note: Compression is only used when output_format is 'kdump'.
+              ELF format does not support compression.
+        """
+        compression = compression.lower()
+        if compression not in VALID_COMPRESSIONS:
+            raise ValueError(f"Invalid compression: {compression}. "
+                             f"Valid options: {VALID_COMPRESSIONS}")
+        if not 1 <= level <= 9:
+            raise ValueError(f"Compression level must be 1-9, got {level}")
+        self.compression = compression
+        self.compression_level = level
+
     def get_status(self) -> Dict[str, Any]:
         """Get current session status."""
         return {
-            'is_recording': self.is_recording,
-            'is_replay': self.is_replay,
-            'output_path': self.output_path,
-            'memory_segments': self.memory.get_segment_count(),
-            'memory_size': self.memory.get_total_size(),
+            'is_recording':
+                self.is_recording,
+            'is_replay':
+                self.is_replay,
+            'output_path':
+                self.output_path,
+            'memory_segments':
+                self.memory.get_segment_count(),
+            'memory_size':
+                self.memory.get_total_size(),
+            'output_format':
+                self.output_format,
+            'compression':
+                self.compression if self.output_format == 'kdump' else 'n/a',
+            'compression_level':
+                self.compression_level
+                if self.output_format == 'kdump' else 'n/a',
         }
 
 
@@ -418,14 +490,17 @@ def extract_sdb_notes(vmcore_path: str) -> Optional[Dict[str, Any]]:
         from elftools.elf.elffile import ELFFile
 
         with open(vmcore_path, 'rb') as f:
-            elf = ELFFile(f)
-            for segment in elf.iter_segments():
+            elf = ELFFile(f)  # type: ignore[no-untyped-call]
+            for segment in elf.iter_segments():  # type: ignore[no-untyped-call]
                 if segment['p_type'] == 'PT_NOTE':
                     for note in segment.iter_notes():
-                        if note['n_name'] == 'SDB' and note['n_type'] == SDB_NOTE_SESSION:
+                        if note['n_name'] == 'SDB' and note[
+                                'n_type'] == SDB_NOTE_SESSION:
                             data = note['n_desc']
                             if isinstance(data, bytes):
-                                return json.loads(data.decode('utf-8'))
+                                result: Dict[str, Any] = json.loads(
+                                    data.decode('utf-8'))
+                                return result
     except Exception:
         pass
     return None

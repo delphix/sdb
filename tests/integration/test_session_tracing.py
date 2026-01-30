@@ -32,7 +32,6 @@ import pytest
 import drgn
 
 import sdb
-from sdb.internal.repl import REPL
 from sdb.session import (
     get_trace_manager,
     reset_trace_manager,
@@ -486,8 +485,8 @@ class TestRecordReplayEndToEnd:
             init_task = sdb_target.get_object("init_task")
             addr = int(init_task.address_of_())
 
-            # Read memory during live mode
-            live_memory = rdump.program.read(addr, 256)
+            # Read memory during live mode (forces cache load)
+            _ = rdump.program.read(addr, 256)
 
             # Record the session
             trace_mgr.start_recording(rdump.program,

@@ -182,10 +182,13 @@ class TestTraceManager:
     def test_compression_setting(self) -> None:
         """Test compression setting can be configured."""
         mgr = TraceManager()
-        assert mgr.compression is None
+        # Default compression is zlib
+        assert mgr.compression == 'zlib'
+        assert mgr.compression_level == 6
 
-        mgr.compression = 'zstd'
+        mgr.set_compression('zstd', level=3)
         assert mgr.compression == 'zstd'
+        assert mgr.compression_level == 3
 
     def test_cannot_start_recording_twice(self) -> None:
         """Test that starting recording twice raises error."""
@@ -197,22 +200,23 @@ class TestTraceManager:
         with pytest.raises(RuntimeError, match="Recording already in progress"):
             # We can't easily test this without a real drgn.Program
             # but we can verify the flag check by setting it manually
-            mgr.start_recording(None, "test.vmcore")  # type: ignore
+            mgr.start_recording(None, "test.vmcore")
 
     def test_cannot_record_in_replay_mode(self) -> None:
         """Test that recording in replay mode raises error."""
         mgr = TraceManager()
         mgr.is_replay = True
 
-        with pytest.raises(RuntimeError, match="Cannot record while in replay mode"):
-            mgr.start_recording(None, "test.vmcore")  # type: ignore
+        with pytest.raises(RuntimeError,
+                           match="Cannot record while in replay mode"):
+            mgr.start_recording(None, "test.vmcore")
 
     def test_stop_recording_without_start(self) -> None:
         """Test stopping recording without starting raises error."""
         mgr = TraceManager()
 
         with pytest.raises(RuntimeError, match="No recording in progress"):
-            mgr.stop_recording(None)  # type: ignore
+            mgr.stop_recording(None)
 
     def test_trace_read_without_recording(self) -> None:
         """Test trace_read without recording raises error."""
@@ -225,7 +229,7 @@ class TestTraceManager:
         """Test capture_object without recording is a no-op."""
         mgr = TraceManager()
         # Should not raise, just silently return
-        mgr.capture_object(None, depth=1)  # type: ignore
+        mgr.capture_object(None, depth=1)
 
 
 class TestFatReadAlignment:
