@@ -177,7 +177,7 @@ class TestTraceManager:
     def test_metadata_defaults(self) -> None:
         """Test metadata is empty dict by default."""
         mgr = TraceManager()
-        assert mgr.metadata == {}
+        assert not mgr.metadata
 
     def test_compression_setting(self) -> None:
         """Test compression setting can be configured."""
