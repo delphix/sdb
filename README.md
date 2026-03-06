@@ -9,6 +9,7 @@
 <p align="center">
     <a href="https://github.com/sdimitro/sdb/actions/workflows/main.yml"><img src="https://github.com/sdimitro/sdb/actions/workflows/main.yml/badge.svg" alt="CI"></a>
     <a href="https://codecov.io/gh/sdimitro/sdb"><img src="https://codecov.io/gh/sdimitro/sdb/graph/badge.svg" alt="Codecov"></a>
+    <a href="https://sdb-debugger.readthedocs.io/"><img src="https://readthedocs.org/projects/sdb-debugger/badge/?version=latest" alt="Documentation"></a>
     <a href="https://pypi.org/project/sdb-debugger/"><img src="https://img.shields.io/pypi/v/sdb-debugger" alt="PyPI"></a>
     <a href="https://pypi.org/project/sdb-debugger/"><img src="https://img.shields.io/pypi/pyversions/sdb-debugger" alt="Python Versions"></a>
     <a href="https://github.com/sdimitro/sdb/blob/master/LICENSE"><img src="https://img.shields.io/github/license/sdimitro/sdb" alt="License"></a>
