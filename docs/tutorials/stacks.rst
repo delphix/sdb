@@ -6,11 +6,6 @@ commands when debugging Linux kernels.  It prints aggregated stack traces for
 kernel threads, making it easy to spot patterns, find blocked threads, and
 diagnose hangs.
 
-.. contents:: In this tutorial
-   :local:
-   :depth: 2
-
-
 Basic usage
 -----------
 

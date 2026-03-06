@@ -4,11 +4,6 @@ Public API reference
 This page documents the public Python API exported by the ``sdb`` package.
 Everything listed here is part of ``sdb.__all__`` and is considered stable.
 
-.. contents:: On this page
-   :local:
-   :depth: 2
-
-
 Entry point
 -----------
 

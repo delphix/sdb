@@ -7,11 +7,6 @@ without the original crash dump, live kernel, or even root access -- making
 it easy to share debugging context with colleagues or revisit a session
 offline.
 
-.. contents:: In this tutorial
-   :local:
-   :depth: 2
-
-
 How it works
 ------------
 

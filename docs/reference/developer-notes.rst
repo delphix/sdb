@@ -4,11 +4,6 @@ Developer notes
 This page covers the internals you need to know when writing sdb commands
 or embedding sdb in your own tools.
 
-.. contents:: On this page
-   :local:
-   :depth: 2
-
-
 Writing a new command
 ---------------------
 

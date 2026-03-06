@@ -4,11 +4,6 @@ Command reference
 This page lists every built-in sdb command, grouped by domain.  Use
 ``help <command>`` inside the REPL for full details and examples.
 
-.. contents:: On this page
-   :local:
-   :depth: 2
-
-
 Core commands
 -------------
 

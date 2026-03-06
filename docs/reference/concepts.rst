@@ -5,11 +5,6 @@ This page explains the key abstractions that make sdb tick.  Understanding
 these concepts will help you read sdb output, compose pipelines effectively,
 and write your own commands.
 
-.. contents:: On this page
-   :local:
-   :depth: 2
-
-
 The pipeline
 ------------
 

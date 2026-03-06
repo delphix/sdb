@@ -8,11 +8,6 @@ kernel introspection tool for NVIDIA BlueField DPUs that builds a
 ``drgn.Program`` backed by TCP (or RDMA) memory reads and then drops the
 user into sdb.
 
-.. contents:: In this tutorial
-   :local:
-   :depth: 2
-
-
 The ``sdb.start()`` entry point
 --------------------------------
 

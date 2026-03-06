@@ -5,11 +5,6 @@ sdb is designed to be extended.  You can write your own commands as Python
 modules, load them at startup or at runtime, and they integrate seamlessly
 with the pipeline, tab completion, and ``help`` system.
 
-.. contents:: In this tutorial
-   :local:
-   :depth: 2
-
-
 Anatomy of a command
 --------------------
 
