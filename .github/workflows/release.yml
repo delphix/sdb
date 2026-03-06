@@ -45,6 +45,7 @@ jobs:
           python-version: '3.10'
       - run: ./.github/scripts/install-drgn.sh
       - run: python3 -m pip install pylint pytest ruff yapf
+      - run: python3 -m pip install .
       - run: pylint -d duplicate-code -d invalid-name -d missing-docstring -d import-outside-toplevel -d too-many-branches -d missing-module-docstring -d missing-function-docstring sdb
       - run: pylint -d duplicate-code -d invalid-name -d missing-docstring -d import-outside-toplevel -d too-many-branches -d missing-module-docstring -d missing-function-docstring tests
       - run: ruff check sdb tests
@@ -62,6 +63,7 @@ jobs:
           python-version: '3.10'
       - run: ./.github/scripts/install-drgn.sh
       - run: python3 -m pip install mypy pytest
+      - run: python3 -m pip install .
       - run: python3 -m mypy --strict --show-error-codes -p sdb
       - run: python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests
 
@@ -79,6 +81,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: python3 -m pip install pytest pytest-cov
       - run: ./.github/scripts/install-drgn.sh
+      - run: python3 -m pip install .
       - run: pytest -v --cov sdb --cov-report xml tests/unit
 
   test-integration:
@@ -98,6 +101,7 @@ jobs:
       - run: python3 -m pip install pytest pytest-cov
       - run: ./.github/scripts/install-libkdumpfile.sh
       - run: ./.github/scripts/install-drgn.sh
+      - run: python3 -m pip install .
       - run: ./.github/scripts/download-dumps-from-gdrive.sh
       - run: ./.github/scripts/extract-dump.sh dump.201912060006.tar.lzma
       - run: ./.github/scripts/extract-dump.sh dump.202303131823.tar.gz
