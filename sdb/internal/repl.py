@@ -23,6 +23,7 @@ from typing import Callable, List, Optional, Tuple
 
 import drgn
 from sdb.error import Error, CommandArgumentsError
+from sdb.loader import load_external_commands
 from sdb.pipeline import invoke
 from sdb.session import get_trace_manager
 
@@ -65,16 +66,19 @@ class REPL:
 
         return custom_complete
 
-    def __init__(self,
-                 target: drgn.Program,
-                 vocabulary: List[str],
-                 prompt: str = "sdb> ",
-                 closing: str = ""):
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+            self,
+            target: drgn.Program,
+            vocabulary: List[str],
+            prompt: str = "sdb> ",
+            closing: str = "",
+            pre_cmd_hook: Optional[Callable[[], None]] = None):
         self.prompt = prompt
         self.closing = closing
         self.vocabulary = vocabulary
         self.target = target
         self.histfile = ""
+        self.pre_cmd_hook = pre_cmd_hook
         readline.set_completer(REPL.__make_completer(vocabulary))
         readline.parse_and_bind("tab: complete")
 
@@ -95,6 +99,35 @@ class REPL:
             return
         readline.set_history_length(1000)
         atexit.register(readline.write_history_file, self.histfile)
+
+    def refresh_vocabulary(self) -> None:
+        """Rebuild the tab-completion vocabulary from registered commands."""
+        from sdb.command import get_registered_commands
+        self.vocabulary = list(get_registered_commands().keys())
+        readline.set_completer(REPL.__make_completer(self.vocabulary))
+
+    def _handle_load_commands(self, args: List[str]) -> int:
+        """Handle %load-commands <path> meta-command."""
+        if not args:
+            print("Usage: %load-commands <file-or-directory>")
+            return 2
+
+        from sdb.command import register_commands
+        path = args[0]
+        try:
+            new_names = load_external_commands(path)
+        except (FileNotFoundError, ImportError, ValueError) as e:
+            print(f"Error loading commands: {e}")
+            return 1
+
+        register_commands()
+        self.refresh_vocabulary()
+
+        if new_names:
+            print(f"Loaded {len(new_names)} command(s): {', '.join(new_names)}")
+        else:
+            print(f"No new commands found in {path}")
+        return 0
 
     def _parse_session_cmd(self, input_: str) -> Tuple[str, List[str]]:
         """Parse session command input into subcmd and args."""
@@ -325,6 +358,7 @@ class REPL:
         - %session snapshot <var> [--depth N] - Capture object graph
         - %session record-memory <addr> <size> - Capture memory region
         - %session load <file> - Load a recorded session
+        - %load-commands <path> - Load external sdb commands
 
         Returns:
             0 for success
@@ -341,9 +375,12 @@ class REPL:
                 )
                 return 2
 
+            if parts[0] == 'load-commands':
+                return self._handle_load_commands(parts[1:])
+
             if parts[0] != 'session':
                 print(f"Unknown meta-command: %{parts[0]}")
-                print("Available meta-commands: %session")
+                print("Available meta-commands: %session, %load-commands")
                 return 1
 
             if len(parts) < 2:
@@ -398,6 +435,9 @@ class REPL:
         # Check for session/meta commands (starting with %)
         if input_.startswith('%'):
             return self.eval_session_cmd(input_[1:])
+
+        if self.pre_cmd_hook is not None:
+            self.pre_cmd_hook()
 
         # Check if recording is active
         trace_mgr = get_trace_manager()

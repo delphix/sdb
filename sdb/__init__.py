@@ -22,6 +22,10 @@ can be used to implement commands for SDB and alternative
 CLI/consumer implementations.
 """
 
+from typing import Callable, List, Optional
+
+import drgn
+
 # Version is set by setuptools_scm from git tags
 try:
     from sdb._version import version as __version__
@@ -82,6 +86,7 @@ from sdb.command import (
     get_registered_commands,
     register_commands,
 )
+from sdb.loader import load_external_commands
 from sdb.pipeline import execute_pipeline, get_first_type, invoke
 
 __all__ = [
@@ -99,12 +104,14 @@ __all__ = [
     'InputHandler',
     'Kernel',
     'Library',
+    'load_external_commands',
     'Locator',
     'Module',
     'ParserError',
     'PrettyPrinter',
     'Runtime',
     'SingleInputCommand',
+    'start',
     'SymbolNotFoundError',
     'Userland',
     'Walk',
@@ -138,3 +145,88 @@ __all__ = [
 # above, so we must be sure to import all of the commands last.
 #
 import sdb.commands  # noqa: F401
+
+
+def start(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    prog: drgn.Program,
+    command_paths: Optional[List[str]] = None,
+    prompt: str = "sdb> ",
+    pre_cmd_hook: Optional[Callable[[], None]] = None,
+    eval_cmd: Optional[str] = None,
+    history_file: str = "~/.sdb_history",
+) -> None:
+    """
+    High-level entry point for using sdb as a library.
+
+    This function accepts a pre-configured ``drgn.Program`` (e.g. one
+    created by GhostWire with TCP-backed memory segments) and starts
+    the sdb REPL.  It is the primary integration point for external
+    tools that want to drive sdb programmatically.
+
+    Args:
+        prog: A fully-initialised drgn.Program.
+        command_paths: Optional list of filesystem paths (files or
+            directories) from which to load additional sdb commands.
+        prompt: REPL prompt string (or an object whose ``__str__``
+            is called each time the prompt is displayed).
+        pre_cmd_hook: Optional callable invoked before every command
+            evaluation (e.g. to bump a transport cache generation).
+        eval_cmd: If provided, evaluate this single command and return
+            instead of starting the interactive REPL.
+        history_file: Path used for readline history persistence.
+    """
+    _start_impl(prog, command_paths, prompt, pre_cmd_hook, eval_cmd,
+                history_file)
+
+
+def _start_impl(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+    prog: drgn.Program,
+    command_paths: Optional[List[str]],
+    prompt: str,
+    pre_cmd_hook: Optional[Callable[[], None]],
+    eval_cmd: Optional[str],
+    history_file: str,
+) -> None:
+    import os
+    import sys
+
+    import sdb.target as sdb_target
+    from sdb.internal.repl import REPL
+    from sdb.mdb_compat import set_mdb_compat_enabled
+
+    set_mdb_compat_enabled(True)
+
+    sdb_target.set_prog(prog)
+
+    try:
+        sdb_target.set_thread(prog.crashed_thread().object)
+    except (ValueError, StopIteration):
+        try:
+            sdb_target.set_thread(next(prog.threads()).object)
+        except StopIteration:
+            sdb_target.set_thread(0)
+    sdb_target.set_frame(-1)
+
+    if command_paths:
+        for path in command_paths:
+            load_external_commands(path)
+
+    env_paths = os.environ.get("SDB_COMMANDS_PATH", "")
+    if env_paths:
+        for p in env_paths.split(":"):
+            if p.strip():
+                load_external_commands(p.strip())
+
+    register_commands()
+
+    repl = REPL(prog,
+                list(get_registered_commands().keys()),
+                prompt=prompt,
+                pre_cmd_hook=pre_cmd_hook)
+    repl.enable_history(os.getenv("SDB_HISTORY_FILE", history_file))
+
+    if eval_cmd:
+        exit_code = repl.eval_cmd(eval_cmd)
+        sys.exit(exit_code)
+    else:
+        repl.start_session()

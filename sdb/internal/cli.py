@@ -118,6 +118,14 @@ def parse_arguments() -> argparse.Namespace:
         action="store_false",
         help="disable mdb compatibility syntax (symbol::cmd)",
     )
+    parser.add_argument(
+        "--load-commands",
+        metavar="PATH",
+        default=[],
+        action="append",
+        help="load external sdb commands from PATH (file or directory);"
+        " this option may be given more than once",
+    )
 
     # Session recording and replay
     session_group = parser.add_argument_group("session recording")
@@ -322,6 +330,28 @@ def setup_replay_target(replay_path: str, symbol_search: List[str],
     return prog
 
 
+def _load_external_command_paths(args: argparse.Namespace, quiet: bool) -> None:
+    """Load external commands from --load-commands flags and SDB_COMMANDS_PATH."""
+    from sdb.loader import load_external_commands
+
+    paths = list(args.load_commands)
+
+    env_paths = os.environ.get("SDB_COMMANDS_PATH", "")
+    if env_paths:
+        for p in env_paths.split(":"):
+            if p.strip():
+                paths.append(p.strip())
+
+    for path in paths:
+        try:
+            new_names = load_external_commands(path)
+            if not quiet and new_names:
+                print(f"sdb: loaded {len(new_names)} command(s) from {path}",
+                      file=sys.stderr)
+        except (FileNotFoundError, ImportError, ValueError) as e:
+            print(f"sdb: warning: {e}", file=sys.stderr)
+
+
 def _run_replay_mode(args: argparse.Namespace) -> None:
     """Handle replay mode execution."""
     try:
@@ -342,6 +372,7 @@ def _run_replay_mode(args: argparse.Namespace) -> None:
             sdb.target.set_thread(0)
 
     sdb.target.set_frame(-1)
+    _load_external_command_paths(args, args.quiet)
     sdb.register_commands()
 
     if not args.quiet:
@@ -369,6 +400,7 @@ def _run_normal_mode(args: argparse.Namespace) -> None:
     except ValueError:
         sdb.target.set_thread(next(prog.threads()).object)
     sdb.target.set_frame(-1)
+    _load_external_command_paths(args, args.quiet)
     sdb.register_commands()
 
     # Handle recording mode
