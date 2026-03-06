@@ -12,6 +12,5 @@ class KernelOnly(sdb.Command):
     names = ["kernel_only_ext"]
     load_on = [sdb.Kernel()]
 
-    def _call(self,
-              objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         return objs

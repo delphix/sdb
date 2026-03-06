@@ -12,6 +12,5 @@ class Hello(sdb.Command):
     names = ["hello_ext"]
     load_on = [sdb.All()]
 
-    def _call(self,
-              objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         return objs
