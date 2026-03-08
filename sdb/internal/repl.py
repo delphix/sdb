@@ -15,17 +15,24 @@
 #
 
 import atexit
+import json
 import os
 import readline
 import shlex
+import sys
 import traceback
-from typing import Callable, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import drgn
 from sdb.error import Error, CommandArgumentsError
 from sdb.loader import load_external_commands
 from sdb.pipeline import invoke
 from sdb.session import get_trace_manager
+
+# Duplicated from sdb to avoid circular import (sdb -> sdb.internal.repl).
+EXIT_SUCCESS = 0
+EXIT_ERROR = 1
+EXIT_BAD_ARGS = 2
 
 
 class REPL:
@@ -72,13 +79,15 @@ class REPL:
             vocabulary: List[str],
             prompt: str = "sdb> ",
             closing: str = "",
-            pre_cmd_hook: Optional[Callable[[], None]] = None):
+            pre_cmd_hook: Optional[Callable[[], None]] = None,
+            json_mode: bool = False):
         self.prompt = prompt
         self.closing = closing
         self.vocabulary = vocabulary
         self.target = target
         self.histfile = ""
         self.pre_cmd_hook = pre_cmd_hook
+        self.json_mode = json_mode
         readline.set_completer(REPL.__make_completer(vocabulary))
         readline.parse_and_bind("tab: complete")
 
@@ -110,7 +119,7 @@ class REPL:
         """Handle %load-commands <path> meta-command."""
         if not args:
             print("Usage: %load-commands <file-or-directory>")
-            return 2
+            return EXIT_BAD_ARGS
 
         from sdb.command import register_commands
         path = args[0]
@@ -118,7 +127,7 @@ class REPL:
             new_names = load_external_commands(path)
         except (FileNotFoundError, ImportError, ValueError) as e:
             print(f"Error loading commands: {e}")
-            return 1
+            return EXIT_ERROR
 
         register_commands()
         self.refresh_vocabulary()
@@ -127,7 +136,7 @@ class REPL:
             print(f"Loaded {len(new_names)} command(s): {', '.join(new_names)}")
         else:
             print(f"No new commands found in {path}")
-        return 0
+        return EXIT_SUCCESS
 
     def _parse_session_cmd(self, input_: str) -> Tuple[str, List[str]]:
         """Parse session command input into subcmd and args."""
@@ -143,12 +152,12 @@ class REPL:
         if not args:
             print("Usage: %session record <file>")
             print("       Output will be saved as <file>.vmcore.recorded")
-            return 2
+            return EXIT_BAD_ARGS
         output_path = args[0]
         trace_mgr = get_trace_manager()
         trace_mgr.start_recording(self.target, output_path)
         print(f"Recording started. Output: {trace_mgr.output_path}")
-        return 0
+        return EXIT_SUCCESS
 
     def _handle_session_stop(self) -> int:
         """Handle %session stop command."""
@@ -159,7 +168,7 @@ class REPL:
         print(f"Saved to: {saved_path}")
         print(f"  Memory segments: {status['memory_segments']}")
         print(f"  Memory size: {status['memory_size']} bytes")
-        return 0
+        return EXIT_SUCCESS
 
     def _handle_session_status(self) -> int:
         """Handle %session status command."""
@@ -183,13 +192,13 @@ class REPL:
                 compression = status['compression']
                 level = status['compression_level']
                 print(f"Default compression: {compression} (level {level})")
-        return 0
+        return EXIT_SUCCESS
 
     def _handle_session_snapshot(self, args: List[str]) -> int:
         """Handle %session snapshot command."""
         if not args:
             print("Usage: %session snapshot <variable> [--depth N]")
-            return 2
+            return EXIT_BAD_ARGS
         var_name = args[0]
         depth = 1
         if len(args) >= 3 and args[1] == '--depth':
@@ -197,14 +206,14 @@ class REPL:
                 depth = int(args[2])
             except ValueError:
                 print(f"Invalid depth: {args[2]}")
-                return 2
+                return EXIT_BAD_ARGS
 
         trace_mgr = get_trace_manager()
         if not trace_mgr.is_recording:
             print(
                 "Error: No recording in progress. Use '%session record <file>' first."
             )
-            return 1
+            return EXIT_ERROR
 
         # Force read the variable to capture it
         try:
@@ -218,25 +227,25 @@ class REPL:
             print(f"  Memory size: {status['memory_size']} bytes")
         except (drgn.FaultError, ValueError, TypeError, LookupError) as e:
             print(f"Failed to snapshot {var_name}: {e}")
-            return 1
-        return 0
+            return EXIT_ERROR
+        return EXIT_SUCCESS
 
     def _handle_session_load(self, args: List[str]) -> int:
         """Handle %session load command."""
         if not args:
             print("Usage: %session load <file.vmcore.recorded>")
-            return 2
+            return EXIT_BAD_ARGS
         # Note: Loading is primarily done via CLI --replay
         print("Note: Use 'sdb --replay <file>' to load a recorded session")
         print("      The %session load command is for advanced use cases")
-        return 0
+        return EXIT_SUCCESS
 
     def _handle_session_record_memory(self, args: List[str]) -> int:
         """Handle %session record-memory command."""
         trace_mgr = get_trace_manager()
         if not trace_mgr.is_recording:
             print("Error: Not recording. Use '%session record <file>' first.")
-            return 1
+            return EXIT_ERROR
 
         # Parse arguments: <address> <size> [--physical]
         physical = '--physical' in args
@@ -245,7 +254,7 @@ class REPL:
 
         if len(args) < 2:
             print("Usage: %session record-memory <address> <size> [--physical]")
-            return 2
+            return EXIT_BAD_ARGS
 
         try:
             # Parse address (supports hex with 0x prefix)
@@ -253,22 +262,22 @@ class REPL:
             size = int(args[1], 0)
         except ValueError as e:
             print(f"Invalid address or size: {e}")
-            return 2
+            return EXIT_BAD_ARGS
 
         if size <= 0:
             print("Error: size must be positive")
-            return 2
+            return EXIT_BAD_ARGS
 
         try:
             trace_mgr.trace_read(address, size, physical)
             phys_str = " (physical)" if physical else ""
             print(f"Recorded {size} bytes at {hex(address)}{phys_str}")
-            return 0
+            return EXIT_SUCCESS
         except drgn.FaultError as e:
             print(f"Failed to read memory at {hex(address)}: {e}")
-            return 1
+            return EXIT_ERROR
 
-    def _handle_session_config(self, args: List[str]) -> int:  # pylint: disable=too-many-return-statements
+    def _handle_session_config(self, args: List[str]) -> int:  # pylint: disable=too-many-return-statements,too-many-branches
         """Handle %session config command."""
         trace_mgr = get_trace_manager()
 
@@ -293,59 +302,59 @@ class REPL:
             print(
                 "  compression-level <1-9>   - Set compression level (kdump only)"
             )
-            return 0
+            return EXIT_SUCCESS
 
         option = args[0].lower()
 
         if option == 'format':
             if len(args) < 2:
                 print("Usage: %session config format <elf|kdump>")
-                return 2
+                return EXIT_BAD_ARGS
             try:
                 trace_mgr.set_output_format(args[1])
                 print(f"Output format set to: {trace_mgr.output_format}")
                 if trace_mgr.output_format == 'kdump':
                     print(f"  Compression: {trace_mgr.compression}")
-                return 0
+                return EXIT_SUCCESS
             except ValueError as e:
                 print(f"Error: {e}")
-                return 1
+                return EXIT_ERROR
 
         if option == 'compression':
             if len(args) < 2:
                 print(
                     "Usage: %session config compression <none|zlib|lzo|snappy|zstd>"
                 )
-                return 2
+                return EXIT_BAD_ARGS
             try:
                 trace_mgr.set_compression(args[1])
                 print(f"Compression set to: {trace_mgr.compression}")
                 if trace_mgr.output_format != 'kdump':
                     print("Note: Compression only applies to kdump format")
-                return 0
+                return EXIT_SUCCESS
             except ValueError as e:
                 print(f"Error: {e}")
-                return 1
+                return EXIT_ERROR
 
         if option in ('compression-level', 'level'):
             if len(args) < 2:
                 print("Usage: %session config compression-level <1-9>")
-                return 2
+                return EXIT_BAD_ARGS
             try:
                 level = int(args[1])
                 trace_mgr.set_compression(trace_mgr.compression, level)
                 print(
                     f"Compression level set to: {trace_mgr.compression_level}")
-                return 0
+                return EXIT_SUCCESS
             except ValueError as e:
                 print(f"Error: {e}")
-                return 1
+                return EXIT_ERROR
 
         print(f"Unknown config option: {option}")
         print("Options: format, compression, compression-level")
-        return 1
+        return EXIT_ERROR
 
-    # pylint: disable=too-many-return-statements
+    # pylint: disable=too-many-return-statements,too-many-branches
     def eval_session_cmd(self, input_: str) -> int:
         """
         Evaluates a session command (commands starting with %).
@@ -373,7 +382,7 @@ class REPL:
                 print(
                     "Commands: record, stop, status, config, snapshot, record-memory, load"
                 )
-                return 2
+                return EXIT_BAD_ARGS
 
             if parts[0] == 'load-commands':
                 return self._handle_load_commands(parts[1:])
@@ -381,14 +390,14 @@ class REPL:
             if parts[0] != 'session':
                 print(f"Unknown meta-command: %{parts[0]}")
                 print("Available meta-commands: %session, %load-commands")
-                return 1
+                return EXIT_ERROR
 
             if len(parts) < 2:
                 print("Usage: %session <command> [args]")
                 print(
                     "Commands: record, stop, status, config, snapshot, record-memory, load"
                 )
-                return 2
+                return EXIT_BAD_ARGS
 
             subcmd = parts[1]
             args = parts[2:]
@@ -412,25 +421,91 @@ class REPL:
             print(
                 "Commands: record, stop, status, config, snapshot, record-memory, load"
             )
-            return 1
+            return EXIT_ERROR
 
         except RuntimeError as e:
             print(f"Session error: {e}")
-            return 1
+            return EXIT_ERROR
         except (ValueError, TypeError, OSError) as e:
             print(f"Session command failed: {e}")
-            return 1
+            return EXIT_ERROR
 
-    # pylint: disable=too-many-return-statements
+    @staticmethod
+    # pylint: disable=broad-exception-caught,too-many-branches,import-outside-toplevel
+    def _obj_to_json(obj: drgn.Object) -> Dict[str, Any]:
+        """Convert a drgn.Object to a JSON-serializable dict.
+
+        If the object's type has a registered PrettyPrinter with a custom
+        to_json() override, that method is used. Otherwise, the generic
+        drgn.Object serialization is used.
+        """
+        from sdb.command import PrettyPrinter
+        from sdb.target import type_canonical_name
+
+        # Check if there's a PrettyPrinter with a custom to_json() for this type.
+        try:
+            type_name = type_canonical_name(obj.type_)
+            if type_name in PrettyPrinter.all_printers:
+                printer_cls = PrettyPrinter.all_printers[type_name]
+                # Only use it if the subclass actually overrode to_json()
+                if printer_cls.to_json is not PrettyPrinter.to_json:
+                    custom = printer_cls().to_json(obj)
+                    if custom:
+                        return custom
+        except Exception:
+            pass
+
+        result: Dict[str, Any] = {}
+        result["type"] = obj.type_.type_name()
+
+        # Try to get the address
+        if obj.address_ is not None:
+            result["address"] = hex(obj.address_)
+
+        # Try to get a scalar value
+        try:
+            val = obj.value_()
+            if isinstance(val, int):
+                result["value"] = val
+            elif isinstance(val, float):
+                result["value"] = val
+            elif isinstance(val, bytes):
+                # Try to decode as string first (char arrays)
+                try:
+                    result["value"] = val.rstrip(b'\x00').decode(
+                        'utf-8', errors='replace')
+                except Exception:
+                    result["value"] = val.hex()
+            elif isinstance(val, dict):
+                # struct/union — keys are member names
+                json_members: Dict[str, Any] = {}
+                for k, v in val.items():
+                    if isinstance(v, int):
+                        json_members[k] = v
+                    else:
+                        json_members[k] = str(v)
+                result["value"] = json_members
+            else:
+                result["value"] = str(val)
+        except Exception:
+            # Fall back to format_() for complex types
+            try:
+                result["value"] = obj.format_(dereference=False)
+            except Exception:
+                result["value"] = str(obj)
+
+        return result
+
+    # pylint: disable=too-many-return-statements,too-many-statements,too-many-branches
     def eval_cmd(self, input_: str) -> int:
         """
         Evaluates the SDB command/pipeline passed as input_
         and prints the result.
 
         Returns:
-            0 for success
-            1 for error
-            2 for incorrect arguments passed
+            ``sdb.EXIT_SUCCESS`` (0) for success,
+            ``sdb.EXIT_ERROR`` (1) for a command error,
+            ``sdb.EXIT_BAD_ARGS`` (2) for incorrect arguments.
         """
         # Check for session/meta commands (starting with %)
         if input_.startswith('%'):
@@ -444,6 +519,8 @@ class REPL:
         is_tracing = trace_mgr.is_recording
 
         # pylint: disable=broad-except
+        json_results: Optional[List[Dict[str, Any]]] = ([] if self.json_mode
+                                                        else None)
         try:
             for obj in invoke([], input_):
                 # If recording, capture the object's memory
@@ -453,20 +530,33 @@ class REPL:
                     except Exception:
                         pass  # Don't let tracing errors break commands
 
-                try:
-                    print(obj.format_(dereference=False))
-                except AttributeError:
-                    print(obj)
-        except CommandArgumentsError:
+                if self.json_mode and json_results is not None:
+                    try:
+                        json_results.append(self._obj_to_json(obj))
+                    except Exception:
+                        json_results.append({"value": str(obj)})
+                else:
+                    try:
+                        print(obj.format_(dereference=False))
+                    except AttributeError:
+                        print(obj)
+        except CommandArgumentsError as err:
             #
             # We skip printing anything for this specific error
             # as argparse should have already printed a helpful
             # message to the REPL for us.
             #
-            return 2
+            if self.json_mode:
+                json.dump({"error": str(err)}, sys.stdout)
+                print()
+            return EXIT_BAD_ARGS
         except Error as err:
-            print(err.text)
-            return 1
+            if self.json_mode:
+                json.dump({"error": err.text}, sys.stdout)
+                print()
+            else:
+                print(err.text)
+            return EXIT_ERROR
         except KeyboardInterrupt:
             #
             # Interrupting commands half way through their execution
@@ -475,13 +565,13 @@ class REPL:
             # prompt.
             #
             print()
-            return 1
+            return EXIT_ERROR
         except BrokenPipeError:
             #
             # If a shell process (invoked by !) exits before reading all
             # of its input, that's OK.
             #
-            return 1
+            return EXIT_ERROR
         except Exception:
             #
             # Ideally it would be great if all commands had no issues and
@@ -512,8 +602,12 @@ class REPL:
             traceback.print_exc()
             print("----------------------------------------------------------")
             print("Link: https://github.com/delphix/sdb/issues/new")
-            return 1
-        return 0
+            return EXIT_ERROR
+
+        if self.json_mode and json_results is not None:
+            json.dump(json_results, sys.stdout, indent=2)
+            print()
+        return EXIT_SUCCESS
 
     def start_session(self) -> None:
         """

@@ -557,6 +557,16 @@ class PrettyPrinter(Command):
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         raise NotImplementedError
 
+    def to_json(self, obj: drgn.Object) -> Dict[str, Any]:  # pylint: disable=unused-argument
+        """
+        Serialize a single object to a JSON-friendly dict.
+
+        Override this in subclasses to control the --json output for
+        this PrettyPrinter's input type. The default returns an empty
+        dict, which tells the REPL to use generic drgn.Object serialization.
+        """
+        return {}
+
     def check_input_type(self,
                          objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         """

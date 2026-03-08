@@ -4,8 +4,126 @@ Public API reference
 This page documents the public Python API exported by the ``sdb`` package.
 Everything listed here is part of ``sdb.__all__`` and is considered stable.
 
-Entry point
------------
+Exit codes
+----------
+
+These constants represent the exit codes used by ``sdb -e`` and returned by
+``REPL.eval_cmd()``.  Agents and scripts can use them to detect failures
+without parsing output.
+
+.. data:: sdb.EXIT_SUCCESS
+
+   Value ``0``.  The command completed successfully.
+
+.. data:: sdb.EXIT_ERROR
+
+   Value ``1``.  A command-level error occurred (unknown command, invalid
+   input, runtime fault, etc.).
+
+.. data:: sdb.EXIT_BAD_ARGS
+
+   Value ``2``.  The arguments passed to a command were invalid (e.g.
+   ``head -n notanumber``).  Also used by ``argparse`` when the CLI flags
+   themselves are wrong.
+
+
+Programmatic API
+----------------
+
+These functions are the recommended way for scripts, notebooks, and AI agents
+to use sdb without an interactive REPL.
+
+.. function:: sdb.open_dump(object_file, core_file, symbol_search=None, command_paths=None, quiet=False)
+
+   Open a crash/core dump for programmatic analysis in one call.
+
+   This is a convenience wrapper that creates a ``drgn.Program``, loads the
+   core dump and debug info, and initialises the sdb runtime.  After calling
+   this function you can immediately use :func:`sdb.run` and
+   :func:`sdb.invoke`.
+
+   :param object_file: Path to the namelist (``vmlinux`` or userland binary).
+   :param core_file: Path to the crash dump or core dump file.
+   :param symbol_search: Optional list of additional paths to search for
+       debug info (``.ko``, ``.debug``, shared objects).
+   :param command_paths: Optional list of filesystem paths from which to
+       load additional sdb commands.
+   :param quiet: If ``True``, suppress warnings about missing debug info.
+   :returns: The initialised ``drgn.Program``.
+   :raises FileNotFoundError: If *object_file* or *core_file* does not exist.
+
+   Example:
+
+   .. code-block:: python
+
+      import sdb
+
+      prog = sdb.open_dump("vmlinux", "vmcore")
+      pools = sdb.run("spa | member spa_name")
+      for p in pools:
+          print(p.string_().decode())
+
+.. function:: sdb.connect(prog, command_paths=None)
+
+   Set up the sdb runtime for programmatic use without starting a REPL.
+
+   This is the recommended entry point for scripts, notebooks, and AI agents
+   that want to call :func:`sdb.run` or :func:`sdb.invoke` without an
+   interactive session.
+
+   :param prog: A fully initialised ``drgn.Program``.
+   :param command_paths: Optional list of filesystem paths (files or
+       directories) from which to load additional sdb commands.
+   :returns: The same *prog* that was passed in (for chaining convenience).
+
+   Example:
+
+   .. code-block:: python
+
+      import drgn, sdb
+
+      prog = drgn.Program()
+      prog.set_core_dump("vmcore")
+      prog.load_debug_info(["vmlinux"])
+
+      sdb.connect(prog)
+      for obj in sdb.run("spa | member spa_name"):
+          print(obj.string_().decode())
+
+.. function:: sdb.run(cmd, input_objs=None)
+
+   Execute an sdb pipeline and return the results as a Python list.
+
+   Unlike :func:`sdb.invoke` (which returns a lazy generator), ``run()``
+   eagerly evaluates the pipeline and returns a concrete list of
+   ``drgn.Object`` values.  The sdb runtime must be initialised first via
+   :func:`sdb.connect` or :func:`sdb.start`.
+
+   :param cmd: An sdb pipeline string, e.g. ``"spa | member spa_name"``.
+   :param input_objs: Optional iterable of ``drgn.Object`` to feed as
+       initial input.  Defaults to ``[]``.
+   :returns: A list of ``drgn.Object`` results.
+   :raises sdb.Error: If the pipeline encounters a command error.
+   :raises sdb.CommandNotFoundError: If a command is unknown.
+   :raises sdb.CommandArgumentsError: If arguments are invalid.
+
+   Example:
+
+   .. code-block:: python
+
+      import sdb
+
+      # After sdb.connect(prog):
+      tasks = sdb.run("threads")
+      print(f"Found {len(tasks)} threads")
+
+      names = sdb.run("threads | member comm")
+      for name in names:
+          print(name.string_().decode())
+
+
+Entry point (REPL)
+------------------
 
 .. function:: sdb.start(prog, command_paths=None, prompt="sdb> ", pre_cmd_hook=None, eval_cmd=None, history_file="~/.sdb_history")
 

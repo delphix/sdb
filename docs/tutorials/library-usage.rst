@@ -8,11 +8,106 @@ kernel introspection tool for NVIDIA BlueField DPUs that builds a
 ``drgn.Program`` backed by TCP (or RDMA) memory reads and then drops the
 user into sdb.
 
-The ``sdb.start()`` entry point
---------------------------------
 
-The simplest integration is to hand sdb a ``drgn.Program`` and let it run
-the REPL:
+``sdb.open_dump()`` -- the fastest way to get started
+------------------------------------------------------
+
+For crash/core dump analysis, ``open_dump()`` is the simplest entry point.
+It creates the ``drgn.Program``, loads debug info, and initialises the sdb
+runtime in a single call:
+
+.. code-block:: python
+
+   import sdb
+
+   sdb.open_dump("vmlinux", "vmcore")
+
+   pools = sdb.run("spa | member spa_name")
+   for p in pools:
+       print(p.string_().decode())
+
+You can also pass extra symbol search paths and custom command directories:
+
+.. code-block:: python
+
+   sdb.open_dump(
+       "vmlinux", "vmcore",
+       symbol_search=["/lib/modules/6.1.0/extra"],
+       command_paths=["/opt/mytools/sdb_commands"],
+   )
+
+
+``sdb.connect()`` and ``sdb.run()`` -- the programmatic API
+------------------------------------------------------------
+
+If you need more control over how the ``drgn.Program`` is created (e.g. for
+live kernel debugging, remote memory targets, or custom memory readers), use
+``connect()`` + ``run()``:
+
+.. code-block:: python
+
+   import drgn, sdb
+
+   prog = drgn.Program()
+   prog.set_core_dump("vmcore")
+   prog.load_debug_info(["vmlinux"])
+
+   sdb.connect(prog)
+
+   # Run a pipeline and get results as a list
+   pools = sdb.run("spa | member spa_name")
+   for p in pools:
+       print(p.string_().decode())
+
+   # Count threads
+   count = sdb.run("threads | count")
+   print(f"Thread count: {count[0].value_()}")
+
+``sdb.run()`` eagerly evaluates the pipeline and returns a concrete list.
+For lazy evaluation (e.g. processing very large result sets), use
+``sdb.invoke()`` which returns a generator:
+
+.. code-block:: python
+
+   for obj in sdb.invoke([], "spa | member spa_name"):
+       name = obj.string_().decode()
+       print(f"Pool: {name}")
+
+
+Jupyter notebook integration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The sdb API works naturally in Jupyter notebooks:
+
+.. code-block:: python
+
+   # Cell 1: Setup
+   import sdb
+   sdb.open_dump("/path/to/vmlinux", "/path/to/vmcore")
+
+   # Cell 2: Explore
+   tasks = sdb.run("threads")
+   print(f"Found {len(tasks)} threads")
+
+   # Cell 3: Drill down
+   names = sdb.run("threads | member comm")
+   for name in names:
+       print(name.string_().decode())
+
+Multiple ``sdb.run()`` calls work independently -- each one parses and
+evaluates a fresh pipeline.  You can also pass the output of one pipeline
+as input to another:
+
+.. code-block:: python
+
+   interesting = sdb.run("threads | filter 'obj.state.value_() != 0'")
+   stacks = sdb.run("stacks", input_objs=interesting)
+
+
+The ``sdb.start()`` entry point (REPL)
+----------------------------------------
+
+For interactive use, hand sdb a ``drgn.Program`` and let it run the REPL:
 
 .. code-block:: python
 
@@ -39,19 +134,16 @@ the REPL:
    )
 
 
-Running pipelines programmatically
------------------------------------
+Running pipelines with ``sdb.invoke()``
+-----------------------------------------
 
-For scripting and automation, use ``sdb.invoke()`` to execute a pipeline
-and iterate over the results:
+``sdb.invoke()`` is the lower-level API that returns a generator:
 
 .. code-block:: python
 
    import sdb
 
-   # After sdb.start() has been called or the target has been
-   # set up manually (see "Manual setup" below)
-
+   # After sdb.connect() or sdb.start()
    for obj in sdb.invoke([], "spa | member spa_name"):
        name = obj.string_().decode()
        print(f"Pool: {name}")
@@ -131,11 +223,17 @@ You can also load commands after initialization:
 See :doc:`external-commands` for how to write custom commands.
 
 
-Manual setup (without ``sdb.start()``)
----------------------------------------
+Manual setup (without ``sdb.connect()`` or ``sdb.start()``)
+-------------------------------------------------------------
 
-If you need tighter control -- for example to run pipelines without starting
-a REPL -- you can set up the sdb runtime manually:
+.. note::
+
+   For most use cases, ``sdb.connect(prog)`` is the recommended way to set
+   up the runtime without a REPL.  The manual approach below is only needed
+   if you want to skip thread/frame initialisation or customise the setup
+   sequence.
+
+If you need tighter control you can set up the sdb runtime manually:
 
 .. code-block:: python
 

@@ -20,11 +20,13 @@ like the entry point, command line interface, etc...
 """
 
 import argparse
+import inspect
+import json
 import os
 import re
 import sys
 
-from typing import List
+from typing import Any, Dict, List, Set, Type
 
 import drgn
 import sdb
@@ -39,7 +41,7 @@ except ImportError:
     commit_id = None
 
 
-def parse_arguments() -> argparse.Namespace:
+def parse_arguments() -> argparse.Namespace:  # pylint: disable=too-many-branches
     """
     Sets up argument parsing and does the first pass of validation
     of the command line input.
@@ -105,8 +107,16 @@ def parse_arguments() -> argparse.Namespace:
         "--eval",
         metavar="CMD",
         type=str,
-        action="store",
-        help="evaluate CMD and exit",
+        action="append",
+        default=[],
+        help="evaluate CMD and exit; may be given more than once"
+        " to run multiple commands in sequence",
+    )
+    parser.add_argument(
+        "-",
+        dest="stdin_script",
+        action="store_true",
+        help="read commands from stdin (one per line) and exit",
     )
     parser.add_argument("-q",
                         "--quiet",
@@ -125,6 +135,20 @@ def parse_arguments() -> argparse.Namespace:
         action="append",
         help="load external sdb commands from PATH (file or directory);"
         " this option may be given more than once",
+    )
+
+    # AI agent / tooling integration
+    agent_group = parser.add_argument_group("agent and tooling integration")
+    agent_group.add_argument(
+        "--list-commands",
+        action="store_true",
+        help="list all available commands as JSON and exit"
+        " (does not require a target)",
+    )
+    agent_group.add_argument(
+        "--json",
+        action="store_true",
+        help="emit pipeline output as JSON (use with -e)",
     )
 
     # Session recording and replay
@@ -189,6 +213,21 @@ def parse_arguments() -> argparse.Namespace:
     #
     if args.record and args.replay:
         parser.error("cannot use --record and --replay together")
+
+    #
+    # --json requires -e or stdin mode (non-interactive mode)
+    #
+    if args.json and not args.eval and not args.stdin_script:
+        parser.error("--json requires -e/--eval or -")
+
+    #
+    # --list-commands is standalone and doesn't need a target
+    #
+    if args.list_commands:
+        if args.object or args.core or args.kernel or args.pid:
+            parser.error("--list-commands cannot be combined with a target")
+        if args.replay:
+            parser.error("--list-commands cannot be combined with --replay")
 
     return args
 
@@ -352,6 +391,116 @@ def _load_external_command_paths(args: argparse.Namespace, quiet: bool) -> None:
             print(f"sdb: warning: {e}", file=sys.stderr)
 
 
+def _get_command_type_name(cls: type) -> str:
+    """Return a human-readable type string for a command class."""
+    types = []
+    if issubclass(cls, sdb.Locator):
+        types.append("Locator")
+    if issubclass(cls, sdb.PrettyPrinter):
+        types.append("PrettyPrinter")
+    if issubclass(cls, sdb.Walker):
+        types.append("Walker")
+    if issubclass(cls, sdb.SingleInputCommand):
+        types.append("SingleInputCommand")
+    if not types:
+        types.append("Command")
+    return "+".join(types)
+
+
+def _get_command_summary(cls: type) -> str:
+    """Extract the first line of a command's docstring."""
+    if not cls.__doc__:
+        return ""
+    doc = inspect.getdoc(cls)
+    if doc:
+        return doc.splitlines()[0].strip()
+    return ""
+
+
+def _list_commands_json(args: argparse.Namespace) -> None:
+    """
+    Dump all known commands as a JSON array and exit.
+
+    This works without a target — it imports all command modules and
+    inspects the class metadata directly from `all_commands`.
+    """
+    _load_external_command_paths(args, quiet=True)
+
+    # Import triggers __init_subclass__ for all built-in commands.
+    # all_commands contains every Command subclass regardless of runtime.
+    from sdb.command import all_commands  # pylint: disable=import-outside-toplevel
+
+    # De-duplicate: group by class, not by alias name.
+    seen_classes: Set[Type[Any]] = set()
+    result = []
+    for cls in sorted(all_commands, key=lambda c: c.names[0]
+                      if c.names else ""):
+        if cls in seen_classes or not cls.names:
+            continue
+        seen_classes.add(cls)
+
+        entry: Dict[str, Any] = {
+            "names": cls.names,
+            "type": _get_command_type_name(cls),
+            "summary": _get_command_summary(cls),
+        }
+        if cls.input_type is not None:
+            entry["input_type"] = cls.input_type
+        if hasattr(cls, "output_type") and cls.output_type is not None:
+            entry["output_type"] = cls.output_type
+
+        # Collect @InputHandler types for Locators
+        if issubclass(cls, sdb.Locator):
+            handler_types = []
+            for _, method in inspect.getmembers(cls, inspect.isfunction):
+                if hasattr(method, "input_typename_handled"):
+                    handler_types.append(method.input_typename_handled)
+            if handler_types:
+                entry["input_handler_types"] = handler_types
+
+        # Runtime info
+        runtimes = []
+        for rt in cls.load_on:
+            runtimes.append(type(rt).__name__)
+        if runtimes:
+            entry["load_on"] = runtimes
+
+        result.append(entry)
+
+    json.dump(result, sys.stdout, indent=2)
+    print()  # trailing newline
+
+
+def _get_eval_commands(args: argparse.Namespace) -> List[str]:
+    """
+    Collect commands to evaluate from -e flags and/or stdin.
+
+    Returns an empty list if neither -e nor stdin mode was requested
+    (meaning we should start the interactive REPL).
+    """
+    cmds = list(args.eval)
+    if args.stdin_script:
+        for line in sys.stdin:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                cmds.append(line)
+    return cmds
+
+
+def _eval_commands(repl: REPL, cmds: List[str]) -> int:
+    """
+    Evaluate a list of commands sequentially.
+
+    Returns the worst (highest) exit code. Stops on the first
+    non-zero exit code.
+    """
+    for cmd in cmds:
+        exit_code = repl.eval_cmd(cmd)
+        if exit_code != 0:
+            return exit_code
+    return 0
+
+
 def _run_replay_mode(args: argparse.Namespace) -> None:
     """Handle replay mode execution."""
     try:
@@ -378,10 +527,13 @@ def _run_replay_mode(args: argparse.Namespace) -> None:
     if not args.quiet:
         print(f"Replay mode: loaded {args.replay}")
 
-    repl = REPL(prog, list(sdb.get_registered_commands().keys()))
+    repl = REPL(prog,
+                list(sdb.get_registered_commands().keys()),
+                json_mode=args.json)
     repl.enable_history(os.getenv("SDB_HISTORY_FILE", "~/.sdb_history"))
-    if args.eval:
-        exit_code = repl.eval_cmd(args.eval)
+    cmds = _get_eval_commands(args)
+    if cmds:
+        exit_code = _eval_commands(repl, cmds)
         sys.exit(exit_code)
     else:
         repl.start_session()
@@ -410,12 +562,15 @@ def _run_normal_mode(args: argparse.Namespace) -> None:
         if not args.quiet:
             print(f"Recording to: {args.record}")
 
-    repl = REPL(prog, list(sdb.get_registered_commands().keys()))
+    repl = REPL(prog,
+                list(sdb.get_registered_commands().keys()),
+                json_mode=args.json)
     repl.enable_history(os.getenv("SDB_HISTORY_FILE", "~/.sdb_history"))
 
+    cmds = _get_eval_commands(args)
     try:
-        if args.eval:
-            exit_code = repl.eval_cmd(args.eval)
+        if cmds:
+            exit_code = _eval_commands(repl, cmds)
             # If recording, stop and save
             if args.record:
                 _stop_recording_if_active(prog, args.quiet)
@@ -448,6 +603,11 @@ def main() -> None:
 
     # Configure mdb compatibility syntax preprocessing
     set_mdb_compat_enabled(args.mdb_compat)
+
+    # --list-commands: dump command metadata as JSON and exit (no target needed)
+    if args.list_commands:
+        _list_commands_json(args)
+        return
 
     # Handle replay mode
     if args.replay:
