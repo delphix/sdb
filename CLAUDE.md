@@ -188,6 +188,32 @@ pytest -v tests/integration
 See each script for details (apt dependencies, build steps, dump archive
 profiles, etc.). All scripts assume they are run from the repo root.
 
+## Regression Test Reference Output
+
+Integration tests in `tests/integration/test_*_generic.py` compare command
+output against checked-in reference baselines stored under
+`tests/integration/data/regression_output/`.
+
+**When adding a new regression test module** (i.e. a new
+`test_<module>_generic.py` file with a `CMD_TABLE`), you must generate
+and commit the reference output so the tests have baselines to compare
+against:
+
+```bash
+# Re-generate ALL reference output (requires crash dumps in place)
+python -m tests.integration.gen_regression_output
+```
+
+This creates/overwrites files under `data/regression_output/<dump>/<module>/`.
+Review the generated output carefully in the PR — it becomes the golden
+baseline that future test runs are validated against.
+
+**When adding new commands to an existing `CMD_TABLE`**, re-run the same
+generation script and commit the new/updated output files.
+
+JSON integration tests (`test_json_generic.py`) use programmatic validation
+(not baseline files), so they do not require reference output generation.
+
 ## CI Requirements
 
 Before opening a PR, every commit must pass the full check suite. Run

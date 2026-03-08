@@ -439,8 +439,20 @@ class REPL:
         to_json() override, that method is used. Otherwise, the generic
         drgn.Object serialization is used.
         """
-        from sdb.command import PrettyPrinter
+        from sdb.command import PrettyPrinter, get_active_json_printer
         from sdb.target import type_canonical_name
+
+        # If a PrettyPrinter instance is actively handling JSON output (e.g.
+        # stacks with aggregated _json_groups), prefer its to_json() so that
+        # instance state is preserved.
+        try:
+            active = get_active_json_printer()
+            if active is not None:
+                custom = active.to_json(obj)
+                if custom:
+                    return custom
+        except Exception:
+            pass
 
         # Check if there's a PrettyPrinter with a custom to_json() for this type.
         try:
@@ -518,96 +530,113 @@ class REPL:
         trace_mgr = get_trace_manager()
         is_tracing = trace_mgr.is_recording
 
+        # Activate JSON mode globally so command _call() methods can
+        # bypass pretty_print() and yield objects for serialization.
+        if self.json_mode:
+            from sdb.command import set_json_mode  # pylint: disable=import-outside-toplevel
+            set_json_mode(True)
+
         # pylint: disable=broad-except
         json_results: Optional[List[Dict[str, Any]]] = ([] if self.json_mode
                                                         else None)
         try:
-            for obj in invoke([], input_):
-                # If recording, capture the object's memory
-                if is_tracing and hasattr(obj, 'address_of_'):
-                    try:
-                        trace_mgr.capture_object(obj, depth=0)
-                    except Exception:
-                        pass  # Don't let tracing errors break commands
+            try:
+                for obj in invoke([], input_):
+                    # If recording, capture the object's memory
+                    if is_tracing and hasattr(obj, 'address_of_'):
+                        try:
+                            trace_mgr.capture_object(obj, depth=0)
+                        except Exception:
+                            pass  # Don't let tracing errors break commands
 
-                if self.json_mode and json_results is not None:
-                    try:
-                        json_results.append(self._obj_to_json(obj))
-                    except Exception:
-                        json_results.append({"value": str(obj)})
+                    if self.json_mode and json_results is not None:
+                        try:
+                            json_results.append(self._obj_to_json(obj))
+                        except Exception:
+                            json_results.append({"value": str(obj)})
+                    else:
+                        try:
+                            print(obj.format_(dereference=False))
+                        except AttributeError:
+                            print(obj)
+            except CommandArgumentsError as err:
+                #
+                # We skip printing anything for this specific error
+                # as argparse should have already printed a helpful
+                # message to the REPL for us.
+                #
+                if self.json_mode:
+                    json.dump({"error": str(err)}, sys.stdout)
+                    print()
+                return EXIT_BAD_ARGS
+            except Error as err:
+                if self.json_mode:
+                    json.dump({"error": err.text}, sys.stdout)
+                    print()
                 else:
-                    try:
-                        print(obj.format_(dereference=False))
-                    except AttributeError:
-                        print(obj)
-        except CommandArgumentsError as err:
-            #
-            # We skip printing anything for this specific error
-            # as argparse should have already printed a helpful
-            # message to the REPL for us.
-            #
-            if self.json_mode:
-                json.dump({"error": str(err)}, sys.stdout)
+                    print(err.text)
+                return EXIT_ERROR
+            except KeyboardInterrupt:
+                #
+                # Interrupting commands half way through their execution
+                # (e.g. with Ctrl+c) should be allowed. Note that we
+                # print a new line for better formatting of the next
+                # prompt.
+                #
                 print()
-            return EXIT_BAD_ARGS
-        except Error as err:
-            if self.json_mode:
-                json.dump({"error": err.text}, sys.stdout)
+                return EXIT_ERROR
+            except BrokenPipeError:
+                #
+                # If a shell process (invoked by !) exits before reading all
+                # of its input, that's OK.
+                #
+                return EXIT_ERROR
+            except Exception:
+                #
+                # Ideally it would be great if all commands had no issues and
+                # would take care of all their possible edge case. That is
+                # something that we should strive for and ask in code reviews
+                # when introducing commands. Looking into the long-term though
+                # if SDB commands/modules are to be decoupled from the SDB repo,
+                # it can be harder to have control over the quality of the
+                # commands imported by SDB during the runtime.
+                #
+                # Catching all exceptions from the REPL may be a bit ugly as a
+                # programming practice in general. That said in this case, not
+                # catching these errors leads to the worst outcome in terms of
+                # user-experience that you can get from SDB - getting dropped
+                # out of SDB with a non-friendly error message. Furthermore,
+                # given that there is no state maintained in the REPL between
+                # commands, attempting to recover after a command error is not
+                # that bad and most probably won't lead to any problems in
+                # future commands issued within the same session.
+                #
+                print(
+                    "sdb encountered an internal error due to a bug. Here's the"
+                )
+                print("information you need to file the bug:")
+                print(
+                    "----------------------------------------------------------"
+                )
+                print("Target Info:")
+                print(f"\t{self.target.flags}")
+                print(f"\t{self.target.platform}")
                 print()
-            else:
-                print(err.text)
-            return EXIT_ERROR
-        except KeyboardInterrupt:
-            #
-            # Interrupting commands half way through their execution
-            # (e.g. with Ctrl+c) should be allowed. Note that we
-            # print a new line for better formatting of the next
-            # prompt.
-            #
-            print()
-            return EXIT_ERROR
-        except BrokenPipeError:
-            #
-            # If a shell process (invoked by !) exits before reading all
-            # of its input, that's OK.
-            #
-            return EXIT_ERROR
-        except Exception:
-            #
-            # Ideally it would be great if all commands had no issues and
-            # would take care of all their possible edge case. That is
-            # something that we should strive for and ask in code reviews
-            # when introducing commands. Looking into the long-term though
-            # if SDB commands/modules are to be decoupled from the SDB repo,
-            # it can be harder to have control over the quality of the
-            # commands imported by SDB during the runtime.
-            #
-            # Catching all exceptions from the REPL may be a bit ugly as a
-            # programming practice in general. That said in this case, not
-            # catching these errors leads to the worst outcome in terms of
-            # user-experience that you can get from SDB - getting dropped
-            # out of SDB with a non-friendly error message. Furthermore,
-            # given that there is no state maintained in the REPL between
-            # commands, attempting to recover after a command error is not
-            # that bad and most probably won't lead to any problems in
-            # future commands issued within the same session.
-            #
-            print("sdb encountered an internal error due to a bug. Here's the")
-            print("information you need to file the bug:")
-            print("----------------------------------------------------------")
-            print("Target Info:")
-            print(f"\t{self.target.flags}")
-            print(f"\t{self.target.platform}")
-            print()
-            traceback.print_exc()
-            print("----------------------------------------------------------")
-            print("Link: https://github.com/delphix/sdb/issues/new")
-            return EXIT_ERROR
+                traceback.print_exc()
+                print(
+                    "----------------------------------------------------------"
+                )
+                print("Link: https://github.com/delphix/sdb/issues/new")
+                return EXIT_ERROR
 
-        if self.json_mode and json_results is not None:
-            json.dump(json_results, sys.stdout, indent=2)
-            print()
-        return EXIT_SUCCESS
+            if self.json_mode and json_results is not None:
+                json.dump(json_results, sys.stdout, indent=2)
+                print()
+            return EXIT_SUCCESS
+        finally:
+            if self.json_mode:
+                from sdb.command import set_json_mode  # pylint: disable=import-outside-toplevel
+                set_json_mode(False)
 
     def start_session(self) -> None:
         """

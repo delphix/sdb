@@ -250,3 +250,13 @@ class TestReplJsonMode:
         assert exit_code == 1
         result = json.loads(captured.out)
         assert "error" in result
+
+    def test_json_mode_resets_flag(self,
+                                   capsys: pytest.CaptureFixture[str]) -> None:
+        """set_json_mode(False) is called even after errors."""
+        repl = self._make_repl(json_mode=True)
+        repl.eval_cmd("nonexistent_command_xyz")
+        _ = capsys.readouterr()
+        # After eval_cmd returns, the global flag should be reset
+        from sdb import command as cmd_mod
+        assert not cmd_mod._json_mode  # pylint: disable=protected-access

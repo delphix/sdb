@@ -49,6 +49,33 @@ from sdb import target
 all_commands: Set[Type["Command"]] = set({})
 registered_commands: Dict[str, Type["Command"]] = {}
 
+#
+# When True, PrettyPrinters at the end of a pipeline yield their
+# objects instead of calling pretty_print().  This allows the REPL's
+# JSON mode to serialise each object individually via to_json().
+#
+_json_mode: bool = False
+
+#
+# When set, the REPL will use this PrettyPrinter's to_json() method
+# to serialise each object yielded by the pipeline.  This is populated
+# automatically when a PrettyPrinter yields objects in JSON mode.
+#
+_active_json_printer: Optional["PrettyPrinter"] = None
+
+
+def set_json_mode(enabled: bool) -> None:
+    """Toggle the pipeline JSON mode flag."""
+    global _json_mode, _active_json_printer  # pylint: disable=global-statement
+    _json_mode = enabled
+    if not enabled:
+        _active_json_printer = None
+
+
+def get_active_json_printer() -> Optional["PrettyPrinter"]:
+    """Return the active PrettyPrinter for JSON serialisation, if any."""
+    return _active_json_printer
+
 
 def add_command(class_: Type["Command"]) -> None:
     """
@@ -590,8 +617,16 @@ class PrettyPrinter(Command):
         """
         This function will call pretty_print() on each input object,
         verifying the types as we go.
+
+        In JSON mode, objects are yielded instead of pretty-printed so
+        the REPL can serialise them via to_json().
         """
         assert self.input_type is not None
+        if _json_mode:
+            global _active_json_printer  # pylint: disable=global-statement
+            _active_json_printer = self
+            yield from self.check_input_type(objs)
+            return  # type: ignore[return-value]
         self.pretty_print(self.check_input_type(objs))
 
 
@@ -668,11 +703,15 @@ class Locator(Command):
     def _call(self,
               objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         # If this is a hybrid locator/pretty printer, this is where that is
-        # leveraged.
-        if self.islast and isinstance(self, PrettyPrinter):
+        # leveraged.  In JSON mode we bypass pretty_print() so that the
+        # REPL can serialise each object via to_json().
+        if self.islast and isinstance(self, PrettyPrinter) and not _json_mode:
             # pylint: disable=no-member
             self.pretty_print(self.caller(objs))
             return None
+        if _json_mode and self.islast and isinstance(self, PrettyPrinter):
+            global _active_json_printer  # pylint: disable=global-statement
+            _active_json_printer = self
         yield from self.caller(objs)
         return None
 

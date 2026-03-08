@@ -85,6 +85,7 @@ from sdb.command import (
     SingleInputCommand,
     get_registered_commands,
     register_commands,
+    set_json_mode,
 )
 from sdb.loader import load_external_commands
 from sdb.pipeline import execute_pipeline, get_first_type, invoke
@@ -146,6 +147,7 @@ __all__ = [
     'get_type',
     'register_commands',
     'set_frame',
+    'set_json_mode',
     'set_thread',
     'type_canonical_name',
     'type_canonicalize',

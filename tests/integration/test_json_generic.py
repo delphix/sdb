@@ -84,8 +84,8 @@ JSON_NEG_CMDS = [
     # Bogus member
     "spa | member spa_ubsync.bogus",
 
-    # Bad filter expression
-    "zfs_dbgmsg | filter 'obj =='",
+    # Bad filter expression (echo guarantees input so filter evaluates)
+    "echo 0x1 | filter 'obj =='",
 ]
 
 JSON_CMD_TABLE = JSON_POS_CMDS + JSON_NEG_CMDS
@@ -127,11 +127,11 @@ def test_json_positive_cmd_201912060006(capsys: Any, rdump: RefDump,
     Commands specific to the 201912060006 dump that may fail on other dumps
     due to different struct layouts.
     """
-    exit_code = rdump.repl_invoke_json(cmd)
-    captured = capsys.readouterr()
-
     if "201912060006" not in rdump.dump_name:
         pytest.skip("command only valid for dump.201912060006")
+
+    exit_code = rdump.repl_invoke_json(cmd)
+    captured = capsys.readouterr()
 
     assert exit_code == 0, f"Expected exit code 0, got {exit_code} for: {cmd}"
     result = json.loads(captured.out)
@@ -263,6 +263,168 @@ def test_json_spa_member_spa_name(capsys: Any, rdump: RefDump) -> None:
     # The value should be a readable string, not hex
     assert isinstance(entry["value"], str), \
         f"Expected string value for char array, got: {type(entry['value'])}"
+
+
+@pytest.mark.skipif(
+    len(get_crash_dump_dir_paths()) == 0,
+    reason="couldn't find any crash/core dumps to run tests against")
+@pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+def test_json_stacks_has_structured_output(capsys: Any, rdump: RefDump) -> None:
+    """
+    Verify that 'stacks' as terminal command in JSON mode produces
+    aggregated output with count, tasks list, and shared stack_trace.
+    """
+    exit_code = rdump.repl_invoke_json("stacks")
+    captured = capsys.readouterr()
+
+    assert exit_code == 0, f"Expected exit code 0, got {exit_code}"
+
+    result = json.loads(captured.out)
+    assert isinstance(result, list)
+    assert len(result) > 0, "Expected at least one aggregated group"
+
+    for entry in result:
+        assert entry["type"] == "struct task_struct *"
+        assert "state" in entry
+        assert isinstance(entry["state"], str)
+        assert "count" in entry
+        assert isinstance(entry["count"], int)
+        assert entry["count"] >= 1
+        assert "tasks" in entry
+        assert isinstance(entry["tasks"], list)
+        assert len(entry["tasks"]) == entry["count"]
+        for task in entry["tasks"]:
+            assert "address" in task
+            assert task["address"].startswith("0x")
+            assert "comm" in task
+            assert "pid" in task
+        assert "stack_trace" in entry
+        assert isinstance(entry["stack_trace"], list)
+        for frame in entry["stack_trace"]:
+            assert "function" in frame
+            assert "offset" in frame
+
+
+@pytest.mark.skipif(
+    len(get_crash_dump_dir_paths()) == 0,
+    reason="couldn't find any crash/core dumps to run tests against")
+@pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+def test_json_stacks_roundtrip(capsys: Any, rdump: RefDump) -> None:
+    """
+    Verify that aggregated stacks JSON output is round-trip serializable.
+    """
+    exit_code = rdump.repl_invoke_json("stacks")
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    result = json.loads(captured.out)
+    roundtripped = json.loads(json.dumps(result))
+    assert result == roundtripped
+
+
+@pytest.mark.skipif(
+    len(get_crash_dump_dir_paths()) == 0,
+    reason="couldn't find any crash/core dumps to run tests against")
+@pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+def test_json_stacks_aggregated_output(capsys: Any, rdump: RefDump) -> None:
+    """
+    Verify that 'stacks' as the terminal command in JSON mode produces
+    aggregated output with count, tasks list, and shared stack_trace.
+    """
+    exit_code = rdump.repl_invoke_json("stacks")
+    captured = capsys.readouterr()
+
+    assert exit_code == 0, f"Expected exit code 0, got {exit_code}"
+
+    result = json.loads(captured.out)
+    assert isinstance(result, list)
+    assert len(result) > 0, "Expected at least one aggregated stack group"
+
+    total_tasks = 0
+    for entry in result:
+        assert entry["type"] == "struct task_struct *"
+        assert "state" in entry
+        assert isinstance(entry["state"], str)
+        assert "count" in entry
+        assert isinstance(entry["count"], int)
+        assert entry["count"] >= 1
+        assert "tasks" in entry
+        assert isinstance(entry["tasks"], list)
+        assert len(entry["tasks"]) == entry["count"]
+        for task in entry["tasks"]:
+            assert "address" in task
+            assert task["address"].startswith("0x")
+            assert "comm" in task
+            assert "pid" in task
+        assert "stack_trace" in entry
+        assert isinstance(entry["stack_trace"], list)
+        total_tasks += entry["count"]
+
+    # The number of groups should be <= total tasks (aggregation reduces)
+    assert len(result) <= total_tasks
+
+
+@pytest.mark.skipif(
+    len(get_crash_dump_dir_paths()) == 0,
+    reason="couldn't find any crash/core dumps to run tests against")
+@pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+def test_json_stacks_aggregated_sorted_descending(capsys: Any,
+                                                  rdump: RefDump) -> None:
+    """
+    Verify that aggregated stacks JSON output is sorted by count descending,
+    matching the pretty-print behavior.
+    """
+    exit_code = rdump.repl_invoke_json("stacks")
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    result = json.loads(captured.out)
+    counts = [entry["count"] for entry in result]
+    assert counts == sorted(counts, reverse=True), \
+        f"Expected counts sorted descending, got: {counts}"
+
+
+@pytest.mark.skipif(
+    len(get_crash_dump_dir_paths()) == 0,
+    reason="couldn't find any crash/core dumps to run tests against")
+@pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+def test_json_stacks_aggregated_with_filter(capsys: Any,
+                                            rdump: RefDump) -> None:
+    """
+    Verify that 'stacks -m zfs' in JSON mode produces aggregated output
+    filtered to ZFS module stacks only.
+    """
+    exit_code = rdump.repl_invoke_json("stacks -m zfs")
+    captured = capsys.readouterr()
+
+    assert exit_code == 0, f"Expected exit code 0, got {exit_code}"
+
+    result = json.loads(captured.out)
+    assert isinstance(result, list)
+    # Should have at least one ZFS stack in the test dumps
+    assert len(result) > 0, "Expected at least one ZFS stack group"
+
+    for entry in result:
+        assert "count" in entry
+        assert "tasks" in entry
+        assert "stack_trace" in entry
+
+
+@pytest.mark.skipif(
+    len(get_crash_dump_dir_paths()) == 0,
+    reason="couldn't find any crash/core dumps to run tests against")
+@pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+def test_json_stacks_aggregated_roundtrip(capsys: Any, rdump: RefDump) -> None:
+    """
+    Verify that aggregated stacks JSON output is round-trip serializable.
+    """
+    exit_code = rdump.repl_invoke_json("stacks")
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    result = json.loads(captured.out)
+    roundtripped = json.loads(json.dumps(result))
+    assert result == roundtripped
 
 
 @pytest.mark.skipif(

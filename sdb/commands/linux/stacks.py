@@ -15,7 +15,7 @@
 #
 
 import argparse
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 from collections import defaultdict
 
 import drgn
@@ -463,6 +463,122 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             if count > 0:
                 stacktrace_info += KernelStacks.frame_string(frame_info, count)
             print(stacktrace_info)
+
+    @staticmethod
+    def _get_stack_frames(task: drgn.Object) -> List[Dict[str, Any]]:
+        """Build a list of frame dicts for a task's stack trace."""
+        frames: List[Dict[str, Any]] = []
+        try:
+            for frame in sdb.get_prog().stack_trace(task):
+                if frame.is_inline:
+                    frames.append({
+                        "function": frame.name or "<unknown>",
+                        "offset": 0,
+                        "inline": True,
+                    })
+                    continue
+                pc = frame.pc
+                if pc == 0x0:
+                    continue
+                name = frame.name
+                offset = 0
+                try:
+                    sym = frame.symbol()
+                    if name is None:
+                        name = sym.name
+                    offset = pc - sym.address
+                except LookupError:
+                    if name is None:
+                        name = hex(pc)
+                frames.append({
+                    "function": name,
+                    "offset": offset,
+                })
+        except (LookupError, ValueError):
+            pass
+        return frames
+
+    @staticmethod
+    def _task_to_json_brief(task: drgn.Object) -> Dict[str, Any]:
+        """Serialize a task_struct to a brief JSON dict (no stack trace)."""
+        try:
+            comm = task.comm.string_().decode('utf-8', errors='replace')
+        except Exception:  # pylint: disable=broad-exception-caught
+            comm = ""
+        try:
+            pid = int(task.pid)
+        except Exception:  # pylint: disable=broad-exception-caught
+            pid = -1
+        return {
+            "address": hex(task.value_()),
+            "comm": comm,
+            "pid": pid,
+        }
+
+    # pylint: disable=redefined-outer-name
+    def _call(
+        self,
+        objs: Iterable[drgn.Object],
+    ) -> Optional[Iterable[drgn.Object]]:
+        from sdb.command import _json_mode  # pylint: disable=import-outside-toplevel
+        if _json_mode and self.islast:
+            import sdb.command as sdb_cmd  # pylint: disable=import-outside-toplevel
+            sdb_cmd._active_json_printer = self  # pylint: disable=protected-access
+            self.validate_context()
+            tasks = list(self.caller(objs))
+            filtered = filter(self.match_stack, tasks)
+            aggregated = KernelStacks.aggregate_stacks(filtered)
+            self._json_groups = {}  # pylint: disable=attribute-defined-outside-init
+            for stack_key, group_tasks in aggregated:
+                representative = group_tasks[0]
+                addr = representative.value_()
+                self._json_groups[addr] = (stack_key, group_tasks)
+                yield representative
+            return None
+        # Non-JSON mode: delegate to parent Locator._call
+        yield from super()._call(objs)  # type: ignore[misc]
+        return None
+
+    def to_json(self, obj: drgn.Object) -> Dict[str, Any]:
+        """
+        Serialize stacks output to JSON.
+
+        When used as the terminal command, returns aggregated output:
+          - type: "struct task_struct *"
+          - state: thread state string
+          - count: number of tasks with this stack
+          - tasks: list of {address, comm, pid} for each task
+          - stack_trace: shared stack trace frames
+
+        When aggregation data is not available (e.g. mid-pipeline),
+        returns per-task output with the same fields as a single entry.
+        """
+        addr = obj.value_()
+        if hasattr(self, '_json_groups') and addr in self._json_groups:
+            stack_key, group_tasks = self._json_groups[addr]
+            state = stack_key[0]
+            task_list = [
+                KernelStacks._task_to_json_brief(t) for t in group_tasks
+            ]
+            return {
+                "type": "struct task_struct *",
+                "state": state,
+                "count": len(group_tasks),
+                "tasks": task_list,
+                "stack_trace": KernelStacks._get_stack_frames(group_tasks[0]),
+            }
+
+        # Fallback: per-task serialization (mid-pipeline or no aggregation)
+        state = KernelStacks.task_struct_get_state(obj)
+        brief = KernelStacks._task_to_json_brief(obj)
+        return {
+            "type": "struct task_struct *",
+            "address": brief["address"],
+            "state": state,
+            "comm": brief["comm"],
+            "pid": brief["pid"],
+            "stack_trace": KernelStacks._get_stack_frames(obj),
+        }
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         self.validate_context()
