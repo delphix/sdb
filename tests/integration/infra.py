@@ -370,10 +370,16 @@ class RefDump:
         that for the given modname "mod" there exist a test module under
         test.integration named test_mod_generic which has a list of commands in
         string form called CMD_TABLE.
+
+        Modules that don't define CMD_TABLE (e.g. those using their own test
+        structure like JSON tests) are silently skipped.
         """
         test_mod = import_module(f"tests.integration.test_{modname}_generic")
+        cmd_table = getattr(test_mod, "CMD_TABLE", None)
+        if cmd_table is None:
+            return
         self.generate_output_for_commands(
-            test_mod.CMD_TABLE, f"{TEST_OUTPUT_DIR}/{self.dump_name}/{modname}")
+            cmd_table, f"{TEST_OUTPUT_DIR}/{self.dump_name}/{modname}")
         print(
             f"Generated regression test output for {self.dump_name}/{modname}..."
         )
