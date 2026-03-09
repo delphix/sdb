@@ -56,7 +56,7 @@ def _driver_name(dev: drgn.Object) -> str:
     try:
         drv_ptr = dev.dev.driver.value_()
         if drv_ptr:
-            return dev.dev.driver.name.string_().decode()
+            return str(dev.dev.driver.name.string_().decode())
     except (AttributeError, drgn.FaultError):
         pass
     return ""

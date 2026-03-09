@@ -73,7 +73,7 @@ class Lsmod(sdb.Locator, sdb.PrettyPrinter):
 
     FIELDS: Dict[str, Callable[[drgn.Object], Union[str, int]]] = {
         "MODULE": lambda obj: obj.name.string_().decode(),
-        "SIZE": lambda obj: _module_size(obj),
+        "SIZE": _module_size,
         "REF": lambda obj: int(obj.refcnt.counter) - 1,
         "ADDR": lambda obj: hex(obj.value_()),
     }

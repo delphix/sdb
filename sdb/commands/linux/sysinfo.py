@@ -15,7 +15,7 @@
 #
 
 import re
-from typing import Iterable, Optional
+from typing import Iterable
 
 import drgn
 
@@ -34,12 +34,10 @@ class Kcmdline(sdb.Command):
     names = ["kcmdline"]
     load_on = [sdb.Kernel()]
 
-    def _call(self,
-              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+    def _call(self, objs: Iterable[drgn.Object]) -> None:
         prog = sdb.get_prog()
         cmdline = prog["saved_command_line"].string_().decode()
         print(cmdline)
-        return None
 
 
 class SerialNumber(sdb.Command):
@@ -60,8 +58,7 @@ class SerialNumber(sdb.Command):
     names = ["serial_number"]
     load_on = [sdb.Kernel()]
 
-    def _call(self,
-              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+    def _call(self, objs: Iterable[drgn.Object]) -> None:
         prog = sdb.get_prog()
 
         try:
@@ -73,7 +70,7 @@ class SerialNumber(sdb.Command):
             serial = prog["dmi_ident"][idx]
             if serial:
                 print(f"Serial: {serial.string_().decode()}")
-                return None
+                return
         except (KeyError, AttributeError, drgn.FaultError):
             pass
 
@@ -83,4 +80,3 @@ class SerialNumber(sdb.Command):
             print(f"Serial (from hostname): {m.group(1)}")
         else:
             print("Serial number not available")
-        return None
