@@ -1,9 +1,10 @@
 on:
   push:
     branches:
-      - '**'
+      - main
+      - develop
     tags-ignore:
-      - 'v*'  # Release workflow handles version tags
+      - 'v*'
   pull_request:
   schedule:
     - cron:  '0 0 * * *'
