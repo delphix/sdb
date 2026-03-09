@@ -640,7 +640,7 @@ class REPL:
                 print(
                     "----------------------------------------------------------"
                 )
-                print("Link: https://github.com/delphix/sdb/issues/new")
+                print("Link: https://github.com/sdimitro/sdb/issues/new")
                 return EXIT_ERROR
 
             if self.json_mode and json_objs is not None:
