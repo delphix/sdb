@@ -125,6 +125,22 @@ POS_CMDS = [
     "threads | head 1 | frame 1 | registers",
     "threads | head 1 | frame 1 | registers -x",
     "threads | head 1 | frame 1 | registers rbp rsp",
+
+    # kcmdline
+    "kcmdline",
+
+    # serial_number
+    "serial_number",
+
+    # lsmod
+    "lsmod",
+    "lsmod | count",
+    'lsmod | filter \'obj.refcnt.counter > 1\' | lsmod',
+
+    # lspci
+    "lspci",
+    "lspci | count",
+    'lspci | filter \'obj.vendor == 0x15ad\' | lspci',
 ]
 
 STRIPPED_POS_CMDS = [

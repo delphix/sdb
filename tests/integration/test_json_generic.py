@@ -89,6 +89,7 @@ JSON_NEG_CMDS = [
 ]
 
 JSON_CMD_TABLE = JSON_POS_CMDS + JSON_NEG_CMDS
+CMD_TABLE = JSON_CMD_TABLE
 
 
 @pytest.mark.skipif(

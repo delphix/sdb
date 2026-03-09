@@ -1,0 +1,3 @@
+BOOT_IMAGE=/ROOT/delphix.i4TlGPg/root@/boot/vmlinuz-5.4.0-1097-dx2023030807-1b2b35b91-aws root=ZFS=rpool/ROOT/delphix.i4TlGPg/root ro console=tty0 console=ttyS0,38400n8 mitigations=off ipv6.disable=1 elevator=noop crashkernel=256M,high crashkernel=256M,low init_on_alloc=0 usbcore.nousb=1 nvme_core.io_timeout=4294967295 earlyprintk=ttyS0,38400n8 rootdelay=300
+@#$ EXIT CODE $#@
+0
