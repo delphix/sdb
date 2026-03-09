@@ -431,6 +431,35 @@ class REPL:
             return EXIT_ERROR
 
     @staticmethod
+    # pylint: disable=import-outside-toplevel
+    def _serialize_json(objs: List[drgn.Object]) -> List[Dict[str, Any]]:
+        """Serialize pipeline output objects to JSON.
+
+        If the terminal command is a PrettyPrinter that overrides
+        ``to_json_aggregate()``, delegate to it so it can perform
+        cross-object transformations (grouping, sorting, etc.).
+        Otherwise, fall back to per-object generic serialization.
+        """
+        from sdb.command import PrettyPrinter, get_active_json_printer
+        active = get_active_json_printer()
+        if active is not None:
+            # Check if the subclass actually overrode to_json_aggregate
+            if type(active
+                   ).to_json_aggregate is not PrettyPrinter.to_json_aggregate:
+                return active.to_json_aggregate(objs)
+            # Subclass has per-object to_json but not aggregate — use it
+            if type(active).to_json is not PrettyPrinter.to_json:
+                results: List[Dict[str, Any]] = []
+                for obj in objs:
+                    entry = active.to_json(obj)
+                    if entry:
+                        results.append(entry)
+                    else:
+                        results.append(REPL._obj_to_json(obj))
+                return results
+        return [REPL._obj_to_json(obj) for obj in objs]
+
+    @staticmethod
     # pylint: disable=broad-exception-caught,too-many-branches,import-outside-toplevel
     def _obj_to_json(obj: drgn.Object) -> Dict[str, Any]:
         """Convert a drgn.Object to a JSON-serializable dict.
@@ -439,20 +468,8 @@ class REPL:
         to_json() override, that method is used. Otherwise, the generic
         drgn.Object serialization is used.
         """
-        from sdb.command import PrettyPrinter, get_active_json_printer
+        from sdb.command import PrettyPrinter
         from sdb.target import type_canonical_name
-
-        # If a PrettyPrinter instance is actively handling JSON output (e.g.
-        # stacks with aggregated _json_groups), prefer its to_json() so that
-        # instance state is preserved.
-        try:
-            active = get_active_json_printer()
-            if active is not None:
-                custom = active.to_json(obj)
-                if custom:
-                    return custom
-        except Exception:
-            pass
 
         # Check if there's a PrettyPrinter with a custom to_json() for this type.
         try:
@@ -537,8 +554,8 @@ class REPL:
             set_json_mode(True)
 
         # pylint: disable=broad-except
-        json_results: Optional[List[Dict[str, Any]]] = ([] if self.json_mode
-                                                        else None)
+        json_objs: Optional[List[drgn.Object]] = ([]
+                                                  if self.json_mode else None)
         try:
             try:
                 for obj in invoke([], input_):
@@ -549,11 +566,8 @@ class REPL:
                         except Exception:
                             pass  # Don't let tracing errors break commands
 
-                    if self.json_mode and json_results is not None:
-                        try:
-                            json_results.append(self._obj_to_json(obj))
-                        except Exception:
-                            json_results.append({"value": str(obj)})
+                    if self.json_mode and json_objs is not None:
+                        json_objs.append(obj)
                     else:
                         try:
                             print(obj.format_(dereference=False))
@@ -629,7 +643,8 @@ class REPL:
                 print("Link: https://github.com/delphix/sdb/issues/new")
                 return EXIT_ERROR
 
-            if self.json_mode and json_results is not None:
+            if self.json_mode and json_objs is not None:
+                json_results = self._serialize_json(json_objs)
                 json.dump(json_results, sys.stdout, indent=2)
                 print()
             return EXIT_SUCCESS

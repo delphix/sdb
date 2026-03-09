@@ -515,70 +515,39 @@ class KernelStacks(sdb.Locator, sdb.PrettyPrinter):
             "pid": pid,
         }
 
-    # pylint: disable=redefined-outer-name
-    def _call(
+    def to_json_aggregate(
         self,
         objs: Iterable[drgn.Object],
-    ) -> Optional[Iterable[drgn.Object]]:
-        from sdb.command import _json_mode  # pylint: disable=import-outside-toplevel
-        if _json_mode and self.islast:
-            import sdb.command as sdb_cmd  # pylint: disable=import-outside-toplevel
-            sdb_cmd._active_json_printer = self  # pylint: disable=protected-access
-            self.validate_context()
-            tasks = list(self.caller(objs))
-            filtered = filter(self.match_stack, tasks)
-            aggregated = KernelStacks.aggregate_stacks(filtered)
-            self._json_groups = {}  # pylint: disable=attribute-defined-outside-init
-            for stack_key, group_tasks in aggregated:
-                representative = group_tasks[0]
-                addr = representative.value_()
-                self._json_groups[addr] = (stack_key, group_tasks)
-                yield representative
-            return None
-        # Non-JSON mode: delegate to parent Locator._call
-        yield from super()._call(objs)  # type: ignore[misc]
-        return None
-
-    def to_json(self, obj: drgn.Object) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         """
-        Serialize stacks output to JSON.
+        Serialize stacks output to aggregated JSON.
 
-        When used as the terminal command, returns aggregated output:
+        Mirrors ``pretty_print()`` by filtering and grouping tasks by
+        state + stack trace, then returning one entry per group:
+
           - type: "struct task_struct *"
           - state: thread state string
           - count: number of tasks with this stack
           - tasks: list of {address, comm, pid} for each task
           - stack_trace: shared stack trace frames
-
-        When aggregation data is not available (e.g. mid-pipeline),
-        returns per-task output with the same fields as a single entry.
         """
-        addr = obj.value_()
-        if hasattr(self, '_json_groups') and addr in self._json_groups:
-            stack_key, group_tasks = self._json_groups[addr]
+        self.validate_context()
+        filtered = filter(self.match_stack, objs)
+        aggregated = KernelStacks.aggregate_stacks(filtered)
+        results: List[Dict[str, Any]] = []
+        for stack_key, group_tasks in aggregated:
             state = stack_key[0]
             task_list = [
                 KernelStacks._task_to_json_brief(t) for t in group_tasks
             ]
-            return {
+            results.append({
                 "type": "struct task_struct *",
                 "state": state,
                 "count": len(group_tasks),
                 "tasks": task_list,
                 "stack_trace": KernelStacks._get_stack_frames(group_tasks[0]),
-            }
-
-        # Fallback: per-task serialization (mid-pipeline or no aggregation)
-        state = KernelStacks.task_struct_get_state(obj)
-        brief = KernelStacks._task_to_json_brief(obj)
-        return {
-            "type": "struct task_struct *",
-            "address": brief["address"],
-            "state": state,
-            "comm": brief["comm"],
-            "pid": brief["pid"],
-            "stack_trace": KernelStacks._get_stack_frames(obj),
-        }
+            })
+        return results
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         self.validate_context()

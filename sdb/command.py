@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 #
 # Copyright 2019 Delphix
 # Copyright 2025 CoreWeave
@@ -593,6 +594,32 @@ class PrettyPrinter(Command):
         dict, which tells the REPL to use generic drgn.Object serialization.
         """
         return {}
+
+    def to_json_aggregate(
+        self,
+        objs: Iterable[drgn.Object],
+    ) -> List[Dict[str, Any]]:
+        """
+        Serialize a collection of objects to a list of JSON-friendly dicts.
+
+        This is the aggregate counterpart to ``pretty_print()``: it
+        receives the full iterable of typed objects that would normally
+        be pretty-printed and returns the complete JSON result list.
+
+        The default implementation delegates to ``to_json()`` per object
+        (falling through to the generic serializer when ``to_json()``
+        returns an empty dict).  Override this in subclasses that need
+        cross-object context for their JSON output — e.g. grouping,
+        aggregation, or sorting.
+        """
+        results: List[Dict[str, Any]] = []
+        for obj in objs:
+            entry = self.to_json(obj)
+            if not entry:
+                # Fall through — the REPL's generic serializer will handle it
+                entry = {}
+            results.append(entry)
+        return results
 
     def check_input_type(self,
                          objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
