@@ -1,3 +1,8 @@
+# DISCLAIMER: VENDOR-SPECIFIC REPO
+
+For the official upstream please refer to [this repo](https://github.com/sdimitro/sdb).
+It has all the features of this repo and more.
+
 # sdb
 The Slick Debugger
 
