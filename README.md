@@ -1,3 +1,11 @@
+> **Delphix downstream notice.** This repository is the Delphix
+> packaging downstream of [sdimitro/sdb](https://github.com/sdimitro/sdb).
+> Active development happens upstream; the `develop` branch here
+> tracks `sdimitro/develop` plus a small Delphix overlay
+> (`.whitesource`, `.github/pull_request_template.md`, this notice,
+> and `debian/` for `dh-virtualenv` packaging). Functional changes
+> belong upstream — please file PRs at sdimitro/sdb.
+
 <p align="center">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sdimitro/sdb/master/assets/img/sdb-logo_white.png">
