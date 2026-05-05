@@ -1,11 +1,37 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@ --with python3 --buildsystem=pybuild
+	dh $@ --with python_virtualenv
 
-override_dh_auto_test:
-	#
-	# Don't run the tests when building the package. We'll enforce
-	# testing via another mechanism, so running it during package
-	# builds is unnecessary.
-	#
+# drgn's manylinux wheel bundles pre-stripped .so files in drgn.libs/.
+# dh_dwz tries to compress their debug info but most of them have no
+# .debug_info sections, so it fails with "Too few files for multifile
+# optimization." Skip dwz entirely for this venv-only package.
+override_dh_dwz:
+
+# Skip dh_strip for the same reason — stripping bundled libs further
+# produces no meaningful size savings and risks breaking auditwheel's
+# RPATH setup.
+override_dh_strip:
+
+# drgn's bundled libs in drgn.libs/ use auditwheel's $ORIGIN RPATH and
+# aren't in any Debian package, so dpkg-shlibdeps can't resolve them.
+# Skip shlibdeps — the venv is self-contained; ${python3:Depends}
+# (filled by dh_python3) covers the Python runtime requirement.
+override_dh_shlibdeps:
+
+# dh_python3 doesn't know about the venv layout dh_virtualenv produces
+# and will complain about unmanaged files. The dh-virtualenv add-on
+# already wires the right Python deps; skip dh_python3.
+override_dh_python3:
+
+# Python rewrites .pyc files at runtime when the bytecode header's
+# recorded source mtime/size doesn't match the .py on disk — which is
+# unavoidable for a venv built by dh-virtualenv (build-time path/mtime
+# rewrites desync the .pyc headers from their .py sources). The first
+# import after install regenerates the affected .pyc on disk, so its
+# md5 no longer matches what dh_md5sums recorded and `debsums -c`
+# flags it. Exclude bytecode from the md5sums file; .py sources and
+# native libs are still checksummed.
+override_dh_md5sums:
+	dh_md5sums -X.pyc -X.pyo
