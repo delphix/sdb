@@ -1,0 +1,5 @@
+"""
+This file has a .disabled extension so it won't be imported by the loader.
+It exists so tests can rename it to .py to test import-error handling.
+"""
+this is not valid python !!!

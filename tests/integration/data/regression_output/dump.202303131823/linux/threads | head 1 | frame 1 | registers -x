@@ -1,0 +1,10 @@
+rbx = 0x0
+rbp = 0xffffb71580017d88
+rsp = 0xffffb71580017d30
+r12 = 0xffff9ac67962f940
+r13 = 0xffff9ac6605e5b80
+r14 = 0xffff9ac576f31e80
+r15 = 0xffffb71580017d48
+rip = 0xffffffff9af7eb0e
+@#$ EXIT CODE $#@
+0

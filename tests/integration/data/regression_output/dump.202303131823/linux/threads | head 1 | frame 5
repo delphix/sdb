@@ -1,0 +1,3 @@
+#5  0xffffffff9a91f8fd in ep_poll (ep=0xffff9ac658b369c0, events=<optimized out>, maxevents=55, timeout=<optimized out>) at eventpoll.c:1933:17
+@#$ EXIT CODE $#@
+0

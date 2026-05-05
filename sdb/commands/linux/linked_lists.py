@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
 
 #
 # The pylint workaround below is for the example
@@ -128,9 +127,9 @@ class LxHList(sdb.Command):
                 raise sdb.CommandError(self.name, str(err))
 
 
-def is_list_empty(l: drgn.Object) -> bool:
+def is_list_empty(list_obj: drgn.Object) -> bool:
     """
     True if list is empty, False otherwise.
     """
-    assert sdb.type_canonical_name(l.type_) == 'struct list_head'
-    return int(l.address_of_().value_()) == int(l.next.value_())
+    assert sdb.type_canonical_name(list_obj.type_) == 'struct list_head'
+    return int(list_obj.address_of_().value_()) == int(list_obj.next.value_())

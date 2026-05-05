@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
 
 #
 # The pylint workaround below is for the example

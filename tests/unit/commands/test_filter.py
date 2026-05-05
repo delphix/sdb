@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
 import pytest
 import drgn
 import sdb

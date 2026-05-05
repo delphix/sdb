@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-function-docstring
 # pylint: disable=line-too-long
 
 from typing import Any
@@ -72,12 +70,11 @@ CMD_TABLE = [
 ] # yapf: disable
 
 
-@pytest.mark.skipif(  # type: ignore[misc]
+@pytest.mark.skipif(
     len(get_crash_dump_dir_paths()) == 0,
     reason="couldn't find any crash/core dumps to run tests against")
-@pytest.mark.parametrize('rdump',
-                         get_all_reference_crash_dumps())  # type: ignore[misc]
-@pytest.mark.parametrize('cmd', CMD_TABLE)  # type: ignore[misc]
+@pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+@pytest.mark.parametrize('cmd', CMD_TABLE)
 def test_cmd_output_and_error_code(capsys: Any, rdump: RefDump,
                                    cmd: str) -> None:
     rdump.verify_cmd_output_and_code(capsys, "zfs", cmd)

@@ -1,0 +1,3 @@
+sdb: registers: symbol not found: bogus_reg
+@#$ EXIT CODE $#@
+1

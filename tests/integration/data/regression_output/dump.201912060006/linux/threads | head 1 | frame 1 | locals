@@ -1,0 +1,13 @@
+preempt = (bool)<optimized out>
+prev = (struct task_struct *)0xffffa089669edc00
+next = (struct task_struct *)<optimized out>
+switch_count = (unsigned long *)<optimized out>
+rf = (struct rq_flags){
+	.flags = (unsigned long)4294967430,
+	.cookie = (struct pin_cookie){},
+	.clock_update_flags = (unsigned int)4,
+}
+rq = (struct rq *)<optimized out>
+cpu = (int)<optimized out>
+@#$ EXIT CODE $#@
+0

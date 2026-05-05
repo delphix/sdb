@@ -1,5 +1,7 @@
+# pylint: disable=too-many-lines
 #
 # Copyright 2019 Delphix
+# Copyright 2025 CoreWeave
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +25,7 @@ registered commands during a session.
 
 import argparse
 import inspect
+import re
 import textwrap
 from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Type, TypeVar
 
@@ -47,6 +50,33 @@ from sdb import target
 all_commands: Set[Type["Command"]] = set({})
 registered_commands: Dict[str, Type["Command"]] = {}
 
+#
+# When True, PrettyPrinters at the end of a pipeline yield their
+# objects instead of calling pretty_print().  This allows the REPL's
+# JSON mode to serialise each object individually via to_json().
+#
+_json_mode: bool = False
+
+#
+# When set, the REPL will use this PrettyPrinter's to_json() method
+# to serialise each object yielded by the pipeline.  This is populated
+# automatically when a PrettyPrinter yields objects in JSON mode.
+#
+_active_json_printer: Optional["PrettyPrinter"] = None
+
+
+def set_json_mode(enabled: bool) -> None:
+    """Toggle the pipeline JSON mode flag."""
+    global _json_mode, _active_json_printer  # pylint: disable=global-statement
+    _json_mode = enabled
+    if not enabled:
+        _active_json_printer = None
+
+
+def get_active_json_printer() -> Optional["PrettyPrinter"]:
+    """Return the active PrettyPrinter for JSON serialisation, if any."""
+    return _active_json_printer
+
 
 def add_command(class_: Type["Command"]) -> None:
     """
@@ -56,11 +86,31 @@ def add_command(class_: Type["Command"]) -> None:
     all_commands.add(class_)
 
 
+# Regex pattern for valid C identifiers (used for command name validation)
+_VALID_COMMAND_NAME_PATTERN = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
+
+
+def is_valid_command_name(name: str) -> bool:
+    """
+    Validate that a command name follows C identifier rules.
+    Must start with a letter or underscore, followed by letters, digits,
+    or underscores. This prevents command names from starting with special
+    characters like ':', ';', ',', '.', '/', '%', etc. which could conflict
+    with mdb compatibility syntax or cause parsing issues.
+    """
+    return bool(_VALID_COMMAND_NAME_PATTERN.match(name))
+
+
 def register_command(name: str, class_: Type["Command"]) -> None:
     """
     Register the specified command name and command class, such that the
     command will be available from the SDB REPL.
     """
+    if not is_valid_command_name(name):
+        raise ValueError(
+            f"Invalid command name '{name}': must start with a letter or underscore "
+            f"and contain only letters, digits, and underscores (C identifier rules)"
+        )
     registered_commands[name] = class_
     if issubclass(class_, Walker):
         Walker.register_walker(class_)
@@ -75,7 +125,6 @@ def get_registered_commands() -> Dict[str, Type["Command"]]:
     return registered_commands
 
 
-# pylint: disable=too-many-branches
 def register_commands() -> None:
     """
     Iterate over the set of all commands and register the ones appropriate for the
@@ -152,17 +201,13 @@ class Command:
         if cls.__doc__:
             summary = (
                 inspect.getdoc(  # type: ignore[union-attr]
-                    cls
-                )
-                .splitlines()[0]
-                .strip()
-            )
+                    cls).splitlines()[0].strip())
         else:
             summary = None
         return argparse.ArgumentParser(prog=name, description=summary)
 
     @classmethod
-    def help_text(cls):
+    def help_text(cls) -> List[str]:
         """
         This method auto-generates help text for the command based off of sub-classes.
         """
@@ -172,13 +217,11 @@ class Command:
                 f"If this command is used to end a pipeline, it will print a"
                 f" human-readable decoding of the '{cls.input_type}' objects."
                 f" For the 'raw' object contents, pipe the output of this"
-                f" command into 'echo'."
-            )
+                f" command into 'echo'.")
 
         if issubclass(cls, Walker):
             paragraphs.append(
-                f"This is a Walker for {cls.input_type}. See 'help walk'."
-            )
+                f"This is a Walker for {cls.input_type}. See 'help walk'.")
 
         if cls.input_type is not None:
             #
@@ -201,15 +244,13 @@ class Command:
             loc_text = (
                 f"This is a Locator for {cls.output_type}.  It finds objects"
                 f" of this type and outputs or pretty-prints them.  It accepts"
-                f" any Walkable type (run 'walk' for a list)."
-            )
+                f" any Walkable type (run 'walk' for a list).")
             if cls.no_input != Locator.no_input:
                 loc_text += (
                     f" This command can be used to start a pipeline, in which"
                     f" case it will consume no objects as input; instead it"
                     f" will locate all objects of type '{cls.output_type}',"
-                    f" and emit them as output."
-                )
+                    f" and emit them as output.")
             types = []
             for _, method in inspect.getmembers(cls, inspect.isroutine):
                 if hasattr(method, "input_typename_handled"):
@@ -218,8 +259,7 @@ class Command:
                 loc_text += (
                     f" Input of the following types is also accepted,"
                     f" in which case the objects of type {cls.output_type}"
-                    f" which are associated with them will be located:"
-                )
+                    f" which are associated with them will be located:")
             for type_name in types:
                 loc_text += f"{type_name}"
                 if type_name != types[-1]:
@@ -237,7 +277,6 @@ class Command:
         command class that it's called on. The docstring and parser for
         the class is used to populate the contents of the message.
         """
-        # pylint: disable=too-many-branches
         parser = cls._init_parser(name)
 
         print("SUMMARY")
@@ -261,10 +300,9 @@ class Command:
         paragraphs = cls.help_text()
         for paragraph in paragraphs:
             print(
-                textwrap.fill(
-                    paragraph, initial_indent=indent, subsequent_indent=indent
-                )
-            )
+                textwrap.fill(paragraph,
+                              initial_indent=indent,
+                              subsequent_indent=indent))
             print()
 
         #
@@ -284,8 +322,7 @@ class Command:
             # line should be empty. Thus, we skip these two lines.
             #
             for line in inspect.getdoc(  # type: ignore[union-attr]
-                cls
-            ).splitlines()[2:]:
+                    cls).splitlines()[2:]:
                 print(f"{line}")
             print()
 
@@ -303,7 +340,9 @@ class Command:
 
     input_type: Optional[str] = None
 
-    def __init__(self, args: Optional[List[str]] = None, name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         self.name = name
         self.isfirst = False
         self.islast = False
@@ -349,24 +388,20 @@ class Command:
         such that the command will be automatically integrated with the
         SDB REPL.
         """
-        #
-        # We ignore the type failure below because of the following issue:
-        # https://github.com/python/mypy/issues/4660
-        #
-        super().__init_subclass__(**kwargs)  # type: ignore[call-arg]
+        super().__init_subclass__(**kwargs)
         if len(cls.names) == 0:
             return
         add_command(cls)
 
-    def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+    def _call(self,
+              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         """
         Implemented by the subclass.
         """
         raise NotImplementedError()
 
-    def __invalid_memory_objects_check(
-        self, objs: Iterable[drgn.Object], fatal: bool
-    ) -> Iterable[drgn.Object]:
+    def __invalid_memory_objects_check(self, objs: Iterable[drgn.Object],
+                                       fatal: bool) -> Iterable[drgn.Object]:
         """
         A filter method for objects passed through the pipeline that
         are backed by invalid memory. When `fatal` is set to True
@@ -385,20 +420,16 @@ class Command:
                 continue
             except TypeError as err:
                 obj_type = type_canonicalize(obj.type_)
-                if (
-                    obj_type.kind == drgn.TypeKind.ARRAY
-                    and not obj_type.is_complete()
-                    and not obj.absent_
-                ):
+                if (obj_type.kind == drgn.TypeKind.ARRAY and
+                        not obj_type.is_complete() and not obj.absent_):
                     #
                     # This is a zero-length array, let it go through.
                     #
                     yield obj
                     continue
                 if obj_type.kind == drgn.TypeKind.FUNCTION:
-                    cerr = CommandError(
-                        self.name, "cannot dereference function pointer"
-                    )
+                    cerr = CommandError(self.name,
+                                        "cannot dereference function pointer")
                     if fatal:
                         raise cerr from err
                     print(cerr.text)
@@ -412,13 +443,14 @@ class Command:
                     err_msg = str(err)
                 else:
                     err_msg = f"addresss {hex(obj.address_of_().value_())}"
-                err = CommandError(self.name, f"invalid memory access: {err_msg}")
+                err = CommandError(self.name,
+                                   f"invalid memory access: {err_msg}")
                 if fatal:
                     raise err
                 print(err.text)
                 continue
             except drgn.ObjectAbsentError as err:
-                # XXX - maybe just go ahead and yield the object?
+                # Note: maybe just go ahead and yield the object?
                 if fatal:
                     raise CommandError(self.name, str(err)) from err
                 print(str(err))
@@ -426,7 +458,6 @@ class Command:
             yield obj
 
     def call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
-        # pylint: disable=missing-docstring
         #
         # Even though we have __invalid_memory_objects_check() to
         # ensure that the objects returned are valid, we still
@@ -445,10 +476,10 @@ class Command:
                 # accordinly.
                 #
                 yield from self.__invalid_memory_objects_check(
-                    result, not issubclass(self.__class__, SingleInputCommand)
-                )
+                    result, not issubclass(self.__class__, SingleInputCommand))
         except drgn.FaultError as err:
-            raise CommandError(self.name, f"invalid memory access: {str(err)}") from err
+            raise CommandError(self.name,
+                               f"invalid memory access: {str(err)}") from err
 
 
 class SingleInputCommand(Command):
@@ -512,7 +543,6 @@ class Walker(Command):
         Walker.allWalkers[class_.input_type] = class_
 
     def walk(self, obj: drgn.Object) -> Iterable[drgn.Object]:
-        # pylint: disable=missing-docstring
         raise NotImplementedError
 
     # Iterate over the inputs and call the walk command on each of them,
@@ -553,10 +583,46 @@ class PrettyPrinter(Command):
         PrettyPrinter.all_printers[class_.input_type] = class_
 
     def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
-        # pylint: disable=missing-docstring
         raise NotImplementedError
 
-    def check_input_type(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
+    def to_json(self, obj: drgn.Object) -> Dict[str, Any]:  # pylint: disable=unused-argument
+        """
+        Serialize a single object to a JSON-friendly dict.
+
+        Override this in subclasses to control the --json output for
+        this PrettyPrinter's input type. The default returns an empty
+        dict, which tells the REPL to use generic drgn.Object serialization.
+        """
+        return {}
+
+    def to_json_aggregate(
+        self,
+        objs: Iterable[drgn.Object],
+    ) -> List[Dict[str, Any]]:
+        """
+        Serialize a collection of objects to a list of JSON-friendly dicts.
+
+        This is the aggregate counterpart to ``pretty_print()``: it
+        receives the full iterable of typed objects that would normally
+        be pretty-printed and returns the complete JSON result list.
+
+        The default implementation delegates to ``to_json()`` per object
+        (falling through to the generic serializer when ``to_json()``
+        returns an empty dict).  Override this in subclasses that need
+        cross-object context for their JSON output — e.g. grouping,
+        aggregation, or sorting.
+        """
+        results: List[Dict[str, Any]] = []
+        for obj in objs:
+            entry = self.to_json(obj)
+            if not entry:
+                # Fall through — the REPL's generic serializer will handle it
+                entry = {}
+            results.append(entry)
+        return results
+
+    def check_input_type(self,
+                         objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         """
         This function acts as a generator, checking that each passed object
         matches the input type for the command
@@ -573,13 +639,21 @@ class PrettyPrinter(Command):
             yield obj
 
     def _call(  # type: ignore[return]
-        self, objs: Iterable[drgn.Object]
-    ) -> Optional[Iterable[drgn.Object]]:
+            self,
+            objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         """
         This function will call pretty_print() on each input object,
         verifying the types as we go.
+
+        In JSON mode, objects are yielded instead of pretty-printed so
+        the REPL can serialise them via to_json().
         """
         assert self.input_type is not None
+        if _json_mode:
+            global _active_json_printer  # pylint: disable=global-statement
+            _active_json_printer = self
+            yield from self.check_input_type(objs)
+            return  # type: ignore[return-value]
         self.pretty_print(self.check_input_type(objs))
 
 
@@ -596,7 +670,6 @@ class Locator(Command):
     output_type: Optional[str] = None
 
     def no_input(self) -> Iterable[drgn.Object]:
-        # pylint: disable=missing-docstring
         raise CommandError(self.name, "command requires an input")
 
     def caller(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
@@ -612,7 +685,8 @@ class Locator(Command):
         for _, method in inspect.getmembers(self, inspect.ismethod):
             if not hasattr(method, "input_typename_handled"):
                 continue
-            baked[type_canonicalize_name(method.input_typename_handled)] = method
+            baked[type_canonicalize_name(
+                method.input_typename_handled)] = method
 
         if self.isfirst:
             assert not objs
@@ -650,20 +724,26 @@ class Locator(Command):
                     pass
 
             # error
-            raise CommandError(self.name, f"no handler for input of type {i.type_}")
+            raise CommandError(self.name,
+                               f"no handler for input of type {i.type_}")
 
-    def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
-        # pylint: disable=missing-docstring
+    def _call(self,
+              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         # If this is a hybrid locator/pretty printer, this is where that is
-        # leveraged.
-        if self.islast and isinstance(self, PrettyPrinter):
+        # leveraged.  In JSON mode we bypass pretty_print() so that the
+        # REPL can serialise each object via to_json().
+        if self.islast and isinstance(self, PrettyPrinter) and not _json_mode:
             # pylint: disable=no-member
             self.pretty_print(self.caller(objs))
-        else:
-            yield from self.caller(objs)
+            return None
+        if _json_mode and self.islast and isinstance(self, PrettyPrinter):
+            global _active_json_printer  # pylint: disable=global-statement
+            _active_json_printer = self
+        yield from self.caller(objs)
+        return None
 
 
-T = TypeVar("T", bound=Locator)
+T = TypeVar("T", bound=Locator)  # pylint: disable=invalid-name
 IH = Callable[[T, drgn.Object], Iterable[drgn.Object]]
 
 
@@ -693,7 +773,9 @@ class Cast(Command):
         parser.add_argument("type", nargs=argparse.REMAINDER)
         return parser
 
-    def __init__(self, args: Optional[List[str]] = None, name: str = "_") -> None:
+    def __init__(self,
+                 args: Optional[List[str]] = None,
+                 name: str = "_") -> None:
         super().__init__(args, name)
         if not self.args.type:
             self.parser.error("the following arguments are required: <type>")
@@ -702,7 +784,8 @@ class Cast(Command):
         try:
             self.type = target.get_type(tname)
         except LookupError as err:
-            raise CommandError(self.name, f"could not find type '{tname}'") from err
+            raise CommandError(self.name,
+                               f"could not find type '{tname}'") from err
 
     def _call(self, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
         for obj in objs:
@@ -736,11 +819,14 @@ class Dereference(Command):
             obj_type = type_canonicalize(obj.type_)
             if obj_type.kind != drgn.TypeKind.POINTER:
                 raise CommandError(
-                    self.name, f"'{obj.type_.type_name()}' is not a valid pointer type"
-                )
+                    self.name,
+                    f"'{obj.type_.type_name()}' is not a valid pointer type")
             if obj_type.type.type_name() == "void":
-                raise CommandError(self.name, "cannot dereference a void pointer")
-            yield drgn.Object(get_prog(), type=obj.type_.type, address=obj.value_())
+                raise CommandError(self.name,
+                                   "cannot dereference a void pointer")
+            yield drgn.Object(get_prog(),
+                              type=obj.type_.type,
+                              address=obj.value_())
 
 
 class Address(Command):
@@ -799,7 +885,6 @@ class Address(Command):
 
     @staticmethod
     def is_hex(arg: str) -> bool:
-        # pylint: disable=missing-docstring
         try:
             int(arg, 16)
             return True
@@ -808,7 +893,6 @@ class Address(Command):
 
     @staticmethod
     def resolve_for_address(arg: str) -> drgn.Object:
-        # pylint: disable=missing-docstring
         if Address.is_hex(arg):
             return target.create_object("void *", int(arg, 16))
         return target.get_object(arg).address_of_()
@@ -897,7 +981,8 @@ class Walk(Command):
             obj_type = type_canonicalize(i.type_)
             # if type is foo_t change to foo_t *
             if obj_type.kind != drgn.TypeKind.POINTER:
-                i = target.create_object(target.get_pointer_type(obj_type), i.address_)
+                i = target.create_object(target.get_pointer_type(obj_type),
+                                         i.address_)
 
             this_type_name = type_canonical_name(i.type_)
             if this_type_name not in baked:
@@ -912,7 +997,7 @@ class Walk(Command):
             print(Walk._help_message())
 
 
-def InputHandler(typename: str) -> Callable[[IH[T]], IH[T]]:
+def InputHandler(typename: str) -> Callable[[IH[T]], IH[T]]:  # pylint: disable=invalid-name
     """
     This is a decorator which should be applied to methods of subclasses of
     Locator. The decorator causes this method to be called when the pipeline

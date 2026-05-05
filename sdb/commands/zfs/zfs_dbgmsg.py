@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
 import argparse
 import datetime
 from typing import Iterable

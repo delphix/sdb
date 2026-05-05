@@ -1,0 +1,3 @@
+BOOT_IMAGE=/ROOT/delphix.gX9jjSh/root@/boot/vmlinuz-5.0.0-36-generic root=ZFS=rpool/ROOT/delphix.gX9jjSh/root ro console=tty0 console=ttyS0,38400n8 mitigations=off ipv6.disable=1 elevator=noop crashkernel=256M,high crashkernel=256M,low
+@#$ EXIT CODE $#@
+0

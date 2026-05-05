@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-module-docstring
-# pylint: disable=missing-function-docstring
 # pylint: disable=line-too-long
 
 from typing import Any, List
@@ -89,7 +87,7 @@ POS_CMDS = [
     # (still a positive tests because we want to keep going besides inconsistencies)
     'slabs | filter \'obj.name == "UNIX"\' | slub_cache | count',
 
-    # stacks
+    # stacks - disabled due to second ref dump issues
     "stacks",
     "stacks -a",
     "stacks -m zfs",
@@ -110,7 +108,39 @@ POS_CMDS = [
     "whatis 0xffffa089407ca870",
     "whatis 0xffffa0888c766000 0xffffa089407ca870",
     "whatis 0xffff",
-    "whatis 0xf987kkbbh"
+    "whatis 0xf987kkbbh",
+
+    # trace/bt
+    "threads | head 1 | trace",
+
+    # frame
+    "threads | head 1 | frame 0",
+    "threads | head 1 | frame 5",
+
+    # locals
+    "threads | head 1 | frame 1 | locals",
+    "threads | head 1 | frame 1 | locals -v",
+
+    # registers
+    "threads | head 1 | frame 1 | registers",
+    "threads | head 1 | frame 1 | registers -x",
+    "threads | head 1 | frame 1 | registers rbp rsp",
+
+    # kcmdline
+    "kcmdline",
+
+    # serial_number
+    "serial_number",
+
+    # lsmod
+    "lsmod",
+    "lsmod | count",
+    'lsmod | filter \'obj.refcnt.counter > 1\' | lsmod',
+
+    # lspci
+    "lspci",
+    "lspci | count",
+    'lspci | filter \'obj.vendor == 0x15ad\' | lspci',
 ]
 
 STRIPPED_POS_CMDS = [
@@ -162,6 +192,18 @@ NEG_CMDS = [
     "stacks -c bogus",
     "stacks -t bogus",
     "stacks -m bogus | count",
+
+    # trace/bt
+    "trace 0xbogusaddress",
+
+    # frame
+    "threads | head 1 | frame 999",
+
+    # locals
+    "threads | head 1 | frame 1 | locals bogus_var",
+
+    # registers
+    "threads | head 1 | frame 1 | registers bogus_reg",
 ]
 
 CMD_TABLE = POS_CMDS + STRIPPED_POS_CMDS + NEG_CMDS + POS_CMDS_201912060006
@@ -171,23 +213,19 @@ def non_stripped_cmds() -> List[str]:
     return POS_CMDS + NEG_CMDS + POS_CMDS_201912060006
 
 
-@pytest.mark.skipif(  # type: ignore[misc]
-    len(get_crash_dump_dir_paths()) == 0,
-    reason="couldn't find any crash dumps to run tests against")
-@pytest.mark.parametrize('rdump',
-                         get_all_reference_crash_dumps())  # type: ignore[misc]
-@pytest.mark.parametrize('cmd', non_stripped_cmds())  # type: ignore[misc]
+@pytest.mark.skipif(len(get_crash_dump_dir_paths()) == 0,
+                    reason="couldn't find any crash dumps to run tests against")
+@pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+@pytest.mark.parametrize('cmd', non_stripped_cmds())
 def test_cmd_output_and_error_code(capsys: Any, rdump: RefDump,
                                    cmd: str) -> None:
     rdump.verify_cmd_output_and_code(capsys, "linux", cmd)
 
 
-@pytest.mark.skipif(  # type: ignore[misc]
-    len(get_crash_dump_dir_paths()) == 0,
-    reason="couldn't find any crash dumps to run tests against")
-@pytest.mark.parametrize('rdump',
-                         get_all_reference_crash_dumps())  # type: ignore[misc]
-@pytest.mark.parametrize('cmd', STRIPPED_POS_CMDS)  # type: ignore[misc]
+@pytest.mark.skipif(len(get_crash_dump_dir_paths()) == 0,
+                    reason="couldn't find any crash dumps to run tests against")
+@pytest.mark.parametrize('rdump', get_all_reference_crash_dumps())
+@pytest.mark.parametrize('cmd', STRIPPED_POS_CMDS)
 def test_cmd_stripped_output_and_error_code_0(capsys: Any, rdump: RefDump,
                                               cmd: str) -> None:
     rdump.verify_cmd_output_and_code(capsys, "linux", cmd, True)

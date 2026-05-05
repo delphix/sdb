@@ -15,10 +15,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
-import os
-
 import drgn
 import sdb
 

@@ -1,0 +1,4 @@
+# Runtime dependencies for SDB
+# Install with: pip install -r requirements.txt
+
+drgn

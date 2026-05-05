@@ -3,7 +3,7 @@
 #
 # Assumptions for this to work:
 # [1] This script is executed from the root of the SDB repo
-# [2] The archive downloaded from S3 has one of the following profiles:
+# [2] The archive downloaded from gdrive has one of the following profiles:
 #     Profile A - It is lzma-compressed and has the following file structure:
 #           dump-data
 #           ├── dump.201912060006
@@ -33,12 +33,8 @@ if [ ! -d $DATA_DIR ]; then
 	exit 1
 fi
 
-if [ -f "$1" ]; then
-	echo "Found $1 locally, skip download ..."
-else
-	echo "downloading of $1 from S3 ..."
-	wget https://sdb-testing-bucket.s3.us-west-2.amazonaws.com/$1
-	[ $? -eq 0 ] || exit 1
+if [ ! -f "$1" ]; then
+	echo "error: $1: file not found"
 fi
 
 if [[ $1 == *.tar.lzma ]]; then

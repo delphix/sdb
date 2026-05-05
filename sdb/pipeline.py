@@ -1,5 +1,6 @@
 #
 # Copyright 2019 Delphix
+# Copyright 2025 CoreWeave
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,11 +28,11 @@ from sdb import parser
 from sdb import target
 from sdb.error import CommandArgumentsError, CommandNotFoundError
 from sdb.command import Address, Cast, Command, get_registered_commands
+from sdb.mdb_compat import preprocess_mdb_syntax
 
 
 def massage_input_and_call(
-    cmd: Command, objs: Iterable[drgn.Object]
-) -> Iterable[drgn.Object]:
+        cmd: Command, objs: Iterable[drgn.Object]) -> Iterable[drgn.Object]:
     """
     Commands can declare that they accept input of type "foo_t*" by
     setting their input_type. They can be passed input of type "void *"
@@ -53,24 +54,22 @@ def massage_input_and_call(
     first_obj_type, objs = get_first_type(objs)
     if first_obj_type is not None:
         # If we are passed a void*, cast it to the expected type.
-        if (
-            first_obj_type.kind is drgn.TypeKind.POINTER
-            and first_obj_type.type.primitive is drgn.PrimitiveType.C_VOID
-        ):
+        if (first_obj_type.kind is drgn.TypeKind.POINTER and
+                first_obj_type.type.primitive is drgn.PrimitiveType.C_VOID):
             yield from execute_pipeline(objs, [Cast([cmd.input_type]), cmd])
             return
 
         # If we are passed a foo_t when we expect a foo_t*, use its address.
-        if target.type_equals(target.get_pointer_type(first_obj_type), expected_type):
+        if target.type_equals(target.get_pointer_type(first_obj_type),
+                              expected_type):
             yield from execute_pipeline(objs, [Address(), cmd])
             return
 
     yield from cmd.call(objs)
 
 
-def execute_pipeline(
-    first_input: Iterable[drgn.Object], pipeline: List[Command]
-) -> Iterable[drgn.Object]:
+def execute_pipeline(first_input: Iterable[drgn.Object],
+                     pipeline: List[Command]) -> Iterable[drgn.Object]:
     """
     This function executes the specified pipeline (i.e. the list of
     Command objects) and yields the output. It recurses through,
@@ -86,13 +85,19 @@ def execute_pipeline(
     yield from massage_input_and_call(pipeline[-1], this_input)
 
 
-def invoke(first_input: Iterable[drgn.Object], line: str) -> Iterable[drgn.Object]:
+def invoke(first_input: Iterable[drgn.Object],
+           line: str) -> Iterable[drgn.Object]:
     """
     This function intends to integrate directly with the SDB REPL, such
     that the REPL will pass in the user-specified line, and this
     function is responsible for converting that string into the
     appropriate pipeline of Command objects, and executing it.
     """
+
+    #
+    # Preprocess mdb-style syntax (e.g., 'symbol::cmd' -> 'addr symbol | cmd')
+    #
+    line = preprocess_mdb_syntax(line)
 
     #
     # Build the pipeline by constructing each of the commands we want to
@@ -135,15 +140,12 @@ def invoke(first_input: Iterable[drgn.Object], line: str) -> Iterable[drgn.Objec
         # re-arrange our std_out.
         #
         # pylint: disable=consider-using-with
-        shell_proc = subprocess.Popen(
-            shell_cmd, shell=True, stdin=subprocess.PIPE, encoding="utf-8"
-        )
+        shell_proc = subprocess.Popen(shell_cmd,
+                                      shell=True,
+                                      stdin=subprocess.PIPE,
+                                      encoding="utf-8")
         old_stdout = sys.stdout
-        #
-        # The type ignore below is due to the following false positive:
-        # https://github.com/python/typeshed/issues/1229
-        #
-        sys.stdout = shell_proc.stdin  # type: ignore[assignment]
+        sys.stdout = shell_proc.stdin
 
     try:
         if pipeline:
@@ -151,7 +153,7 @@ def invoke(first_input: Iterable[drgn.Object], line: str) -> Iterable[drgn.Objec
             pipeline[-1].islast = True
             yield from execute_pipeline(first_input, pipeline)
 
-        if shell_cmd is not None:
+        if shell_cmd is not None and shell_proc.stdin is not None:
             shell_proc.stdin.flush()
             shell_proc.stdin.close()
 
@@ -162,8 +164,7 @@ def invoke(first_input: Iterable[drgn.Object], line: str) -> Iterable[drgn.Objec
 
 
 def get_first_type(
-    objs: Iterable[drgn.Object],
-) -> Tuple[drgn.Type, Iterable[drgn.Object]]:
+    objs: Iterable[drgn.Object],) -> Tuple[drgn.Type, Iterable[drgn.Object]]:
     """
     Determine the type of the first object in the iterable. The first element
     in the iterable will be consumed. Therefore, a tuple is returned with the
