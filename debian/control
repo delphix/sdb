@@ -1,11 +1,27 @@
 Source: sdb
-Section: misc
+Section: utils
 Priority: optional
-Maintainer: Serapheim Dimitropoulos <serapheimd@gmail.com>
-Standards-Version: 4.1.2
-Build-Depends: debhelper (>= 9), dh-python, python3
+Maintainer: Delphix Engineering <eng@delphix.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-virtualenv (>= 1.2.2),
+ python3,
+ python3-dev,
+ python3-pip,
+ python3-setuptools,
+ python3-venv
+Standards-Version: 4.6.2
+Homepage: https://github.com/sdimitro/sdb
 
 Package: sdb
-Architecture: any
+Architecture: amd64
 Depends: ${shlibs:Depends}, ${python3:Depends}
-Description: The Slick/Simple Debugger
+Description: kernel debugger built on drgn
+ sdb is a high-level kernel debugger built on top of drgn.
+ .
+ This package bundles drgn, kdumpling, pyelftools, and their
+ transitive Python dependencies inside a self-contained virtualenv at
+ /opt/venvs/sdb/. The /usr/bin/sdb entry point activates the
+ venv. No external runtime dependency on libkdumpfile is required —
+ drgn's manylinux wheel ships a bundled libkdumpfile.so via auditwheel
+ with RPATH=$ORIGIN/drgn.libs.
