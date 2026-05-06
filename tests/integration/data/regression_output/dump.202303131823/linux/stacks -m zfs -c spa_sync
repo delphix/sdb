@@ -1,7 +1,7 @@
 TASK_STRUCT        STATE             COUNT
 ==========================================
 0xffff9ac5bb82db80 UNINTERRUPTIBLE       1
-                  __schedule+0x2de
+                  context_switch (inlined)
                   __schedule+0x2de
                   schedule+0x42
                   schedule_timeout+0x8a

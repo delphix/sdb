@@ -1,0 +1,23 @@
+# Development dependencies for SDB
+# Install with: pip install -r requirements-dev.txt
+
+# Include runtime dependencies
+-r requirements.txt
+
+# Linting
+pylint
+ruff
+
+# Type checking
+mypy
+
+# Code formatting
+yapf
+
+# Testing
+pytest
+pytest-cov
+
+# Build tools (for publishing)
+build
+twine

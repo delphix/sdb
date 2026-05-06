@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
 import argparse
 from enum import Enum
 from typing import Iterable, List, Tuple

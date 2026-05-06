@@ -1,0 +1,3 @@
+#0  0xffffffff9af7eb0e in context_switch (rq=<optimized out>, prev=<optimized out>, next=<optimized out>, rf=<optimized out>) at core.c:3484:2 (inlined)
+@#$ EXIT CODE $#@
+0

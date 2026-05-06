@@ -1,0 +1,175 @@
+#
+# Release workflow - triggered on version tag push (e.g., v0.2.0) or manually
+#
+# This workflow:
+# 1. Runs all CI checks (lint, type-check, tests)
+# 2. Builds the package (sdist + wheel)
+# 3. Publishes to PyPI using Trusted Publishing (OIDC)
+# 4. Creates a GitHub Release with auto-generated notes
+#
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'  # Allow pre-release tags like v0.2.0-beta1
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g., v0.2.0)'
+        required: true
+        type: string
+
+env:
+  # Use input tag for workflow_dispatch, or ref_name for tag push
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+
+# Required for PyPI Trusted Publishing (OIDC)
+permissions:
+  contents: write  # For creating GitHub releases
+  id-token: write  # For PyPI OIDC authentication
+
+jobs:
+  #
+  # Run all CI checks before releasing
+  #
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: ./.github/scripts/install-drgn.sh
+      - run: python3 -m pip install pylint pytest ruff yapf
+      - run: python3 -m pip install .
+      - run: pylint -d duplicate-code -d invalid-name -d missing-docstring -d import-outside-toplevel -d too-many-branches -d missing-module-docstring -d missing-function-docstring sdb
+      - run: pylint -d duplicate-code -d invalid-name -d missing-docstring -d import-outside-toplevel -d too-many-branches -d missing-module-docstring -d missing-function-docstring tests
+      - run: ruff check sdb tests
+      - run: yapf --diff --style google --recursive sdb
+      - run: yapf --diff --style google --recursive tests
+
+  type-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: ./.github/scripts/install-drgn.sh
+      - run: python3 -m pip install mypy pytest
+      - run: python3 -m pip install .
+      - run: python3 -m mypy --strict --show-error-codes -p sdb
+      - run: python3 -m mypy --strict --ignore-missing-imports --show-error-codes -p tests
+
+  test-unit:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python3 -m pip install pytest pytest-cov
+      - run: ./.github/scripts/install-drgn.sh
+      - run: python3 -m pip install .
+      - run: pytest -v --cov sdb --cov-report xml tests/unit
+
+  test-integration:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.12']
+    env:
+      AWS_DEFAULT_REGION: 'us-west-2'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python3 -m pip install pytest pytest-cov
+      - run: ./.github/scripts/install-libkdumpfile.sh
+      - run: ./.github/scripts/install-drgn.sh
+      - run: python3 -m pip install .
+      - run: ./.github/scripts/download-dumps-from-gdrive.sh
+      - run: ./.github/scripts/extract-dump.sh dump.201912060006.tar.lzma
+      - run: ./.github/scripts/extract-dump.sh dump.202303131823.tar.gz
+      - run: pytest -v --cov sdb --cov-report xml tests/integration
+
+  #
+  # Build the package
+  #
+  build:
+    needs: [lint, type-check, test-unit, test-integration]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+          fetch-depth: 0  # Required for setuptools_scm to get version from tags
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install build dependencies
+        run: python3 -m pip install build
+      - name: Build package
+        run: python3 -m build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  #
+  # Publish to PyPI using Trusted Publishing (OIDC)
+  #
+  publish-pypi:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: pypi
+      url: https://pypi.org/project/sdb-debugger/
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  #
+  # Create GitHub Release with auto-generated notes
+  #
+  github-release:
+    needs: publish-pypi
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+          fetch-depth: 0  # Required for generating release notes
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          gh release create '${{ env.RELEASE_TAG }}' \
+            --title 'sdb ${{ env.RELEASE_TAG }}' \
+            --generate-notes \
+            dist/*

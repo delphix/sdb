@@ -14,12 +14,10 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-docstring
-
 import argparse
-import textwrap
+import os
 from textwrap import shorten
-from typing import Callable, Dict, Iterable, Optional, Union
+from typing import Callable, Dict, Iterable, List, Optional, Union
 
 import drgn
 from drgn.helpers.linux.pid import for_each_task
@@ -30,8 +28,8 @@ from sdb.commands.internal.table import Table
 from sdb.commands.linux.stacks import KernelStacks
 from sdb.error import SymbolNotFoundError
 
-TraceContext = None
-FrameContext = None
+# Maximum width for command line display in threads output
+CMDLINE_MAX_WIDTH = 50
 
 
 def _cmdline(obj: drgn.Object) -> str:
@@ -48,7 +46,7 @@ def _cmdline(obj: drgn.Object) -> str:
         # the cost of not always showing the full command line of a
         # thread.
         #
-        return shorten(s, width=50)
+        return shorten(s, width=CMDLINE_MAX_WIDTH)
     except drgn.FaultError:
         #
         # The command line information is contained in the user address
@@ -99,7 +97,9 @@ class KernelThreads(sdb.Locator, sdb.PrettyPrinter):
         fields = list(KernelThreads.FIELDS.keys())
         table = Table(fields, None, {"task": str})
         for obj in objs:
-            row_dict = {field: KernelThreads.FIELDS[field](obj) for field in fields}
+            row_dict = {
+                field: KernelThreads.FIELDS[field](obj) for field in fields
+            }
             table.add_row(row_dict["task"], row_dict)
         table.print_()
 
@@ -122,10 +122,8 @@ def _framestr(frame_index: int, frame: drgn.StackFrame, args: bool) -> str:
     Returns:
         Formatted frame string like: "#0  0xaddr in function() at file.c:line:col (inlined)"
     """
-    # Format frame index with padding for alignment
-    id_str = f"#{frame_index}"
-    if len(id_str) < 3:
-        id_str = id_str + " "
+    # Format frame index with padding for alignment (e.g., "#0 ", "#10")
+    id_str = f"#{frame_index:<2}"
 
     # Get program counter (address) - pc is always available as a Final[int] attribute
     addr = hex(frame.pc)
@@ -149,7 +147,7 @@ def _framestr(frame_index: int, frame: drgn.StackFrame, args: bool) -> str:
     try:
         filename, line, column = frame.source()
         # Extract just the filename from the full path
-        filename_only = filename.split("/")[-1] if filename else "??"
+        filename_only = os.path.basename(filename) if filename else "??"
         location_str = f" at {filename_only}:{line}:{column}"
     except LookupError:
         # No source information available
@@ -159,6 +157,7 @@ def _framestr(frame_index: int, frame: drgn.StackFrame, args: bool) -> str:
     inline_str = " (inlined)" if frame.is_inline else ""
 
     return id_str + " " + addr + function_str + location_str + inline_str
+
 
 def _funcstr(frame: drgn.StackFrame) -> str:
     name = frame.name
@@ -177,7 +176,12 @@ def _funcstr(frame: drgn.StackFrame) -> str:
             func_info += ", "
         func_info += f"{parm.name}"
         try:
-            func_info += f"={(frame[parm.name].format_(dereference=False, type_name=False, member_type_names=False, member_names=False, members_same_line=True))}"
+            val = frame[parm.name].format_(dereference=False,
+                                           type_name=False,
+                                           member_type_names=False,
+                                           member_names=False,
+                                           members_same_line=True)
+            func_info += f"={val}"
         except KeyError:
             func_info += "=<absent>"
         first = False
@@ -229,37 +233,34 @@ class KernelTrace(sdb.Locator, sdb.PrettyPrinter):
         return parser
 
     @classmethod
-    def help_text(cls):
+    def help_text(cls) -> List[str]:
         p1 = (
-            "If this command is used to end a pipeline, it will print a"
-            + " human-readable decoding of the execution state of threads."
-            + " Otherwise, it will set the current thread context to the final"
-            + " input thread and return the threads that were input to it."
-        )
-        p2 = (
-            "This command can be used to start a pipeline, in which"
-            + " case it will use the current thread context as input."
-        )
+            "If this command is used to end a pipeline, it will print a" +
+            " human-readable decoding of the execution state of threads." +
+            " Otherwise, it will set the current thread context to the final" +
+            " input thread and return the threads that were input to it.")
+        p2 = ("This command can be used to start a pipeline, in which" +
+              " case it will use the current thread context as input.")
         return [p1, p2]
 
-    def pretty_print(self, threads: Iterable[drgn.Object]) -> None:
+    def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
         if not self.isfirst and self.args.task:
-            raise sdb.CommandError(self.name, "<task> argument not allowed with input")
-        for thread in threads:
+            raise sdb.CommandError(self.name,
+                                   "<task> argument not allowed with input")
+        for thread in objs:
             try:
                 stack_trace = sdb.get_prog().stack_trace(thread)
-            except drgn.FaultError:
-                raise sdb.CommandError(self.name, f"Thread {hex(thread)} not found")
-            except LookupError:
+            except drgn.FaultError as err:
                 raise sdb.CommandError(
-                    self.name, f"Thread with id {hex(thread)} not found"
-                )
+                    self.name, f"Thread {hex(thread)} not found") from err
+            except LookupError as err:
+                raise sdb.CommandError(
+                    self.name,
+                    f"Thread with id {hex(thread)} not found") from err
             sdb.set_thread(thread)
-            print(
-                f"TASK: {hex(thread.value_())} "
-                + str(KernelStacks.task_struct_get_state(thread))
-                + f" PID: {int(thread.pid)}"
-            )
+            print(f"TASK: {hex(thread.value_())} " +
+                  str(KernelStacks.task_struct_get_state(thread)) +
+                  f" PID: {int(thread.pid)}")
             for frame_index, frame in enumerate(stack_trace):
                 if frame.pc == 0:
                     # Note: We filter out frames with zero program counter,
@@ -270,13 +271,12 @@ class KernelTrace(sdb.Locator, sdb.PrettyPrinter):
     def no_input(self) -> Iterable[drgn.Object]:
         if self.args.task:
             try:
-                yield sdb.target.create_object(
-                    "struct task_struct *", int(self.args.task, 16)
-                )
-            except ValueError:
+                yield sdb.target.create_object("struct task_struct *",
+                                               int(self.args.task, 16))
+            except ValueError as err:
                 raise sdb.CommandError(
-                    self.name, f"Invalid task address: {self.args.task}"
-                )
+                    self.name,
+                    f"Invalid task address: '{self.args.task}'") from err
         else:
             yield sdb.get_thread()
 
@@ -287,7 +287,7 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
 
     EXAMPLE
         sdb> frame 7
-        #7  0xffffffffc048c8d1 in thread_generic_wrapper (arg=0xffff94614f3cc400) at spl-thread.c:61:3
+        #7  0xffffffffc048c8d1 in thread_generic_wrapper (arg=...) at spl-thread.c:61:3
     """
 
     names = ["stackframe", "frame", "f"]
@@ -316,22 +316,23 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
         return parser
 
     @classmethod
-    def help_text(cls):
+    def help_text(cls) -> List[str]:
         p1 = (
             "This command is used to set the context for the 'locals' and 'registers'"
-            + " commands. If no frame is specified, the most recent frame is used. If"
-            + " no thread is input, the current thread context is used."
-        )
-        p2 = (
-            "If this command is used to end a pipeline, it will print a"
-            + " human-readable decoding of the requested stack frame for"
-            + " each stack trace provided. Otherwise, it will set the current"
-            + " frame context to the specified frame and return the threads"
-            + " that were input to it."
-        )
+            +
+            " commands. If no frame is specified, the most recent frame is used. If"
+            + " no thread is input, the current thread context is used.")
+        p2 = ("If this command is used to end a pipeline, it will print a" +
+              " human-readable decoding of the requested stack frame for" +
+              " each stack trace provided. Otherwise, it will set the current" +
+              " frame context to the specified frame and return the threads" +
+              " that were input to it.")
         return [p1, p2]
 
-    def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+    def _call(
+        self,  # pylint: disable=too-many-branches
+        objs: Iterable[drgn.Object]
+    ) -> Optional[Iterable[drgn.Object]]:
         if self.args.frame >= 0:
             self.frame_id = self.args.frame
             sdb.set_frame(self.frame_id)
@@ -339,21 +340,24 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
             self.frame_id = sdb.get_frame()
         if self.frame_id == -1:
             raise sdb.CommandError(
-                self.name, "No frame context set. Use 'frame' command to set frame"
-            )
+                self.name,
+                "No frame context set. Use 'frame' command to set frame")
         if self.islast:
-            self.pretty_print(self.caller(objs))
-        else:
-            # return threads that have the requested frame number
-            for thread in self.caller(objs):
-                try:
-                    _frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
-                except IndexError:
-                    continue
-                yield thread
+            self.pretty_print(objs)
+            return None
+        # return threads that have the requested frame number
+        for thread in objs:
+            try:
+                _frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
+            except IndexError:
+                continue
+            yield thread
+        return None
 
-    def pretty_print(self, threads: Iterable[drgn.Object]) -> None:
-        for thread in threads:
+    def pretty_print(
+        self,  # pylint: disable=too-many-branches
+        objs: Iterable[drgn.Object]) -> None:
+        for thread in objs:
             try:
                 frame = sdb.get_prog().stack_trace(thread)[self.frame_id]
                 if self.args.verbose:
@@ -361,12 +365,13 @@ class KernelStackFrame(sdb.Locator, sdb.PrettyPrinter):
                 else:
                     print(_framestr(self.frame_id, frame, True))
             except IndexError:
-                print(f"Frame {self.frame_id} out of range for thread {hex(thread)}")
+                print(
+                    f"Frame {self.frame_id} out of range for thread {hex(thread)}"
+                )
                 continue
 
     def no_input(self) -> Iterable[drgn.Object]:
-        threads = [sdb.get_thread()]
-        yield from threads
+        yield sdb.get_thread()
 
 
 class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
@@ -383,6 +388,7 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
 
     names = ["locals", "local"]
     input_type = "struct task_struct *"
+    output_type = "void *"
     load_on = [sdb.Kernel()]
 
     @classmethod
@@ -404,55 +410,59 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
         return parser
 
     @classmethod
-    def help_text(cls):
+    def help_text(cls) -> List[str]:
         p1 = (
-            "This command is used to print the local variables for the frame"
-            + " context set by the last 'frame' command."
-            + " If no variables are specified, all local variables are printed."
-            + " If no thread is input, the current thread context is used."
-        )
-        p2 = (
-            "If this command is used to end a pipeline, it will print a"
-            + " human-readable decoding of the requested variables for"
-            + " each thread provided. Otherwise, it will output the"
-            + " requested variable(s) in raw format."
-        )
+            "This command is used to print the local variables for the frame" +
+            " context set by the last 'frame' command." +
+            " If no variables are specified, all local variables are printed." +
+            " If no thread is input, the current thread context is used.")
+        p2 = ("If this command is used to end a pipeline, it will print a" +
+              " human-readable decoding of the requested variables for" +
+              " each thread provided. Otherwise, it will output the" +
+              " requested variable(s) in raw format.")
         return [p1, p2]
 
-    def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+    def _call(self,
+              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+        # pylint: disable=too-many-branches
         frame_id = sdb.get_frame()
         if frame_id == -1:
             raise sdb.CommandError(
-                self.name, "No frame context set. Use 'frame' command to set frame"
-            )
+                self.name,
+                "No frame context set. Use 'frame' command to set frame")
         if self.islast:
-            self.pretty_print(self.caller(objs))
-        else:
-            # return all locals or variables requested
-            for thread in self.caller(objs):
-                try:
-                    frame = sdb.get_prog().stack_trace(thread)[frame_id]
-                    if self.args.variables:
-                        for variable in self.args.variables:
-                            try:
-                                yield frame[variable]
-                            except KeyError as err:
-                                raise SymbolNotFoundError(self.name, variable) from err
-                    else:
-                        for variable in frame.locals():
-                            if frame[variable].absent_:
-                                continue
-                            try:
-                                yield frame[variable]
-                            except drgn.ObjectAbsentError:
-                                continue
-                except IndexError:
-                    continue
+            self.pretty_print(objs)
+            return None
+        # return all locals or variables requested
+        for thread in objs:
+            try:
+                frame = sdb.get_prog().stack_trace(thread)[frame_id]
+                if self.args.variables:
+                    for variable in self.args.variables:
+                        try:
+                            yield frame[variable]
+                        except KeyError as err:
+                            raise SymbolNotFoundError(self.name,
+                                                      variable) from err
+                else:
+                    for variable in frame.locals():
+                        if frame[variable].absent_:
+                            continue
+                        try:
+                            yield frame[variable]
+                        except drgn.ObjectAbsentError:
+                            continue
+            except IndexError:
+                continue
+        return None
 
-    def pretty_print(self, stacks: Iterable[drgn.Object]) -> None:
+    def pretty_print(self, objs: Iterable[drgn.Object]) -> None:  # pylint: disable=too-many-branches
         frame_id = sdb.get_frame()
-        for stack in stacks:
-            frame = sdb.get_prog().stack_trace(stack)[frame_id]
+        for stack in objs:
+            try:
+                frame = sdb.get_prog().stack_trace(stack)[frame_id]
+            except IndexError:
+                continue
             if self.args.variables:
                 for variable in self.args.variables:
                     try:
@@ -461,7 +471,9 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
                             f"{variable} = {local.format_(dereference=self.args.verbose)}"
                         )
                     except KeyError:
-                        print(f"'{variable}' is not a local variable in this frame")
+                        print(
+                            f"'{variable}' is not a local variable in this frame"
+                        )
                 continue
             for variable in frame.locals():
                 print(
@@ -469,8 +481,7 @@ class KernelFrameLocals(sdb.Locator, sdb.PrettyPrinter):
                 )
 
     def no_input(self) -> Iterable[drgn.Object]:
-        threads = [sdb.get_thread()]
-        yield from threads
+        yield sdb.get_thread()
 
 
 class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
@@ -491,6 +502,7 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
 
     names = ["registers", "register"]
     input_type = "struct task_struct *"
+    output_type = "void *"
     load_on = [sdb.Kernel()]
 
     @classmethod
@@ -512,55 +524,57 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
         return parser
 
     @classmethod
-    def help_text(cls):
+    def help_text(cls) -> List[str]:
         p1 = (
-            "This command is used to print the registers for the frame"
-            + " context set by the last 'frame' command."
-            + " If no register names are specified, all registers are printed."
-            + " If no thread is input, the current thread context is used."
-        )
-        p2 = (
-            "If this command is used to end a pipeline, it will print a"
-            + " human-readable decoding of the requested registers for"
-            + " each thread provided. Otherwise, it will output the"
-            + " requested register(s) in raw format."
-        )
+            "This command is used to print the registers for the frame" +
+            " context set by the last 'frame' command." +
+            " If no register names are specified, all registers are printed." +
+            " If no thread is input, the current thread context is used.")
+        p2 = ("If this command is used to end a pipeline, it will print a" +
+              " human-readable decoding of the requested registers for" +
+              " each thread provided. Otherwise, it will output the" +
+              " requested register(s) in raw format.")
         return [p1, p2]
 
-    def _call(self, objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
+    def _call(self,
+              objs: Iterable[drgn.Object]) -> Optional[Iterable[drgn.Object]]:
         frame_id = sdb.get_frame()
         if frame_id == -1:
             raise sdb.CommandError(
-                self.name, "No frame context set. Use 'frame' command to set frame"
-            )
+                self.name,
+                "No frame context set. Use 'frame' command to set frame")
         if self.islast:
-            self.pretty_print(self.caller(objs))
-        else:
-            frame_id = sdb.get_frame()
-            for stack in self.caller(objs):
-                frame = sdb.get_prog().stack_trace(stack)[frame_id]
-                if self.args.registers:
-                    for register in self.args.registers:
-                        try:
-                            yield sdb.target.create_object(
-                                "void *", frame.register(register)
-                            )
-                        except ValueError as err:
-                            raise SymbolNotFoundError(self.name, register) from err
-                    continue
-                registers = frame.registers()
-                for value in registers.values():
-                    yield sdb.target.create_object("void *", value)
-
-    def pretty_print(self, stacks: Iterable[drgn.Object]) -> None:
-        frame_id = sdb.get_frame()
-        for stack in stacks:
+            self.pretty_print(objs)
+            return None
+        for stack in objs:
             try:
                 frame = sdb.get_prog().stack_trace(stack)[frame_id]
             except IndexError:
+                continue
+            if self.args.registers:
+                for register in self.args.registers:
+                    try:
+                        yield sdb.target.create_object("void *",
+                                                       frame.register(register))
+                    except (LookupError, ValueError) as err:
+                        raise SymbolNotFoundError(self.name, register) from err
+                continue
+            registers = frame.registers()
+            for value in registers.values():
+                yield sdb.target.create_object("void *", value)
+        return None
+
+    def pretty_print(self, objs: Iterable[drgn.Object]) -> None:
+        # pylint: disable=too-many-branches
+        frame_id = sdb.get_frame()
+        for stack in objs:
+            try:
+                frame = sdb.get_prog().stack_trace(stack)[frame_id]
+            except IndexError as err:
                 raise sdb.CommandError(
-                    self.name, f"Frame {frame_id} out of range for thread {hex(stack)}"
-                )
+                    self.name,
+                    f"Frame {frame_id} out of range for thread {hex(stack)}"
+                ) from err
             if self.args.registers:
                 for register in self.args.registers:
                     try:
@@ -568,6 +582,8 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
                         if self.args.hex:
                             value = hex(value)
                         print(f"{register} = {value}")
+                    except LookupError:
+                        print(f"{register} = <unavailable>")
                     except ValueError as err:
                         raise SymbolNotFoundError(self.name, register) from err
                 continue
@@ -578,5 +594,4 @@ class KernelFrameRegisters(sdb.Locator, sdb.PrettyPrinter):
                 print(f"{register} = {value}")
 
     def no_input(self) -> Iterable[drgn.Object]:
-        threads = [sdb.get_thread()]
-        yield from threads
+        yield sdb.get_thread()

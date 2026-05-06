@@ -1,0 +1,146 @@
+[build-system]
+requires = ["setuptools>=64.0", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sdb-debugger"
+description = "The Slick/Simple Debugger"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [
+    { name = "Serapheim Dimitropoulos", email = "serapheimd@gmail.com" }
+]
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: System :: Operating System Kernels :: Linux",
+]
+dependencies = [
+    "drgn",
+    "kdumpling>=0.2.0",
+    "pyelftools>=0.29",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/sdimitro/sdb"
+Repository = "https://github.com/sdimitro/sdb"
+Issues = "https://github.com/sdimitro/sdb/issues"
+
+[project.scripts]
+sdb = "sdb.internal.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pylint",
+    "pytest",
+    "pytest-cov",
+    "mypy",
+    "yapf",
+    "ruff",
+]
+
+# Setuptools configuration
+[tool.setuptools]
+packages = [
+    "sdb",
+    "sdb.commands",
+    "sdb.commands.internal",
+    "sdb.commands.linux",
+    "sdb.commands.linux.internal",
+    "sdb.commands.spl",
+    "sdb.commands.spl.internal",
+    "sdb.commands.zfs",
+    "sdb.commands.zfs.internal",
+    "sdb.internal",
+]
+
+# Setuptools SCM for version management from git tags
+[tool.setuptools_scm]
+write_to = "sdb/_version.py"
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
+
+# Ruff configuration
+# https://docs.astral.sh/ruff/
+[tool.ruff]
+extend-exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+target-version = "py310"
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+]
+ignore = [
+    "E501",  # line too long (handled by yapf)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# Mypy configuration
+[tool.mypy]
+python_version = "3.10"
+strict = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "drgn.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "kdumpling.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "elftools.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "sdb._version"
+ignore_missing_imports = true
+
+# Pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v"
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["sdb"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]

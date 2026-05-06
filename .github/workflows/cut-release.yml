@@ -1,0 +1,67 @@
+#
+# Cut Release workflow - manually create and push a version tag
+#
+# This workflow:
+# 1. Validates the version format
+# 2. Checks if the tag already exists
+# 3. Creates and pushes the tag
+#
+# After running this, the Release workflow will automatically trigger.
+#
+name: Cut Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v0.2.0 or v0.2.0-beta1)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  cut-release:
+    name: Cut Release
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate version format
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "Error: Version must be in format v0.0.0 or v0.0.0-suffix"
+            echo "Got: $VERSION"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Check if tag already exists
+        run: |
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "Error: Tag $VERSION already exists"
+            exit 1
+          fi
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create and push tag
+        run: |
+          git tag -a "$VERSION" -m "Release $VERSION"
+          git push origin "$VERSION"
+
+      - name: Summary
+        run: |
+          echo "## Tag $VERSION created!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The **Release** workflow should now trigger automatically." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "You can monitor it at [Actions → Release](/${{ github.repository }}/actions/workflows/release.yml)" >> $GITHUB_STEP_SUMMARY

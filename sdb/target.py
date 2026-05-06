@@ -45,11 +45,10 @@ from typing import Any, List, Tuple, Union
 
 import drgn
 
-# pylint: disable=missing-function-docstring
 # pylint: disable=global-statement
 prog: drgn.Program
-thread: int
-frame: int
+thread: int = 0
+frame: int = -1
 
 
 def set_thread(thread_: int) -> None:
@@ -58,7 +57,6 @@ def set_thread(thread_: int) -> None:
 
 
 def get_thread() -> int:
-    global thread
     return thread
 
 
@@ -68,7 +66,6 @@ def set_frame(frame_: int) -> None:
 
 
 def get_frame() -> int:
-    global frame
     return frame
 
 
@@ -231,5 +228,15 @@ def get_runtimes() -> Tuple[bool, List[str]]:
     """
     Returns whether we are in kernel or user mode, and the list of loaded
     modules or libraries.
+
+    In replay mode, we treat the session as a kernel session since recordings
+    are made from kernel debugging sessions.
     """
-    return (get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL, [])
+    # Import here to avoid circular dependency
+    from sdb.session import is_replay_mode
+
+    is_kernel = bool(get_target_flags() & drgn.ProgramFlags.IS_LINUX_KERNEL)
+    # In replay mode, treat as kernel session
+    if is_replay_mode():
+        is_kernel = True
+    return (is_kernel, [])

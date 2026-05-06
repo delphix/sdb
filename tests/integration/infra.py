@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-# pylint: disable=missing-module-docstring
-
 import glob
 import os
 import re
@@ -257,6 +255,51 @@ class RefDump:
         sdb.register_commands()
         return self.repl.eval_cmd(cmd)
 
+    def repl_invoke_json(self, cmd: str) -> int:
+        """
+        Invoke the supplied command with JSON mode enabled.
+        """
+        assert self.program
+        sdb.target.set_prog(self.program)
+        sdb.register_commands()
+        json_repl = REPL(self.program,
+                         list(sdb.get_registered_commands().keys()),
+                         json_mode=True)
+        return json_repl.eval_cmd(cmd)
+
+    def verify_json_cmd(self, capsys: Any, cmd: str) -> None:
+        """
+        Run command in JSON mode and verify the output is valid JSON
+        with the expected exit code and structure.
+        """
+        exit_code = self.repl_invoke_json(cmd)
+        captured = capsys.readouterr()
+        import json
+        if exit_code == 0:
+            result = json.loads(captured.out)
+            assert isinstance(result, list)
+            for entry in result:
+                assert "type" in entry
+                assert "value" in entry
+        else:
+            result = json.loads(captured.out)
+            assert "error" in result
+
+    def generate_json_output_for_commands(self, cmds: List[str],
+                                          dirpath: str) -> None:
+        """
+        Generate JSON regression output for the given commands.
+        """
+        if os.path.exists(dirpath):
+            shutil.rmtree(dirpath)
+        os.makedirs(dirpath)
+        for cmd in cmds:
+            with open(f"{dirpath}/{cmd}", 'w', encoding="utf-8") as f:
+                with redirect_stdout(f):
+                    exit_code = self.repl_invoke_json(cmd)
+                    print("@#$ EXIT CODE $#@")
+                    print(f"{exit_code}")
+
     def get_reference_data(self, modname: str, cmd: str) -> Tuple[str, int]:
         """
         Given a module name and a command, find the output file and return a
@@ -327,11 +370,16 @@ class RefDump:
         that for the given modname "mod" there exist a test module under
         test.integration named test_mod_generic which has a list of commands in
         string form called CMD_TABLE.
+
+        Modules that don't define CMD_TABLE (e.g. those using their own test
+        structure like JSON tests) are silently skipped.
         """
         test_mod = import_module(f"tests.integration.test_{modname}_generic")
+        cmd_table = getattr(test_mod, "CMD_TABLE", None)
+        if cmd_table is None:
+            return
         self.generate_output_for_commands(
-            test_mod.CMD_TABLE,  # type: ignore[attr-defined]
-            f"{TEST_OUTPUT_DIR}/{self.dump_name}/{modname}")
+            cmd_table, f"{TEST_OUTPUT_DIR}/{self.dump_name}/{modname}")
         print(
             f"Generated regression test output for {self.dump_name}/{modname}..."
         )
@@ -362,27 +410,48 @@ class RefDump:
                 self.generate_output_for_test_module(modname)
 
 
+# Module-level caches for loaded dumps to avoid reloading during test collection
+_crash_dumps_cache: Optional[List[RefDump]] = None
+_core_dumps_cache: Optional[List[RefDump]] = None
+
+
 def get_all_reference_crash_dumps() -> List[RefDump]:
     """
     Returns all discoverable kernel crash dumps as RefDump objects.
+
+    Results are cached to avoid reloading dumps multiple times during
+    test collection (which can cause OOM with large vmlinux files).
     """
+    global _crash_dumps_cache  # pylint: disable=global-statement
+    if _crash_dumps_cache is not None:
+        return _crash_dumps_cache
+
     rdumps = []
     for dump_dir_path in get_crash_dump_dir_paths():
         rdump = RefDump(dump_dir_path, setup_crash_dump_target)
         rdump.setup_target()
         rdumps.append(rdump)
+    _crash_dumps_cache = rdumps
     return rdumps
 
 
 def get_all_reference_core_dumps() -> List[RefDump]:
     """
     Returns all discoverable userland core dumps as RefDump objects.
+
+    Results are cached to avoid reloading dumps multiple times during
+    test collection.
     """
+    global _core_dumps_cache  # pylint: disable=global-statement
+    if _core_dumps_cache is not None:
+        return _core_dumps_cache
+
     rdumps = []
     for dump_dir_path in get_core_dump_dir_paths():
         rdump = RefDump(dump_dir_path, setup_userland_core_target)
         rdump.setup_target()
         rdumps.append(rdump)
+    _core_dumps_cache = rdumps
     return rdumps
 
 
