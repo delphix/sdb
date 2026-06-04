@@ -28,7 +28,7 @@ ELF note sections.
 import json
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, cast, Dict, List, Optional, Tuple
 
 from kdumpling import CompressionType, KdumpBuilder, OutputFormat
 
@@ -489,14 +489,15 @@ def extract_sdb_notes(vmcore_path: str) -> Optional[Dict[str, Any]]:
     """
     try:
         from elftools.elf.elffile import ELFFile
+        from elftools.elf.segments import NoteSegment
 
         with open(vmcore_path, 'rb') as f:
-            elf = ELFFile(f)  # type: ignore[no-untyped-call]
-            for segment in elf.iter_segments():  # type: ignore[no-untyped-call]
+            elf = ELFFile(f)
+            for segment in elf.iter_segments():
                 if segment['p_type'] == 'PT_NOTE':
-                    for note in segment.iter_notes():
-                        if note['n_name'] == 'SDB' and note[
-                                'n_type'] == SDB_NOTE_SESSION:
+                    for note in cast(NoteSegment, segment).iter_notes():
+                        note_type = cast(int, note['n_type'])
+                        if note['n_name'] == 'SDB' and note_type == SDB_NOTE_SESSION:
                             data = note['n_desc']
                             if isinstance(data, bytes):
                                 result: Dict[str, Any] = json.loads(

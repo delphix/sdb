@@ -114,7 +114,7 @@ def entries_per_slab(cache: drgn.Object) -> int:
     Uses drgn's slab_cache_objects_per_slab() helper.
     """
     assert sdb.type_canonical_name(cache.type_) == 'struct kmem_cache *'
-    return slab_cache_objects_per_slab(cache)
+    return int(slab_cache_objects_per_slab(cache))
 
 
 def entry_size(cache: drgn.Object) -> int:
