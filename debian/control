@@ -10,7 +10,8 @@ Build-Depends:
  python3-pip,
  python3-setuptools,
  python3-setuptools-scm,
- python3-venv
+ python3-venv,
+ virtualenv
 Standards-Version: 4.6.2
 Homepage: https://github.com/sdimitro/sdb
 
