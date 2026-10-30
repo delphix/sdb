@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+# Point the drgn wheel's bundled Brotli at the system libbrotli1.
+#
+# The wheel ships libbrotlicommon and libbrotlidec 1.0.6 in drgn.libs/, which
+# have a known decoder buffer overflow. Replace them with symlinks to the
+# system libraries, which Ubuntu patches; debian/control depends on a patched
+# libbrotli1. Remove this step once the wheel bundles Brotli 1.2.1 or later.
+#
+# Usage: use-system-brotli <venv-dir>
+#
+set -eu
+
+venv=${1:?usage: use-system-brotli <venv-dir>}
+libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+die() {
+	echo "use-system-brotli: $*" >&2
+	exit 1
+}
+
+found=0
+while IFS= read -r lib; do
+	base=$(basename "$lib")
+	name=${base%%-*} # libbrotlidec-0a7ba021.so.1.0.6 -> libbrotlidec
+	[ -e "$libdir/$name.so.1" ] || die "$libdir/$name.so.1 not found"
+	ln -sf "$libdir/$name.so.1" "$lib"
+	found=1
+done < <(find "$venv" -path '*/drgn.libs/libbrotli*.so*' -type f)
+[ "$found" = 1 ] ||
+	die "no bundled Brotli found in drgn.libs; remove this step if the wheel dropped it"
+
+#
+# Check that the wheel's extension module still resolves every library it
+# links. (ldd on a drgn.libs library alone fails: they are found through
+# the extension module's RPATH.)
+#
+ext=$(find "$venv" -name '_drgn*.so' | head -n 1)
+[ -n "$ext" ] || die "_drgn extension module not found"
+if ldd "$ext" | grep -q 'not found'; then
+	die "unresolved libraries for $ext"
+fi
