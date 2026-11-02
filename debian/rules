@@ -35,3 +35,9 @@ override_dh_python3:
 # native libs are still checksummed.
 override_dh_md5sums:
 	dh_md5sums -X.pyc -X.pyo
+
+# The drgn wheel bundles a vulnerable Brotli. Once dh_virtualenv has built
+# the venv, swap it for the system libbrotli1 (see debian/use-system-brotli).
+override_dh_virtualenv:
+	dh_virtualenv
+	debian/use-system-brotli debian/sdb/opt/venvs/sdb
