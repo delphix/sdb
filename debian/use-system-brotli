@@ -37,6 +37,7 @@ done < <(find "$venv" -path '*/drgn.libs/libbrotli*.so*' -type f)
 #
 ext=$(find "$venv" -name '_drgn*.so' | head -n 1)
 [ -n "$ext" ] || die "_drgn extension module not found"
-if ldd "$ext" | grep -q 'not found'; then
+out=$(ldd "$ext") || die "ldd failed on $ext"
+if grep -q 'not found' <<<"$out"; then
 	die "unresolved libraries for $ext"
 fi
