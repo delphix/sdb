@@ -14,12 +14,6 @@ override_dh_dwz:
 # RPATH setup.
 override_dh_strip:
 
-# drgn's bundled libs in drgn.libs/ use auditwheel's $ORIGIN RPATH and
-# aren't in any Debian package, so dpkg-shlibdeps can't resolve them.
-# Skip shlibdeps — the venv is self-contained; ${python3:Depends}
-# (filled by dh_python3) covers the Python runtime requirement.
-override_dh_shlibdeps:
-
 # dh_python3 doesn't know about the venv layout dh_virtualenv produces
 # and will complain about unmanaged files. The dh-virtualenv add-on
 # already wires the right Python deps; skip dh_python3.
@@ -36,8 +30,17 @@ override_dh_python3:
 override_dh_md5sums:
 	dh_md5sums -X.pyc -X.pyo
 
-# The drgn wheel bundles a vulnerable Brotli. Once dh_virtualenv has built
-# the venv, swap it for the system libbrotli1 (see debian/use-system-brotli).
+# Build drgn from its sdist against the system elfutils and libkdumpfile
+# instead of installing the manylinux wheel, whose auditwheel-vendored
+# drgn.libs/ copies of OpenSSL, libcurl, krb5 and Brotli apt cannot patch.
+# Every configure flag is explicit. Left to auto-detection, drgn's
+# feature set follows whatever headers the build host happens to have:
+# a host without libkdumpfile produces, without failing, a drgn that
+# cannot read a kdump vmcore. debuginfod is off because it is what
+# pulls in libcurl and its TLS and authentication dependencies, and
+# the appliance installs its debug symbols locally.
+export CONFIGURE_FLAGS := --with-libkdumpfile=yes --with-lzma=yes --with-pcre2=yes \
+                          --without-json-c --without-debuginfod
+
 override_dh_virtualenv:
-	dh_virtualenv
-	debian/use-system-brotli debian/sdb/opt/venvs/sdb
+	dh_virtualenv --extra-pip-arg "--no-binary=drgn"
